@@ -13,6 +13,7 @@ import cors from 'cors';
 import { spawn } from 'node:child_process';
 
 app.use(cors());
+app.use(express.json());
 
 const server = createServer(app);
 const io = new socketIo(server);
