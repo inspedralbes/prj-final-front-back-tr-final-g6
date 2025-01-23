@@ -1,10 +1,10 @@
-import express, { json } from 'express';
+import express from 'express';
 
 const app = express();
 const PORT = 3020;
 
 import { createServer } from 'http';
-import socketIo from 'socket.io';
+import { Server as socketIo } from 'socket.io';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,11 +12,10 @@ import fs from 'fs';
 import cors from 'cors';
 import { spawn } from 'node:child_process';
 
-app.use(json());
 app.use(cors());
 
 const server = createServer(app);
-const io = socketIo(server);
+const io = new socketIo(server);
 
 const services = [];
 
