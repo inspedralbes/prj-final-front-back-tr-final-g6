@@ -9,9 +9,9 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
   ],
   css: [
-    "primevue/resources/primevue.min.css", // Estilos básicos de PrimeVue
-    "primeicons/primeicons.css", // Iconos de PrimeVue
-    "tailwindcss/tailwind.css" // TailwindCSS
+    "primevue/resources/primevue.min.css",
+    "primeicons/primeicons.css",
+    "tailwindcss/tailwind.css"
   ],
   primevue: {
     options: {
