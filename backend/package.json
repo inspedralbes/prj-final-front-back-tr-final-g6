@@ -1,5 +1,5 @@
 {
-  "name": "back",
+  "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "backend": "file:",
     "express": "^4.21.2"
   }
 }
