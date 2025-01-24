@@ -19,8 +19,7 @@ Un cop comenceu heu de canviar aquesta explicació amb la corresponent al vostre
 https://tree.taiga.io/project/fabian03-tr-final/backlog](url)
    
  * Adreça del prototip gràfic del projecte (Penpot, figma, moqups...)
-   
-[https://design.penpot.app/#/workspace/96c4bd8e-df43-800f-8005-9d34b1032236/790b4dba-cade-8121-8005-9d34b9a8a08d?page-id=790b4dba-cade-8121-8005-9d34b9a8fdd8
+[https://design.penpot.app/#/view/790b4dba-cade-8121-8005-9d34b9a8a08d?page-id=3e75d40f-fa06-8008-8005-9d36ca42f02c&section=interactions&index=0&share-id=8233eca0-468b-80cb-8005-a13ec47c9100
 ](url)   
  * URL de producció (quan la tingueu)
 
