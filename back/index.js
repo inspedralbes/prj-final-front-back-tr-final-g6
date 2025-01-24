@@ -5,6 +5,7 @@ const PORT = 3020;
 
 import { createServer } from 'http';
 import { Server as socketIo } from 'socket.io';
+import mysql2 from 'mysql2';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,6 +20,26 @@ const server = createServer(app);
 const io = new socketIo(server);
 
 const services = [];
+
+const connexioBD = mysql2.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'acubox'
+});
+
+function connectToDB() {
+  connexioBD.connect(err => {
+    if (err) {
+      console.error('Error de connexió a la base de dades: ' + err.stack);
+      return;
+    }
+
+    console.log('Connexió a la base de dades correcta');
+  });
+}
+
+connectToDB();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 fs.readdirSync(path.join(__dirname, 'services')).forEach(file => {
@@ -169,6 +190,32 @@ function checkServiceStatus(serviceName) {
     return status;
   }
 };
+
+//ENDPOINTS
+
+app.post('/login', (req, res) => {
+  const { correu, contrasenya } = req.body;
+
+  if (!correu || !contrasenya) {
+    return res.status(400).send({ message: 'correu i contrasenya són necessaris' });
+  }
+
+  const query = 'SELECT * FROM usuari WHERE correu = ? AND contrasenya = ?';
+  connexioBD.execute(query, [correu, contrasenya], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+
+    if (results.length > 0) {
+      res.status(200).send({ message: 'Login successful', user: results[0] });
+    } else {
+      res.status(401).send({ message: 'Invalid correu or contrasenya' });
+    }
+  });
+});
+
 
 server.listen(PORT, () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
