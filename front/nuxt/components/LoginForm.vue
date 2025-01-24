@@ -1,26 +1,28 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1] flex items-center justify-center animated-bg">
-        <div class="w-full max-w-md bg-white rounded shadow dark:border dark:bg-gray-800 dark:border-gray-700 backdrop-filter backdrop-blur-sm">
+    <div
+        class="min-h-screen bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1] flex items-center justify-center animated-bg">
+        <div
+            class="w-full max-w-md bg-white rounded shadow dark:border dark:bg-gray-800 dark:border-gray-700 backdrop-filter backdrop-blur-sm">
             <div class="p-6 space-y-4 md:space-y-6 sm:p-8 rounded border border-black">
                 <h1 class="text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white text-center">
                     Iniciar Sesión
                 </h1>
-                <form class="space-y-4 md:space-y-6" action="#">
+                <form @submit.prevent="handleLogin" class="space-y-4 md:space-y-6">
                     <div>
                         <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                             Correo Electrónico
                         </label>
-                        <input type="email" name="email" id="email"
+                        <input v-model="email" type="email" name="email" id="email"
                             class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                            placeholder="correo@dominio.com" required="" />
+                            placeholder="correo@dominio.com" required />
                     </div>
                     <div>
                         <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                             Contraseña
                         </label>
-                        <input type="password" name="password" id="password" placeholder="••••••••"
+                        <input v-model="password" type="password" name="password" id="password" placeholder="••••••••"
                             class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                            required="" />
+                            required />
                     </div>
                     <div class="flex justify-center">
                         <button type="submit"
@@ -35,7 +37,23 @@
 </template>
 
 <script setup>
-import 'tailwindcss/tailwind.css';
+import { ref } from 'vue';
+import { login } from '~/utils/communicationManager';
+import { useRouter } from 'vue-router';
+
+const email = ref('');
+const password = ref('');
+const router = useRouter();
+
+const handleLogin = async () => {
+    try {
+        const response = await login(email.value, password.value);
+        console.log('Login exitoso:', response);
+        router.push('/aulas');
+    } catch (error) {
+        console.error('Error al iniciar sesión:', error.message);
+    }
+};
 </script>
 
 <style scoped>
