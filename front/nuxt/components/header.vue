@@ -47,7 +47,4 @@ const toggleMenu = () => {
 </script>
 
 <style scoped>
-header {
-    border-bottom: 2px solid #0A85ED;
-}
 </style>
