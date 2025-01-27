@@ -1,24 +1,24 @@
 services: 
   prfg6-front:
-    build: 
-      dockerfile: ./front/develop.Dockerfile
-      context: .
-    command: sh -c "cp .env.DEV .env && npm install && npm start"
-    volumes:
-      - ./front:/usr/src/app
+    image: node:23-bullseye
+    container_name: nuxt
     working_dir: /usr/src/app
-    ports: 
-      - 3000:3000
-    depends_on:
+    volumes:
+      - ./front/nuxt:/usr/src/app
+    ports:
+      - "3000:3000"
+    environment:
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    command: bash -c "rm -rf node_modules && npm install --no-bin-links && npm run dev"
+    links:
       - prfg6-back
 
-
   prfg6-back:
-    
      build: 
        dockerfile: ./back/develop.Dockerfile
        context: .
-     command: sh -c "cp .env.DEV .env && npm install && nodemon -L index.js"
+     command: sh -c "cp .env.DEV .env && rm -rf node_modules && npm install --no-bin-links && nodemon -L index.js"
      volumes:
        - ./back:/usr/src/app
      working_dir: /usr/src/app
@@ -57,7 +57,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root 
-      MYSQL_DATABASE: tr2-g1
+      MYSQL_DATABASE: prf-g6
     volumes:
       - mysql-bd:/var/lib/mysql:rw
       - ./bd/mysql/acubox.sql:/docker-entrypoint-initdb.d/acubox.sql
