@@ -25,9 +25,9 @@
                             </router-link>
                         </li>
                         <li class="px-4 py-3 hover:bg-gray-100 transition-colors">
-                            <router-link to="/logout" class="block text-sm font-medium text-gray-700">
+                            <button @click="logout" class="block text-sm font-medium text-gray-700">
                                 Cerrar Sesión
-                            </router-link>
+                            </button>
                         </li>
                     </ul>
                 </div>
@@ -38,11 +38,23 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const isMenuVisible = ref(false);
 
+// Función para alternar la visibilidad del menú
 const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
+};
+
+// Función para cerrar sesión y redirigir al login
+const logout = () => {
+    // Eliminar el token o cualquier dato de sesión que estés utilizando
+    localStorage.removeItem('authToken'); // O sessionStorage, según lo que uses
+
+    // Redirigir al login
+    router.push('/login');
 };
 </script>
 
