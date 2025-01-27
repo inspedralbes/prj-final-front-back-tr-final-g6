@@ -2,19 +2,23 @@
     <div
         class="min-h-screen bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1] flex flex-col items-center justify-center animated-bg">
         <div class="text-center text-white px-6 space-y-8">
+            <!-- Título principal con sombra y diseño llamativo -->
             <h1 class="text-6xl font-extrabold mb-4 drop-shadow-lg">
                 ACOUBOX
             </h1>
+            <!-- Separador visual con degradado -->
             <div class="w-24 h-1 bg-gradient-to-r from-white to-transparent mx-auto"></div>
+            <!-- Descripción en catalán -->
             <p class="text-xl leading-relaxed max-w-2xl mx-auto">
-                ¡Bienvenidos a ACOUBOX! 🌟  
+                Benvinguts a <strong>ACOUBOX</strong>! 🌟  
                 <br />
-                Un proyecto de estudiantes de <strong>CFGS DAM</strong> y <strong>PFI</strong>, donde combinamos creatividad y aprendizaje para dar vida a algo único.
+                Un projecte creat pels estudiants de <strong>CFGS DAM</strong> i <strong>PFI</strong> de l'<strong>Institut Pedralbes</strong>, on unim la nostra creativitat i aprenentatge per donar vida a una cosa única.
             </p>
+            <!-- Botón con espacio adicional para mejor separación -->
             <div class="mt-6">
-                <nuxt-link to="/login" aria-label="Ir a la página de inicio de sesión" class="button-container">
+                <nuxt-link to="/login" aria-label="Anar a la pàgina d'inici de sessió" class="button-container">
                     <Button
-                        label="Inicia Sesión"
+                        label="Inicia Sessió"
                         icon="pi pi-user"
                         class="bg-white text-black font-bold py-3 px-8 rounded-full shadow-lg border border-transparent transition-all duration-300 custom-button"
                     />
@@ -52,6 +56,7 @@ import 'primeicons/primeicons.css';
     }
 }
 
+/* Botón personalizado */
 .custom-button:hover {
     transform: scale(1.1);
     box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
@@ -62,7 +67,7 @@ import 'primeicons/primeicons.css';
     outline-offset: 2px;
 }
 
-/* Separador con animacin linear */
+/* Separador con animación */
 div.w-24.h-1 {
     animation: pulse-separator 2s infinite ease-in-out;
 }
