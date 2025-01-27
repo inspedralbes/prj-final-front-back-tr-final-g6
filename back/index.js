@@ -216,6 +216,98 @@ app.post('/login', (req, res) => {
   });
 });
 
+app.get('/aulas', (req, res) => {
+  const query = 'SELECT * FROM aula';
+  connexioBD.execute(query, (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+
+    res.status(200).send(results);
+  });
+});
+
+app.get('/aula/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'SELECT * FROM aula WHERE id = ?';
+  connexioBD.execute(query, [id], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+
+    if (results.length > 0) {
+      res.status(200).send(results[0]);
+    } else {
+      res.status(404).send('Aula not found');
+    }
+  });
+});
+
+app.post('/createAula', (req, res) => {
+  const { curs, classe, etapa } = req.body;
+
+  if (!curs || !classe || !etapa) {
+    return res.status(400).send({ message: 'curs, classe i etapa són necessaris' });
+  }
+
+  const query = 'INSERT INTO aula (curs, classe, etapa) VALUES (?, ?, ?)';
+  connexioBD.execute(query, [curs, classe, etapa], (err, results) => {
+    if (err) {
+      console.error('Error en la inserció a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la inserció a la base de dades');
+      return;
+    }
+
+    res.status(201).send({ message: 'Aula creada correctament', id: results.insertId });
+  });
+});
+
+app.put('/updateAula/:id', (req, res) => {
+  const { curs, classe, etapa } = req.body;
+  const { id } = req.params;
+
+  if (!curs || !classe || !etapa) {
+    return res.status(400).send({ message: 'curs, classe i etapa són necessaris' });
+  }
+
+  const query = 'UPDATE aula SET curs = ?, classe = ?, etapa = ? WHERE id = ?';
+  connexioBD.execute(query, [curs, classe, etapa, id], (err, results) => {
+    if (err) {
+      console.error('Error en la actualització a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la actualització a la base de dades');
+      return;
+    }
+
+    if (results.affectedRows > 0) {
+      res.status(200).send({ message: 'aula actualitzada correctament' });
+    } else {
+      res.status(404).send('aula not found');
+    }
+  });
+});
+
+app.delete('/deleteAula/:id', (req, res) => {
+  const { id } = req.params;
+
+  const query = 'DELETE FROM aula WHERE id = ?';
+  connexioBD.execute(query, [id], (err, results) => {
+    if (err) {
+      console.error('Error en l\'esborrat a la base de dades: ' + err.stack);
+      res.status(500).send('Error en l\'esborrat a la base de dades');
+      return;
+    }
+
+    if (results.affectedRows > 0) {
+      res.status(200).send({ message: 'aula esborrada correctament' });
+    } else {
+      res.status(404).send('aula not found');
+    }
+  });
+});
 
 server.listen(PORT, () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
