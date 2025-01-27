@@ -24,8 +24,6 @@
                     />
                 </nuxt-link>
             </div>
-            <!-- Botón de configuración -->
-            <ConfigBoton />
         </div>
     </div>
 </template>
@@ -36,7 +34,6 @@ import Button from 'primevue/button';
 import 'primevue/resources/themes/saga-blue/theme.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
-import ConfigBoton from '~/components/ConfigBoton.vue'; // Importa el nuevo componente
 </script>
 
 <style scoped>
