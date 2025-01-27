@@ -14,7 +14,7 @@
                 <br />
                 Un projecte creat pels estudiants de <strong>CFGS DAM</strong> i <strong>PFI</strong> de l'<strong>Institut Pedralbes</strong>, on unim la nostra creativitat i aprenentatge per donar vida a una cosa única.
             </p>
-            <!-- Botón con espacio adicional para mejor separación -->
+            <!-- Botón de inicio de sesión -->
             <div class="mt-6">
                 <nuxt-link to="/login" aria-label="Anar a la pàgina d'inici de sessió" class="button-container">
                     <Button
@@ -24,6 +24,8 @@
                     />
                 </nuxt-link>
             </div>
+            <!-- Botón de configuración -->
+            <ConfigBoton />
         </div>
     </div>
 </template>
@@ -34,6 +36,7 @@ import Button from 'primevue/button';
 import 'primevue/resources/themes/saga-blue/theme.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
+import ConfigBoton from '~/components/ConfigBoton.vue'; // Importa el nuevo componente
 </script>
 
 <style scoped>
