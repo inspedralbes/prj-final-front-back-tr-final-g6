@@ -98,17 +98,19 @@ onMounted(async () => {
 
 // Filtrar aulas conforme al texto de búsqueda y el filtro de etapa
 const filteredAulas = computed(() => {
-    // Si no hay búsqueda ni filtro de etapa, mostrar todas las aulas
-    if (!searchQuery.value && !selectedEtapa.value) {
-        return aulas.value;
-    }
-
-    return aulas.value.filter(aula => {
+    // Filtrar por búsqueda primero
+    let filtered = aulas.value.filter(aula => {
         const matchesSearch = aula.Curs.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
                               aula.Classe.toLowerCase().includes(searchQuery.value.toLowerCase());
-        const matchesEtapa = selectedEtapa ? aula.Etapa === selectedEtapa : true;
-        return matchesSearch && matchesEtapa;
+        return matchesSearch;
     });
+
+    // Luego, aplicar el filtro de etapa, si hay uno seleccionado
+    if (selectedEtapa.value) {
+        filtered = filtered.filter(aula => aula.Etapa === selectedEtapa.value);
+    }
+
+    return filtered;
 });
 
 // Función para limpiar los filtros
