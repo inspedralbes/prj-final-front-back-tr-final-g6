@@ -10,7 +10,7 @@ services:
     environment:
       - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true
-    command: bash -c "rm -rf node_modules && npm install --no-bin-links && npm run dev"
+    command: bash -c "echo INI && npm install --no-bin-links && npm run dev"
     links:
       - prfg6-back
 
@@ -18,7 +18,7 @@ services:
      build: 
        dockerfile: ./back/develop.Dockerfile
        context: .
-     command: sh -c "cp .env.DEV .env && rm -rf node_modules && npm install --no-bin-links && nodemon -L index.js"
+     command: sh -c "cp .env.DEV .env && npm install --no-bin-links && nodemon -L index.js"
      volumes:
        - ./back:/usr/src/app
      working_dir: /usr/src/app
@@ -59,8 +59,8 @@ services:
       MYSQL_ROOT_PASSWORD: root 
       MYSQL_DATABASE: prf-g6
     volumes:
-      - mysql-bd:/var/lib/mysql:rw
-      - ./bd/mysql/acubox.sql:/docker-entrypoint-initdb.d/acubox.sql
+        - ./bd/mysql-bd/:/var/lib/mysql:rw
+    #  - ./bd/mysql/acubox.sql:/docker-entrypoint-initdb.d/acubox.sql
     ports:
       - 3306:3306
     # healthcheck:
