@@ -2,7 +2,16 @@
     <div
         class="min-h-screen bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1] flex items-start justify-center mt-0 animated-bg">
         <div class="p-6 w-full max-w-4xl flex flex-col items-center flex-grow">
-            <h1 class="text-2xl text-center text-white mb-6">Aula {{ aulaId }}</h1>
+
+            <div v-if="aula" class="w-full p-6 mb-6">
+                <div class="flex items-center justify-center space-x-8 text-lg text-white">
+                    <p><strong>Clase:</strong> {{ aula.Classe || 'Sin clase' }}</p>
+                    <p><strong>Etapa:</strong> {{ aula.Etapa }}</p>
+                    <p><strong>Planta:</strong> {{ aula.Planta }}</p>
+                    <p><strong>Aula:</strong> {{ aula.Aula }}</p>
+                </div>
+            </div>
+
 
             <div class="w-full mb-6 flex justify-center gap-4 items-center">
                 <div class="flex gap-4">
@@ -26,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
@@ -34,9 +43,11 @@ import Dropdown from 'primevue/dropdown';
 import TemperatureChart from './charts/TemperatureChart.vue';
 import Co2Chart from './charts/Co2Chart.vue';
 import VolumeChart from './charts/VolumeChart.vue';
+import { getAulaById } from '~/utils/communicationManager';
 
 const route = useRoute();
 const aulaId = route.params.id;
+const aula = ref(null);
 
 const items = [
     { label: 'Temperatura', icon: 'pi pi-home', component: TemperatureChart },
@@ -59,6 +70,17 @@ const currentChart = computed(() => {
     const item = items.find((i) => i.label === selectedChart.value);
     return item ? item.component : null;
 });
+
+onMounted(async () => {
+    try {
+        aula.value = await getAulaById(aulaId);
+        if (!aula.value) {
+            console.log('No se encontraron datos para el aula');
+        }
+    } catch (error) {
+        console.error('Error al obtener el aula:', error);
+    }
+});
 </script>
 
 <style scoped>
@@ -80,9 +102,11 @@ button:hover {
     0% {
         background-position: 0% 50%;
     }
+
     50% {
         background-position: 100% 50%;
     }
+
     100% {
         background-position: 0% 50%;
     }
