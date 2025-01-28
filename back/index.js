@@ -24,8 +24,8 @@ const services = [];
 const connexioBD = mysql2.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '',
-  database: 'acubox'
+  password: 'root',
+  database: 'prf-g6'
 });
 
 function connectToDB() {
