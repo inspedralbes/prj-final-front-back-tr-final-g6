@@ -1,21 +1,14 @@
 <template>
     <div>
-    <Header />
-        <h1>Aula {{ aulaId }}</h1>
+        <Header />
+        <LineChart />
     </div>
 </template>
 
 <script setup>
 import { useRoute } from 'vue-router';
 import Header from '~/components/header.vue';
-
-const route = useRoute();
-const aulaId = route.params.id;
+import LineChart from '~/components/Charts.vue';
 </script>
 
-<style scoped>
-.aula-detail {
-    padding: 20px;
-    text-align: center;
-}
-</style>
+<style scoped></style>
