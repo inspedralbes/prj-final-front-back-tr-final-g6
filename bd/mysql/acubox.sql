@@ -34,7 +34,7 @@ CREATE TABLE `aula` (
   `Etapa` enum('ESO','BATX', 'PFI', 'CFGM','CFGS', 'ALTRES') NOT NULL,
   `Planta` int(2) NOT NULL,
   `Aula` varchar(100) NOT NULL,
-  `activa` tinyint(1) NOT NULL DEFAULT 1
+  `activa` tinyint(1) NOT NULL DEFAULT 1,
   `turn` enum('mati', 'tarda', 'mati i tarda') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
