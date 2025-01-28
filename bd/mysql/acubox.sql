@@ -146,7 +146,8 @@ INSERT INTO `aula` (`id`, `Curs`, `Classe`, `Etapa`, `Planta`, `Aula`, `activa`,
 (101, '', 'lab ciències naturals', 'ALTRES', 3, '', 1, 'mati'),
 (102, '', 'Musica 2', 'ALTRES', 3, '', 1, 'mati'),
 (103, '', 'Lab Bio 1', 'ALTRES', 3, '', 1, 'mati'),
-(104, '', 'Lab Bio 2', 'ALTRES', 3, '', 1, 'mati');
+(104, '', 'Lab Bio 2', 'ALTRES', 3, '', 1, 'mati'),
+(105, '', 'INFO 1', 'CFGS', 3, 'INFO 1', 1, 'tarda');
 
 -- --------------------------------------------------------
 
