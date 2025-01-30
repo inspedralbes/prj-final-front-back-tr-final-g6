@@ -7,7 +7,7 @@ function getVolumeInDecibels() {
 }
 
 // Connexió a MongoDB
-const url = 'mongodb+srv://marti:marti@cluster0.b6lov.mongodb.net/';
+const url = 'mongodb://root:example@prfg6-mongodb:27017/';
 const dbName = 'projecte_final';
 const client = new MongoClient(url);
 
