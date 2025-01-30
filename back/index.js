@@ -22,7 +22,7 @@ const io = new socketIo(server);
 const services = [];
 
 const connexioBD = mysql2.createConnection({
-  host: 'localhost',
+  host: 'prfg6-mysql',
   user: 'root',
   password: 'root',
   database: 'prf-g6'
