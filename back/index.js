@@ -25,10 +25,10 @@ const services = [];
 dotenv.config();
 
 const connexioBD = mysql2.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  host: process.env.MYSQL_HOST,
+  user: process.env.MYSQL_USER,  // <-- Debe ser MYSQL_USER en lugar de MYSQL_DATABASE
+  password: process.env.MYSQL_PASSWORD,  // <-- Debe ser MYSQL_PASSWORD en lugar de MYSQL_USER
+  database: process.env.MYSQL_DATABASE  // <-- Debe ser MYSQL_DATABASE en lugar de MYSQL_PASSWORD
 });
 
 function connectToDB() {
@@ -50,33 +50,30 @@ fs.readdirSync(path.join(__dirname, 'services')).forEach(file => {
 
   try {
     let data = fs.readFileSync(path.join(__dirname, 'logs') + `/${file}.log`, 'utf8');
-
     let splitData = data.toString().split('||\n');
 
     splitData.forEach(element => {
       if (element.length === 0) return;
-      const parsedElement = JSON.parse(element);
 
-      services.find(service => service.name === file).logs.push(parsedElement);
+      // Almacenar solo como texto
+      services.find(service => service.name === file).logs.push({ log: element, date: new Date().toISOString() });
     });
   } catch (error) {
-    console.log(`File not found: ${error}`);
+    console.log(`Error al leer el archivo ${file}.log: ${error.message}`);
   }
-
 
   try {
     let data = fs.readFileSync(path.join(__dirname, 'logs') + `/${file}.error.log`, 'utf8');
-
     let splitData = data.toString().split('||\n');
 
     splitData.forEach(element => {
       if (element.length === 0) return;
-      const parsedElement = JSON.parse(element);
 
-      services.find(service => service.name === file).errorLogs.push(parsedElement);
+      // Almacenar solo como texto
+      services.find(service => service.name === file).errorLogs.push({ log: element, date: new Date().toISOString() });
     });
   } catch (error) {
-    console.log(`File not found: ${error}`);
+    console.log(`Error al leer el archivo ${file}.error.log: ${error.message}`);
   }
 });
 
@@ -85,10 +82,7 @@ app.get('/services', (req, res) => {
 });
 
 app.post('/changeServiceState', (req, res) => {
-
-
-  const { id } = req.body
-
+  const { id } = req.body;
   const service = services.find(service => service.id === id);
 
   if (service.state === 'tancat') {
@@ -100,10 +94,9 @@ app.post('/changeServiceState', (req, res) => {
   }
 
   res.send(services);
-
 });
 
-//Endpoint per a comprovar l'estat d'un servei
+// Endpoint para comprobar el estado de un servicio
 app.post('/api/checkServiceStatus', (req, res) => {
   const { serviceName } = req.body;
   console.log(serviceName);
@@ -128,7 +121,6 @@ function startProcess(service) {
     const date = new Date(Date.now("YYYY-MM-DD HH:mm:ss")).toISOString().split('.')[0].replace('T', ' ');
     service.errorLogs.push({ log: data.toString(), date: date });
     saveErrorLogs(service, { log: data.toString(), date: date });
-
   });
 
   process.on('close', code => {
@@ -179,7 +171,7 @@ function enviarServeis() {
   io.emit('actualitzar serveis', JSON.stringify(services.map(service => {
     return { id: service.id, name: service.name, state: service.state, logs: service.logs, errorLogs: service.errorLogs };
   })));
-};
+}
 
 function checkServiceStatus(serviceName) {
   const service = services.find(service => service.name === serviceName);
@@ -192,9 +184,9 @@ function checkServiceStatus(serviceName) {
     }
     return status;
   }
-};
+}
 
-//ENDPOINTS
+// ENDPOINTS
 
 app.post('/login', (req, res) => {
   const { correu, contrasenya } = req.body;
