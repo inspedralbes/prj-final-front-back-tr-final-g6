@@ -1,7 +1,7 @@
 import express from 'express';
 
 const app = express();
-const PORT = 3020;
+const PORT = process.env.PORT || 3020;
 
 import { createServer } from 'http';
 import { Server as socketIo } from 'socket.io';
@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import cors from 'cors';
 import { spawn } from 'node:child_process';
+import dotenv from 'dotenv';
 
 app.use(cors());
 app.use(express.json());
@@ -21,11 +22,13 @@ const io = new socketIo(server);
 
 const services = [];
 
+dotenv.config();
+
 const connexioBD = mysql2.createConnection({
-  host: 'prfg6-mysql',
-  user: 'root',
-  password: 'root',
-  database: 'prf-g6'
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
 function connectToDB() {
@@ -217,7 +220,7 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/aulas', (req, res) => {
-  const query = 'SELECT * FROM aula';
+  const query = 'SELECT * FROM aula WHERE activa = 1';
   connexioBD.execute(query, (err, results) => {
     if (err) {
       console.error('Error en la consulta a la base de dades: ' + err.stack);

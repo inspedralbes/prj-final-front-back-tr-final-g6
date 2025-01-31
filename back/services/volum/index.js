@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb';
+import dotenv from 'dotenv';
 
 // Funció per simular la lectura del volum en decibels
 function getVolumeInDecibels() {
@@ -7,8 +8,10 @@ function getVolumeInDecibels() {
 }
 
 // Connexió a MongoDB
-const url = 'mongodb://root:example@prfg6-mongodb:27017/';
-const dbName = 'projecte_final';
+dotenv.config();
+
+const url = process.env.MONGODB_URI;
+const dbName = process.env.MONGO_DB;
 const client = new MongoClient(url);
 
 async function logVolume() {

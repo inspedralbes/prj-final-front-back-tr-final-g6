@@ -24,7 +24,7 @@
                     </template>
                     <template #title>
                         <div class="text-center text-xl font-semibold text-gray-900 dark:text-white">
-                            Aula: {{ aula.Curs }} - {{ aula.Classe || 'Sin clase' }}
+                            {{ aula.Curs || 'Sin clase' }}
                         </div>
                     </template>
                     <template #subtitle>
@@ -34,7 +34,7 @@
                     </template>
                     <template #content>
                         <p class="text-gray-900 dark:text-white text-center mt-4">
-                            Aula en planta {{ aula.Planta }} - Código: {{ aula.Aula }}
+                            Pis {{ aula.Planta }} - Classe: {{ aula.Aula }}
                         </p>
                     </template>
                 </Card>
