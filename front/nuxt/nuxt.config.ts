@@ -19,5 +19,8 @@ export default defineNuxtConfig({
         preset: Aura
       }
     }
-  }
+  },
+  plugins: [
+    '~/plugins/socket.js',
+  ],
 });
