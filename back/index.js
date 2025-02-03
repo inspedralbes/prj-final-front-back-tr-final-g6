@@ -312,6 +312,58 @@ app.delete('/deleteAula/:id', (req, res) => {
   });
 });
 
+// Endponit per Python
+
+const executePythonScript = (script) => {
+  return new Promise((resolve, reject) => {
+    const scriptPath = path.join(__dirname, 'scripts', script);
+
+    if (!fs.existsSync(scriptPath)) {
+      return reject(`Script not found: ${script}`);
+    };
+
+    const process = spawn('/usr/src/app/venv/bin/python3', [scriptPath]);
+
+    let output = '';
+    let error = '';
+
+    process.stdout.on('data', (data) => {
+      output += data.toString();
+    });
+
+    process.stderr.on('data', (data) => {
+      error += data.toString();
+    });
+
+    process.on('close', (code) => {
+      if (code === 0) {
+        resolve(output);
+      } else {
+        reject(error);
+      }
+    });
+
+    process.on('error', (err) => {
+      reject(`Failed to start process: ${err.message} ~ ${err.stack}`);
+    });
+  });
+};
+
+app.post('/api/execute', async (req, res) => {
+  const { script } = req.body;
+
+  if (!script || typeof script !== 'string') {
+      return res.status(400).json({ message: 'Entrada invàlida' });
+  }
+
+  try {
+      const output = await executePythonScript(script);
+      res.json({ message: 'Script executat amb èxit', output });
+  } catch (error) {
+      res.status(500).json({ message: `Error en l'execució de l'script`, error });
+  }
+});
+
 server.listen(PORT, () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
 });
