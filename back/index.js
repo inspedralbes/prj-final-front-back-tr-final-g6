@@ -312,6 +312,28 @@ app.delete('/deleteAula/:id', (req, res) => {
   });
 });
 
+
+app.get('/api/aules/:id/habilitar', (req, res) => {
+  const { id } = req.params;
+  const query = 'SELECT * FROM aula WHERE id = ?';
+  connexioBD.execute(query, [id], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+
+    if (results.length > 0) {
+      const aula = results[0];
+      res.status(200).send({
+        estado: aula.activa ? 1 : 0
+      });
+    } else {
+      res.status(404).send('Aula not found');
+    }
+  });
+});
+
 server.listen(PORT, () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
 });
