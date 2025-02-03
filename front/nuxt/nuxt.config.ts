@@ -7,6 +7,7 @@ export default defineNuxtConfig({
   modules: [
     '@primevue/nuxt-module',
     '@nuxtjs/tailwindcss',
+    '@pinia/nuxt'
   ],
   css: [
     "primevue/resources/primevue.min.css",
