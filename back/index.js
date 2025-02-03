@@ -312,9 +312,11 @@ app.delete('/deleteAula/:id', (req, res) => {
   });
 });
 
-
-app.get('/api/aules/:id/habilitar', (req, res) => {
+// Endpoint para habilitar o deshabilitar el aula
+app.put('/api/aules/:id/habilitar', (req, res) => {
   const { id } = req.params;
+
+  // Consultamos el estado actual del aula
   const query = 'SELECT * FROM aula WHERE id = ?';
   connexioBD.execute(query, [id], (err, results) => {
     if (err) {
@@ -325,8 +327,24 @@ app.get('/api/aules/:id/habilitar', (req, res) => {
 
     if (results.length > 0) {
       const aula = results[0];
-      res.status(200).send({
-        estado: aula.activa ? 1 : 0
+
+      // Determinamos el nuevo estado para el aula
+      const nuevoEstado = aula.activa === 1 ? 0 : 1; // Si está activa (1), la deshabilitamos (0) y viceversa
+
+      // Actualizamos el estado en la base de datos
+      const updateQuery = 'UPDATE aula SET activa = ? WHERE id = ?';
+      connexioBD.execute(updateQuery, [nuevoEstado, id], (err, updateResults) => {
+        if (err) {
+          console.error('Error en la actualización a la base de dades: ' + err.stack);
+          res.status(500).send('Error en la actualización a la base de dades');
+          return;
+        }
+
+        // Respondemos con el nuevo estado
+        res.status(200).send({
+          message: `Aula ${nuevoEstado === 1 ? 'habilitada' : 'deshabilitada'} correctamente`,
+          estado: nuevoEstado
+        });
       });
     } else {
       res.status(404).send('Aula not found');
