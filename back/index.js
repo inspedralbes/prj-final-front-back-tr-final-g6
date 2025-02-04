@@ -219,6 +219,18 @@ app.post('/login', (req, res) => {
   });
 });
 
+app.get('/getAulas', (req, res) => {
+  const query = 'SELECT * FROM aula';
+  connexioBD.execute(query, (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+    res.status(200).send(results);
+  });
+});
+
 app.get('/aulas', (req, res) => {
   const query = 'SELECT * FROM aula WHERE activa = 1';
   connexioBD.execute(query, (err, results) => {

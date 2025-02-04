@@ -89,10 +89,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Dropdown from 'primevue/dropdown';
-import { getAulas, deleteAula as deleteAulaAPI, updateAula, habilitarAula } from '~/utils/communicationManager';
+import { getTotesAulas } from '~/utils/communicationManager';
 
 const router = useRouter();
 const aulas = ref([]);
@@ -110,7 +110,7 @@ const etapas = [
 
 onMounted(async () => {
     try {
-        aulas.value = await getAulas();
+        aulas.value = await getTotesAulas();
         aulas.value = aulas.value.map(aula => ({
             ...aula,
             showDetails: false,

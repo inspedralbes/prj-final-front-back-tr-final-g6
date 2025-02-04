@@ -26,6 +26,24 @@ export async function login(correu, contrasenya) {
 
 // Aulas
 
+export async function getTotesAulas() {
+    try {
+        const response = await fetch(`${URL}/getAulas`);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al obtener las aulas');
+        }
+
+        const data = await response.json();
+        return data;
+
+    } catch (error) {
+        console.error(error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
 export async function getAulas() {
     try {
         const response = await fetch(`${URL}/aulas`);
