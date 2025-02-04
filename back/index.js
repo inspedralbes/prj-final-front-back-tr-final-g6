@@ -322,7 +322,7 @@ const executePythonScript = (script) => {
       return reject(`Script not found: ${script}`);
     };
 
-    const process = spawn('/usr/src/app/venv/bin/python3', [scriptPath]);
+    const process = spawn('./venv/bin/python3', [scriptPath]);
 
     let output = '';
     let error = '';
