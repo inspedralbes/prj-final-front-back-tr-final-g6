@@ -19,7 +19,7 @@ COPY back/requirements.txt ./
 #RUN ./venv/bin/pip install -r requirements.txt
 
 # Instal·la nodemon globalment
-#RUN npm install -g nodemon
+RUN npm install -g nodemon
 
 # Copia el codi de l'aplicació
 #COPY back/ ./
