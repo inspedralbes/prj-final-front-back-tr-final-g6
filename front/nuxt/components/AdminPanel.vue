@@ -2,6 +2,10 @@
     <div
         class="min-h-screen bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1] flex flex-col items-center p-8 animated-bg">
         <!-- Filtres -->
+        <button @click="navigateToMapas"
+            class="px-4 py-2 my-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all">
+            Veure Mapes
+        </button>
         <div class="w-full max-w-3xl mb-8 bg-white p-6 rounded-lg shadow-lg">
             <div class="flex flex-wrap gap-4">
                 <input v-model="searchQuery" type="text" placeholder="Cercar Aula..."
@@ -81,9 +85,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import Dropdown from 'primevue/dropdown';
 import { getAulas, deleteAula as deleteAulaAPI, updateAula } from '~/utils/communicationManager';
 
+const router = useRouter();
 const aulas = ref([]);
 const searchQuery = ref('');
 const selectedEtapa = ref(null);
@@ -141,6 +147,10 @@ const deleteAula = async (id) => {
             console.error('Error en eliminar l\'aula:', error.message);
         }
     }
+};
+
+const navigateToMapas = () => {
+    router.push('/mapas');
 };
 </script>
 
