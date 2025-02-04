@@ -83,7 +83,7 @@ export async function getUsuaris() {
 }
 
 export async function getUsuariById() {
-    const userId = localStorage.getItem('userId');  // Obtener el ID desde el localStorage
+    const userId = localStorage.getItem('userId');
 
     if (!userId) {
         throw new Error('No se encontró el ID del usuario en el almacenamiento local');
@@ -106,19 +106,38 @@ export async function getUsuariById() {
     }
 }
 
-export async function updateAula(aula) {
+export async function updateAula(id, aula) {
     try {
-        const response = await fetch(`${URL}/aula/${aula.id}`, {
+        const response = await fetch(`${URL}/updateAula/${id}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(aula)
+            body: JSON.stringify(aula) // Asegúrate de enviar los datos correctamente
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error en la actualización: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('Aula actualizada con éxito', result);
+        return result;
+    } catch (error) {
+        console.error('Error en la solicitud de actualización:', error);
+        throw new Error('Error en actualizar el aula');
+    }
+}
+
+export async function deleteAula(id) {
+    try {
+        const response = await fetch(`${URL}/deleteAula/${id}`, {
+            method: 'DELETE',
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al actualizar el aula');
+            throw new Error(errorData.message || 'Error al eliminar el aula');
         }
 
         const data = await response.json();
@@ -130,15 +149,19 @@ export async function updateAula(aula) {
     }
 }
 
-export async function deleteAula(id) {
+export async function habilitarAula(aula) {
     try {
-        const response = await fetch(`${URL}/aula/${id}`, {
-            method: 'DELETE',
+        const response = await fetch(`${URL}/api/aules/${aula.id}/activa`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ activa: aula.activa }),
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al eliminar el aula');
+            throw new Error(errorData.message || 'Error al habilitar el aula');
         }
 
         const data = await response.json();
