@@ -37,19 +37,29 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { useUserStore } from '~/stores/userStore';
 import { login } from '~/utils/communicationManager';
 import { useRouter } from 'vue-router';
 
 const email = ref('');
 const password = ref('');
 const router = useRouter();
+const userStore = useUserStore();
 
 const handleLogin = async () => {
     try {
         const response = await login(email.value, password.value);
-        console.log('Login exitoso:', response);
-        router.push('/aulas');
+        console.log('Respuesta del servidor:', response);
+
+        if (response && response.user) {
+            console.log('Login exitoso, datos del usuario:', response.user);
+
+            userStore.setUser(response.user);
+
+            router.push('/aulas');
+        } else {
+            console.error('Respuesta incorrecta:', response);
+        }
     } catch (error) {
         console.error('Error al iniciar sesión:', error.message);
     }

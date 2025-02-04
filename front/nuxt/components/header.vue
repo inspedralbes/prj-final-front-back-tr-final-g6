@@ -24,6 +24,11 @@
                                 Configuración
                             </router-link>
                         </li>
+                        <li v-if="isAdmin" class="px-4 py-3 hover:bg-gray-100 transition-colors">
+                            <router-link to="/admin" class="block text-sm font-medium text-gray-700">
+                                Admin
+                            </router-link>
+                        </li>
                         <li class="px-4 py-3 hover:bg-gray-100 transition-colors">
                             <button @click="logout" class="block text-sm font-medium text-gray-700">
                                 Cerrar Sesión
@@ -37,25 +42,24 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '~/stores/userStore';
 
 const router = useRouter();
 const isMenuVisible = ref(false);
+const userStore = useUserStore();
 
-// Función para alternar la visibilidad del menú
 const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
 };
 
-// Función para cerrar sesión y redirigir al login
 const logout = () => {
-    // Eliminar el token o cualquier dato de sesión que estés utilizando
-    localStorage.removeItem('authToken'); // O sessionStorage, según lo que uses
-
-    // Redirigir al login
+    userStore.logout();
     router.push('/login');
 };
+
+const isAdmin = computed(() => userStore.user?.admin === 1);
 </script>
 
 <style scoped>
