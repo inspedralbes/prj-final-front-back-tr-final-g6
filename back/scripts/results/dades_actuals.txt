@@ -2,21 +2,21 @@
     "1": {
         "Dilluns": 60.5,
         "Dimarts": 0,
-        "Dimecres": 64.76,
+        "Dimecres": 65.64516129032258,
         "Dijous": 0,
         "Divendres": 0
     },
     "2": {
         "Dilluns": 64.33333333333333,
         "Dimarts": 69.0,
-        "Dimecres": 63.28,
+        "Dimecres": 63.5,
         "Dijous": 0,
         "Divendres": 0
     },
     "3": {
         "Dilluns": 64.0,
         "Dimarts": 65.33333333333333,
-        "Dimecres": 63.785714285714285,
+        "Dimecres": 64.27777777777777,
         "Dijous": 0,
         "Divendres": 0
     }

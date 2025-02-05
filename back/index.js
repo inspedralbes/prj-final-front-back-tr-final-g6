@@ -410,6 +410,12 @@ app.post('/api/execute', async (req, res) => {
   }
 });
 
+// SetInterval cada minut. Si han passat 60 minuts calcula tmb hores etc. Passar per arguments al python l'interval de temps
+// Algun dia hi haura servidor de cua.
+
+
+// Endpoint(s) per enviar dades del gràfic al frontend (algun dia tindra socket), request body serà de quina taula volem les dades i quin interval de temps.
+
 server.listen(PORT, () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
 });

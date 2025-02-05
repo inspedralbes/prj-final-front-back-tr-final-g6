@@ -1,3 +1,6 @@
+# Arguments: interval de temps format datetime
+
+
 import os  # Importa el mòdul os per treballar amb variables d'entorn i altres funcionalitats del sistema operatiu
 import pymongo  # Importa el mòdul pymongo per treballar amb MongoDB
 from dotenv import load_dotenv  # Importa la funció load_dotenv per carregar variables d'entorn des d'un fitxer .env
