@@ -54,8 +54,9 @@ onMounted(() => {
 const points = [
   { x: 129 * scaleFactor, y: 119 * scaleFactor, info: "Zona 1: Información futura." },
   { x: 192 * scaleFactor, y: 112 * scaleFactor, info: "Zona 2: Información futura." },
-  { x: 300 * scaleFactor, y: 50 * scaleFactor, info: "Zona 3: Información futura." },
-  { x: 400 * scaleFactor, y: 50 * scaleFactor, info: "Zona 4: Información futura." },
+  { x: 136 * scaleFactor, y: 208 * scaleFactor, info: "Zona 3: Información futura." },
+  { x: 200 * scaleFactor, y: 202 * scaleFactor, info: "Zona 4: Información futura." },
+  
   { x: 500 * scaleFactor, y: 50 * scaleFactor, info: "Zona 5: Información futura." },
   { x: 600 * scaleFactor, y: 50 * scaleFactor, info: "Zona 6: Información futura." },
   { x: 700 * scaleFactor, y: 50 * scaleFactor, info: "Zona 7: Información futura." },
