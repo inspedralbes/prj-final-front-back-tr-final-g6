@@ -13,36 +13,29 @@ onMounted(() => {
     const imgWidth = imageObj.width;
     const imgHeight = imageObj.height;
 
-    // Fijar las dimensiones del canvas de forma rectangular (más ancho que alto)
-    const canvasWidth = 1500;  // Tamaño fijo para el contenedor del canvas (ancho)
-    const canvasHeight = 600;  // Tamaño fijo para el contenedor del canvas (alto)
+    // Fijar las dimensiones del canvas de forma dinámica (se ajusta al contenedor)
+    const canvasWidth = stageRef.value.offsetWidth;  // Ancho del contenedor del canvas
+    const canvasHeight = stageRef.value.offsetHeight;  // Alto del contenedor del canvas
 
-    // Fijar un pequeño margen (por ejemplo, 50px de margen alrededor de la imagen)
-    const margin = 50;  // Margen pequeño alrededor de la imagen
-
-    // Ajustar el tamaño del canvas para dejar el margen
-    const usableWidth = canvasWidth - 2 * margin;
-    const usableHeight = canvasHeight - 2 * margin;
-
-    // Crear el stage con el tamaño rectangular
+    // Crear el stage con el tamaño dinámico
     const stage = new Konva.Stage({
-      container: stageRef.value,  // referencia al contenedor del canvas
-      width: canvasWidth,  // Establecer un ancho fijo para el canvas
-      height: canvasHeight,  // Establecer un alto fijo para el canvas
+      container: stageRef.value,  // Referencia al contenedor del canvas
+      width: canvasWidth,  // Ancho del canvas ajustado
+      height: canvasHeight,  // Alto del canvas ajustado
     });
 
     const layer = new Konva.Layer();
     stage.add(layer);
 
     // Calcular la escala para que la imagen ocupe todo el ancho disponible dentro del canvas (sin deformar)
-    const scaleFactor = Math.min(usableWidth / imgWidth, usableHeight / imgHeight);
+    const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight);
 
     const scaledWidth = imgWidth * scaleFactor;
     const scaledHeight = imgHeight * scaleFactor;
 
     // Calcular la posición para centrar la imagen en el canvas (deja margen en los lados)
-    const x = (canvasWidth - scaledWidth) / 2; // Posición centrada en el eje X con margen
-    const y = (canvasHeight - scaledHeight) / 2; // Posición centrada en el eje Y con margen
+    const x = (canvasWidth - scaledWidth) / 2; // Posición centrada en el eje X
+    const y = (canvasHeight - scaledHeight) / 2; // Posición centrada en el eje Y
 
     // Crear la imagen en Konva
     const konvaImage = new Konva.Image({
