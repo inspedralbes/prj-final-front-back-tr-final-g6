@@ -219,6 +219,18 @@ app.post('/login', (req, res) => {
   });
 });
 
+app.get('/getAulas', (req, res) => {
+  const query = 'SELECT * FROM aula';
+  connexioBD.execute(query, (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+    res.status(200).send(results);
+  });
+});
+
 app.get('/aulas', (req, res) => {
   const query = 'SELECT * FROM aula WHERE activa = 1';
   connexioBD.execute(query, (err, results) => {
@@ -270,28 +282,21 @@ app.post('/createAula', (req, res) => {
 });
 
 app.put('/updateAula/:id', (req, res) => {
-  const { curs, classe, etapa } = req.body;
-  const { id } = req.params;
+  const id = req.params.id;
+  const { Curs, Classe, Etapa, Planta, Aula, activa, turn } = req.body;
 
-  if (!curs || !classe || !etapa) {
-    return res.status(400).send({ message: 'curs, classe i etapa són necessaris' });
-  }
+  const query = 'UPDATE aula SET Curs = ?, Classe = ?, Etapa = ?, Planta = ?, Aula = ?, activa = ?, turn = ? WHERE id = ?';
+  const values = [Curs, Classe, Etapa, Planta, Aula, activa, turn, id];
 
-  const query = 'UPDATE aula SET curs = ?, classe = ?, etapa = ? WHERE id = ?';
-  connexioBD.execute(query, [curs, classe, etapa, id], (err, results) => {
+  connexioBD.query(query, values, (err, results) => {
     if (err) {
-      console.error('Error en la actualització a la base de dades: ' + err.stack);
-      res.status(500).send('Error en la actualització a la base de dades');
-      return;
+      console.error('Error en la actualización de la base de datos:', err);
+      return res.status(500).json({ message: 'Error en actualizar el aula' });
     }
-
-    if (results.affectedRows > 0) {
-      res.status(200).send({ message: 'aula actualitzada correctament' });
-    } else {
-      res.status(404).send('aula not found');
-    }
+    res.json({ message: 'Aula actualizada con éxito' });
   });
 });
+
 
 app.delete('/deleteAula/:id', (req, res) => {
   const { id } = req.params;
@@ -312,42 +317,26 @@ app.delete('/deleteAula/:id', (req, res) => {
   });
 });
 
-// Endpoint para habilitar o deshabilitar el aula
-app.put('/api/aules/:id/habilitar', (req, res) => {
+app.put('/api/aules/:id/activa', (req, res) => {
   const { id } = req.params;
+  const { activa } = req.body;  // El valor de activa (1 o 0)
 
-  // Consultamos el estado actual del aula
-  const query = 'SELECT * FROM aula WHERE id = ?';
-  connexioBD.execute(query, [id], (err, results) => {
+  if (activa === undefined) {
+    return res.status(400).send({ message: 'El estado "activa" es necesario' });
+  }
+
+  const query = 'UPDATE aula SET activa = ? WHERE id = ?';
+  connexioBD.execute(query, [activa, id], (err, results) => {
     if (err) {
-      console.error('Error en la consulta a la base de dades: ' + err.stack);
-      res.status(500).send('Error en la consulta a la base de dades');
+      console.error('Error en la actualización a la base de datos: ' + err.stack);
+      res.status(500).send('Error en la actualización a la base de datos');
       return;
     }
 
-    if (results.length > 0) {
-      const aula = results[0];
-
-      // Determinamos el nuevo estado para el aula
-      const nuevoEstado = aula.activa === 1 ? 0 : 1; // Si está activa (1), la deshabilitamos (0) y viceversa
-
-      // Actualizamos el estado en la base de datos
-      const updateQuery = 'UPDATE aula SET activa = ? WHERE id = ?';
-      connexioBD.execute(updateQuery, [nuevoEstado, id], (err, updateResults) => {
-        if (err) {
-          console.error('Error en la actualización a la base de dades: ' + err.stack);
-          res.status(500).send('Error en la actualización a la base de dades');
-          return;
-        }
-
-        // Respondemos con el nuevo estado
-        res.status(200).send({
-          message: `Aula ${nuevoEstado === 1 ? 'habilitada' : 'deshabilitada'} correctamente`,
-          estado: nuevoEstado
-        });
-      });
+    if (results.affectedRows > 0) {
+      res.status(200).send({ message: `El estado del aula ha sido actualizado a ${activa === 1 ? 'habilitada' : 'deshabilitada'}` });
     } else {
-      res.status(404).send('Aula not found');
+      res.status(404).send('Aula no encontrada');
     }
   });
 });
