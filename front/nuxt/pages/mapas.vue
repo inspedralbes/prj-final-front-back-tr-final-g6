@@ -1,15 +1,16 @@
 <template>
     <div class="min-h-screen bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1] flex flex-col items-center p-8 animated-bg">
         <h1 class="text-4xl font-bold text-white mb-6">Mapes</h1>
-        <div class="w-full max-w-3xl bg-white p-6 rounded-lg shadow-lg text-center">
-            <mapaplanta />
+        <div class="w-full max-w-full lg:max-w-full bg-white p-6 pt-2 rounded-lg shadow-lg text-center flex justify-center items-center">
+            <div class="w-full h-[80vh] max-w-[98vw] flex justify-center items-center ml-[-93px] mr-[-93px]">
+                <img src="/PLANTA 1.png" alt="Map Image" class="object-contain object-center w-[90%] h-[90%]" />
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router';
-import Mapaplanta from '~/components/mapaplanta.vue';
 
 const router = useRouter();
 </script>
