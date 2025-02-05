@@ -124,6 +124,25 @@ export async function getUsuariById() {
     }
 }
 
+export async function createAula(curs, classe, etapa) {
+    if (!curs || !classe || !etapa) {
+        throw new Error("curs, classe i etapa són necessaris");
+    }
+
+    const response = await fetch(`${URL}/createAula`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ curs, classe, etapa })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al crear el aula');
+    }
+
+    return await response.json();
+}
+
 export async function updateAula(id, aula) {
     try {
         const response = await fetch(`${URL}/updateAula/${id}`, {
