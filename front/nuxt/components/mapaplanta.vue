@@ -60,8 +60,7 @@ const points = [
   { x: 330 * scaleFactor, y: 192 * scaleFactor, info: "Zona 6: Información futura." },
   { x: 730 * scaleFactor, y: 115 * scaleFactor, info: "Zona 7: Información futura." },
   { x: 794 * scaleFactor, y: 122 * scaleFactor, info: "Zona 8: Información futura." },
-
-  { x: 200 * scaleFactor, y: 50 * scaleFactor, info: "Zona 9: Información futura." },
+  { x: 530 * scaleFactor, y: 190 * scaleFactor, info: "Zona 9: Información futura." },
 
   { x: 200 * scaleFactor, y: 50 * scaleFactor, info: "Zona 10: Información futura." },
 
