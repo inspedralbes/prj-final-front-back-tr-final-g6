@@ -56,16 +56,16 @@ const points = [
   { x: 192 * scaleFactor, y: 112 * scaleFactor, info: "Zona 2: Información futura." },
   { x: 136 * scaleFactor, y: 208 * scaleFactor, info: "Zona 3: Información futura." },
   { x: 200 * scaleFactor, y: 202 * scaleFactor, info: "Zona 4: Información futura." },
-  
-  { x: 500 * scaleFactor, y: 50 * scaleFactor, info: "Zona 5: Información futura." },
-  { x: 600 * scaleFactor, y: 50 * scaleFactor, info: "Zona 6: Información futura." },
-  { x: 700 * scaleFactor, y: 50 * scaleFactor, info: "Zona 7: Información futura." },
-  { x: 800 * scaleFactor, y: 50 * scaleFactor, info: "Zona 8: Información futura." },
-  { x: 900 * scaleFactor, y: 50 * scaleFactor, info: "Zona 9: Información futura." },
-  { x: 1000 * scaleFactor, y: 50 * scaleFactor, info: "Zona 10: Información futura." },
-  { x: 1100 * scaleFactor, y: 50 * scaleFactor, info: "Zona 11: Información futura." },
-  { x: 1200 * scaleFactor, y: 50 * scaleFactor, info: "Zona 12: Información futura." },
-  { x: 1300 * scaleFactor, y: 50 * scaleFactor, info: "Zona 13: Información futura." },
+  { x: 355 * scaleFactor, y: 100 * scaleFactor, info: "Zona 5: Información futura." },
+
+  { x: 200 * scaleFactor, y: 50 * scaleFactor, info: "Zona 6: Información futura." },
+  { x: 200 * scaleFactor, y: 50 * scaleFactor, info: "Zona 7: Información futura." },
+  { x: 200 * scaleFactor, y: 50 * scaleFactor, info: "Zona 8: Información futura." },
+  { x: 200 * scaleFactor, y: 50 * scaleFactor, info: "Zona 9: Información futura." },
+  { x: 200 * scaleFactor, y: 50 * scaleFactor, info: "Zona 10: Información futura." },
+  { x: 200 * scaleFactor, y: 50 * scaleFactor, info: "Zona 11: Información futura." },
+  { x: 200 * scaleFactor, y: 50 * scaleFactor, info: "Zona 12: Información futura." },
+  { x: 200 * scaleFactor, y: 50 * scaleFactor, info: "Zona 13: Información futura." },
 ];
 
 
@@ -74,7 +74,7 @@ const points = [
         x: x + point.x * scaleFactor,  // Ajustar la posición según la escala
         y: y + point.y * scaleFactor,
         radius: 10,
-        fill: "red",
+        fill: "gray",
         stroke: "black",
         strokeWidth: 2,
         draggable: true,  // Hacer que el círculo sea arrastrable
