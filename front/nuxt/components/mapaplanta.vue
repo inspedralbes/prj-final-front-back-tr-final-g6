@@ -3,7 +3,7 @@ import { onMounted, ref } from "vue";
 import Konva from "konva";
 
 const stageRef = ref(null);
-const showPopup = ref(false);  // Para controlar la visibilidad del contenedor de información
+const showPopup = ref(true);  // Para controlar la visibilidad del contenedor de información
 const popupInfo = ref("");     // Contenedor de información
 
 onMounted(() => {
@@ -74,10 +74,10 @@ const points = [
         x: x + point.x * scaleFactor,  // Ajustar la posición según la escala
         y: y + point.y * scaleFactor,
         radius: 10,
-        fill: "gray",
+        fill: "red",
         stroke: "black",
         strokeWidth: 2,
-        draggable: true,  // Hacer que el círculo sea arrastrable
+        draggable: false,  // Hacer que el círculo sea arrastrable
       });
 
       // Mostrar un contenedor de información al hacer clic en el punto
@@ -101,7 +101,7 @@ const points = [
     <!-- Contenedor de información (popup) -->
     <div v-if="showPopup" class="popup">
       <p>{{ popupInfo }}</p>
-      <button @click="showPopup = false">Cerrar</button>
+      <button @click="showPopup = true">Cerrar</button>
     </div>
   </div>
 </template>
