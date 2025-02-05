@@ -376,10 +376,16 @@ const executePythonScript = (script) => {
     });
 
     process.on('close', (code) => {
+      const resultPath = path.join(__dirname, 'scripts', 'results', `${path.basename(script, '.py')}.txt`);
+      const errorPath = path.join(__dirname, 'scripts', 'results', `${path.basename(script, '.py')}.error.txt`);
+      
+      fs.writeFileSync(resultPath, output);
+      fs.writeFileSync(errorPath, error);
+
       if (code === 0) {
-        resolve(output);
+      resolve(output);
       } else {
-        reject(error);
+      reject(error);
       }
     });
 

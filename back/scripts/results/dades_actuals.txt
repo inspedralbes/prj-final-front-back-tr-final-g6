@@ -1,0 +1,23 @@
+{
+    "1": {
+        "Dilluns": 60.5,
+        "Dimarts": 0,
+        "Dimecres": 64.76,
+        "Dijous": 0,
+        "Divendres": 0
+    },
+    "2": {
+        "Dilluns": 64.33333333333333,
+        "Dimarts": 69.0,
+        "Dimecres": 63.28,
+        "Dijous": 0,
+        "Divendres": 0
+    },
+    "3": {
+        "Dilluns": 64.0,
+        "Dimarts": 65.33333333333333,
+        "Dimecres": 63.785714285714285,
+        "Dijous": 0,
+        "Divendres": 0
+    }
+}
