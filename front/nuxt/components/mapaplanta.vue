@@ -51,23 +51,22 @@ onMounted(() => {
 
     layer.add(konvaImage);
 
-    // Puntos interactivos (13 puntos)
+    // Puntos interactivos (13 puntos) con posiciones manuales para los popups
     const points = [
-      { x: 179, y: 164, info: "2N ESO A: Información futura." },
-      { x: 268, y: 156, info: "2N ESO C: Información futura." },
-      { x: 494, y: 135, info: "2N ESO E: Información futura." },
-      { x: 189, y: 288, info: "2N ESO B: Información futura." },
-      { x: 279, y: 280, info: "2N ESO D: Información futura." },
-      { x: 458, y: 265, info: "2N ESO F: Información futura." },
-      { x: 735, y: 260, info: "1R SMIX / SMIX-B1: Información futura." },
-      { x: 824, y: 268, info: "PFI 2: Información futura." },
-      { x: 915, y: 274, info: "1R SMIX-A1 / 1R SMIX-B2: Información futura." },
-      { x: 1003, y: 283, info: "1R DAM / 1 A 3D: Información futura." },
-      { x: 1016, y: 160, info: "1R SMIX / DAM-VI: Información futura." },
-      { x: 1103, y: 168, info: "1 SMIX / 2N A43D: Información futura." },
-      { x: 1095, y: 294, info: "1SMX-A3 / 2SMX-B: Información futura." },
+      { x: 179, y: 164, info: "2N ESO A: Información futura.", popupX: 175, popupY: 350 },
+      { x: 268, y: 156, info: "2N ESO C: Información futura.", popupX: 320, popupY: 350 },
+      { x: 494, y: 135, info: "2N ESO E: Información futura.", popupX: 599, popupY: 350 },
+      { x: 189, y: 288, info: "2N ESO B: Información futura.", popupX: 180, popupY: 300 },
+      { x: 279, y: 280, info: "2N ESO D: Información futura.", popupX: 270, popupY: 290 },
+      { x: 458, y: 265, info: "2N ESO F: Información futura.", popupX: 460, popupY: 275 },
+      { x: 735, y: 260, info: "1R SMIX / SMIX-B1: Información futura.", popupX: 725, popupY: 270 },
+      { x: 824, y: 268, info: "PFI 2: Información futura.", popupX: 810, popupY: 280 },
+      { x: 915, y: 274, info: "1R SMIX-A1 / 1R SMIX-B2: Información futura.", popupX: 900, popupY: 285 },
+      { x: 1003, y: 283, info: "1R DAM / 1 A 3D: Información futura.", popupX: 995, popupY: 290 },
+      { x: 1016, y: 160, info: "1R SMIX / DAM-VI: Información futura.", popupX: 1000, popupY: 170 },
+      { x: 1103, y: 168, info: "1 SMIX / 2N A43D: Información futura.", popupX: 1090, popupY: 180 },
+      { x: 1095, y: 294, info: "1SMX-A3 / 2SMX-B: Información futura.", popupX: 1085, popupY: 305 },
     ];
-
 
     points.forEach(point => {
       const circle = new Konva.Circle({
@@ -85,14 +84,10 @@ onMounted(() => {
         popupInfo.value = point.info;  // Mostrar la información asociada al punto
         showPopup.value = true;  // Hacer visible el contenedor de información
 
-        // Posicionar el popup sobre el punto seleccionado
-        const stageBox = stageRef.value.getBoundingClientRect();
-        const scale = stage.scaleX();  // Escala aplicada al stage
-
-        // Ajustamos la posición del popup en base a la posición de la zona
+        // Usar las posiciones manuales del popup
         popupPosition.value = {
-          x: stageBox.left + e.evt.clientX / scale, // Convertir a coordenadas reales
-          y: stageBox.top + e.evt.clientY / scale,
+          x: point.popupX, // Usar el valor de la posición X predefinida
+          y: point.popupY, // Usar el valor de la posición Y predefinida
         };
       });
 
