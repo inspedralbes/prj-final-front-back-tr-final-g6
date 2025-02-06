@@ -3,8 +3,9 @@ import { onMounted, ref } from "vue";
 import Konva from "konva";
 
 const stageRef = ref(null);
-const showPopup = ref(true);  // Para controlar la visibilidad del contenedor de información
+const showPopup = ref(false);  // Para controlar la visibilidad del contenedor de información
 const popupInfo = ref("");     // Contenedor de información
+const popupPosition = ref({ x: 0, y: 0 });  // Posición dinámica del popup
 
 onMounted(() => {
   const imageUrl = '/Planta 1.png'; // Ruta de la imagen en la carpeta public
@@ -51,22 +52,21 @@ onMounted(() => {
     layer.add(konvaImage);
 
     // Puntos interactivos (13 puntos)
-const points = [
-  { x: 129 * scaleFactor, y: 119 * scaleFactor, info: "Zona 1: Información futura." },
-  { x: 192 * scaleFactor, y: 112 * scaleFactor, info: "Zona 2: Información futura." },
-  { x: 136 * scaleFactor, y: 208 * scaleFactor, info: "Zona 3: Información futura." },
-  { x: 200 * scaleFactor, y: 202 * scaleFactor, info: "Zona 4: Información futura." },
-  { x: 355 * scaleFactor, y: 100 * scaleFactor, info: "Zona 5: Información futura." },
-  { x: 330 * scaleFactor, y: 192 * scaleFactor, info: "Zona 6: Información futura." },
-  { x: 730 * scaleFactor, y: 115 * scaleFactor, info: "Zona 7: Información futura." },
-  { x: 794 * scaleFactor, y: 122 * scaleFactor, info: "Zona 8: Información futura." },
-  { x: 530 * scaleFactor, y: 190 * scaleFactor, info: "Zona 9: Información futura." },
-  { x: 591 * scaleFactor, y: 194 * scaleFactor, info: "Zona 10: Información futura." },
-  { x: 657 * scaleFactor, y: 199 * scaleFactor, info: "Zona 11: Información futura." },
-  { x: 722 * scaleFactor, y: 205 * scaleFactor, info: "Zona 12: Información futura." },
-  { x: 788 * scaleFactor, y: 211 * scaleFactor, info: "Zona 13: Información futura." },
-
-];
+    const points = [
+      { x: 179, y: 164, info: "2N ESO A: Información futura." },
+      { x: 268, y: 156, info: "2N ESO C: Información futura." },
+      { x: 494, y: 135, info: "2N ESO E: Información futura." },
+      { x: 189, y: 288, info: "2N ESO B: Información futura." },
+      { x: 355, y: 100, info: "Zona 5: Información futura." },
+      { x: 330, y: 192, info: "Zona 6: Información futura." },
+      { x: 730, y: 115, info: "Zona 7: Información futura." },
+      { x: 794, y: 122, info: "Zona 8: Información futura." },
+      { x: 530, y: 190, info: "Zona 9: Información futura." },
+      { x: 591, y: 194, info: "Zona 10: Información futura." },
+      { x: 657, y: 199, info: "Zona 11: Información futura." },
+      { x: 722, y: 205, info: "Zona 12: Información futura." },
+      { x: 788, y: 211, info: "Zona 13: Información futura." },
+    ];
 
 
     points.forEach(point => {
@@ -81,9 +81,19 @@ const points = [
       });
 
       // Mostrar un contenedor de información al hacer clic en el punto
-      circle.on('click', () => {
+      circle.on('click', (e) => {
         popupInfo.value = point.info;  // Mostrar la información asociada al punto
         showPopup.value = true;  // Hacer visible el contenedor de información
+
+        // Posicionar el popup sobre el punto seleccionado
+        const stageBox = stageRef.value.getBoundingClientRect();
+        const scale = stage.scaleX();  // Escala aplicada al stage
+
+        // Ajustamos la posición del popup en base a la posición de la zona
+        popupPosition.value = {
+          x: stageBox.left + e.evt.clientX / scale, // Convertir a coordenadas reales
+          y: stageBox.top + e.evt.clientY / scale,
+        };
       });
 
       layer.add(circle);
@@ -97,19 +107,20 @@ const points = [
 </script>
 
 <template>
-  <div ref="stageRef" class="canvas-container">
-    <!-- Contenedor de información (popup) -->
-    <div v-if="showPopup" class="popup">
-      <p>{{ popupInfo }}</p>
-      <button @click="showPopup = true">Cerrar</button>
-    </div>
+  <!-- Contenedor del canvas de Konva -->
+  <div ref="stageRef" class="canvas-container"></div>
+
+  <!-- Contenedor de información (popup) -->
+  <div v-if="showPopup" class="popup" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
+    <p>{{ popupInfo }}</p>
   </div>
 </template>
 
 <style scoped>
+/* Asegurarse de que el contenedor de Konva ocupa todo el espacio */
 .canvas-container {
   width: 100%;
-  height: 100vh;
+  height: 100vh;  /* Usar toda la altura de la ventana */
   padding: 0;
   margin: 0;
   overflow: hidden;
@@ -118,22 +129,11 @@ const points = [
 
 .popup {
   position: absolute;
-  top: 20px;
-  left: 20px;
   padding: 20px;
   background-color: rgba(0, 0, 0, 0.7);
   color: white;
   border-radius: 5px;
   max-width: 300px;
-}
-
-.popup button {
-  margin-top: 10px;
-  padding: 5px 10px;
-  background-color: red;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  z-index: 10;
 }
 </style>
