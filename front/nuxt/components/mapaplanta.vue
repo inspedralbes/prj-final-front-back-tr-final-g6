@@ -56,11 +56,14 @@ onMounted(() => {
       { x: 179, y: 164, info: "2N ESO A: Información futura.", popupX: 175, popupY: 350 },
       { x: 268, y: 156, info: "2N ESO C: Información futura.", popupX: 320, popupY: 350 },
       { x: 494, y: 135, info: "2N ESO E: Información futura.", popupX: 599, popupY: 350 },
-      { x: 189, y: 288, info: "2N ESO B: Información futura.", popupX: 180, popupY: 300 },
-      { x: 279, y: 280, info: "2N ESO D: Información futura.", popupX: 270, popupY: 290 },
-      { x: 458, y: 265, info: "2N ESO F: Información futura.", popupX: 460, popupY: 275 },
+
+      { x: 189, y: 288, info: "2N ESO B: Información futura.", popupX: 180, popupY: 550 },
+      { x: 279, y: 280, info: "2N ESO D: Información futura.", popupX: 299, popupY: 540 },
+      { x: 458, y: 265, info: "2N ESO F: Información futura.", popupX: 540, popupY: 530 },
+
       { x: 735, y: 260, info: "1R SMIX / SMIX-B1: Información futura.", popupX: 725, popupY: 270 },
       { x: 824, y: 268, info: "PFI 2: Información futura.", popupX: 810, popupY: 280 },
+      
       { x: 915, y: 274, info: "1R SMIX-A1 / 1R SMIX-B2: Información futura.", popupX: 900, popupY: 285 },
       { x: 1003, y: 283, info: "1R DAM / 1 A 3D: Información futura.", popupX: 995, popupY: 290 },
       { x: 1016, y: 160, info: "1R SMIX / DAM-VI: Información futura.", popupX: 1000, popupY: 170 },
