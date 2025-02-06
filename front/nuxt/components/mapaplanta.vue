@@ -7,6 +7,10 @@ const showPopup = ref(false);  // Para controlar la visibilidad del contenedor d
 const popupInfo = ref("");     // Contenedor de información
 const popupPosition = ref({ x: 0, y: 0 });  // Posición dinámica del popup
 
+const closePopup = () => {
+  showPopup.value = false; // Cerrar el popup
+};
+
 onMounted(() => {
   const imageUrl = '/Planta 1.png'; // Ruta de la imagen en la carpeta public
   const imageObj = new Image();
@@ -112,6 +116,8 @@ onMounted(() => {
   <!-- Contenedor de información (popup) -->
   <div v-if="showPopup" class="popup" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
     <p>{{ popupInfo }}</p>
+    <!-- Botón de cierre (X) -->
+    <button @click="closePopup" class="close-btn">X</button>
   </div>
 </template>
 
@@ -134,5 +140,20 @@ onMounted(() => {
   border-radius: 5px;
   max-width: 300px;
   z-index: 10;
+}
+
+.close-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: red;
 }
 </style>
