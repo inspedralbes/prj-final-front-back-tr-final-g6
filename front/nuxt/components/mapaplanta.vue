@@ -62,9 +62,9 @@ onMounted(() => {
       { x: 458, y: 265, info: "2N ESO F: Información futura.", popupX: 540, popupY: 530 },
 
       { x: 735, y: 260, info: "1R SMIX / SMIX-B1: Información futura.", popupX: 920, popupY: 490 },
-      { x: 824, y: 268, info: "PFI 2: Información futura.", popupX: 810, popupY: 490 },
+      { x: 824, y: 268, info: "PFI 2: Información futura.", popupX: 1100, popupY: 500 },
       
-      { x: 915, y: 274, info: "1R SMIX-A1 / 1R SMIX-B2: Información futura.", popupX: 900, popupY: 490 },
+      { x: 915, y: 274, info: "1R SMIX-A1 / 1R SMIX-B2: Información futura.", popupX: 1190, popupY: 490 },
       { x: 1003, y: 283, info: "1R DAM / 1 A 3D: Información futura.", popupX: 1290, popupY: 490 },
       { x: 1016, y: 160, info: "1R SMIX-A2 / DAM-VI: Información futura.", popupX: 1300, popupY: 350 },
 
