@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  prfg6-front:
+    image: node:23-bullseye
+    container_name: nuxt
+    working_dir: /usr/src/app
+    volumes:
+      - ./front/nuxt:/usr/src/app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    command: bash -c "npm install --no-bin-links && npm run generate"
+    depends_on:
+      - prfg6-back
+
+  prfg6-back:
+    build:
+      context: .
+      dockerfile: ./back/prod.Dockerfile
+    container_name: back
+    working_dir: /usr/src/app
+    ports:
+      - 3020:3020
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - prfg6-mysql
+      - prfg6-mongodb
+
+  prfg6-mongodb:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongo-bd:/data/db
+
+  prfg6-mysql:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: prf-g6
+    volumes:
+      - mysql-bd:/var/lib/mysql:rw
+      - ./bd/mysql/acubox.sql:/docker-entrypoint-initdb.d/acubox.sql
+    ports:
+      - 3306:3306
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+    ports:
+      - 9000:9000
+
+volumes:
+  mysql-bd:
+  mongo-bd:
+  portainer_data:
