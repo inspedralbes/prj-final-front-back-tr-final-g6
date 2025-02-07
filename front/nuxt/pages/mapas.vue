@@ -8,8 +8,7 @@
         </div>
         <div class="w-full max-w-full lg:max-w-full bg-white p-6 pt-2 rounded-lg shadow-lg text-center flex justify-center items-center">
             <div class="w-full h-[80vh] max-w-[98vw] flex justify-center items-center ml-[-93px] mr-[-93px]">
-                <!-- Llamamos al componente mapaplanta -->
-                <mapaplanta />
+                <Mapaplanta />
             </div>
         </div>
     </div>
@@ -18,11 +17,11 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
-// Importar el componente mapaplanta
 import Mapaplanta from '~/components/mapaplanta.vue';
 
 const router = useRouter();
 const plantas = ['PLANTA BAJA', 'PLANTA 1', 'PLANTA 2', 'PLANTA 3', 'PLANTA SUBTERRANEA'];
+
 const seleccionarPlanta = (planta) => {
     console.log(`Seleccionaste: ${planta}`);
 };
