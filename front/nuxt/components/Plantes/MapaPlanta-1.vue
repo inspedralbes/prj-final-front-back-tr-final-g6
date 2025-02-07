@@ -1,6 +1,14 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, defineProps } from "vue";
 import Konva from "konva";
+
+// Recibe la URL de la imagen como prop
+const props = defineProps({
+  imageUrl: {
+    type: String,
+    required: true
+  }
+});
 
 const stageRef = ref(null);
 const showPopup = ref(false);
@@ -19,7 +27,6 @@ const getInterpolatedColor = (value, min, max) => {
 };
 
 onMounted(() => {
-  const imageUrl = '/Planta 1.png';
   const imageObj = new Image();
 
   imageObj.onload = function() {
@@ -104,7 +111,7 @@ onMounted(() => {
     layer.batchDraw();
   };
 
-  imageObj.src = imageUrl;
+  imageObj.src = props.imageUrl; // Usar la URL de la imagen pasada como prop
 });
 </script>
 

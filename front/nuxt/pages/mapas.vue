@@ -7,23 +7,25 @@
             </button>
         </div>
         <div class="w-full max-w-full lg:max-w-full bg-white p-6 pt-2 rounded-lg shadow-lg text-center flex justify-center items-center">
-            <div class="w-full h-[80vh] max-w-[98vw] flex justify-center items-center ml-[-93px] mr-[-93px]">
-                <Mapaplanta />
+            <div :class="['w-full h-[80vh] max-w-[98vw] flex justify-center items-center ml-[-93px] mr-[-93px]', { 'planta-1': plantaSeleccionada === 'PLANTA 1', 'planta-2': plantaSeleccionada === 'PLANTA 2' }]">
+                <Mapaplanta v-if="plantaSeleccionada === 'PLANTA 1'" />
+                <Mapaplanta v-if="plantaSeleccionada === 'PLANTA 2'" />
+                <!-- Añadir más mapas según las plantas -->
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
 import { ref } from 'vue';
-import Mapaplanta from '~/components/mapaplanta.vue';
+import Mapaplanta from '~/components/plantes/MapaPlanta-1.vue';
 
-const router = useRouter();
 const plantas = ['PLANTA BAJA', 'PLANTA 1', 'PLANTA 2', 'PLANTA 3', 'PLANTA SUBTERRANEA'];
+const plantaSeleccionada = ref('');
 
 const seleccionarPlanta = (planta) => {
     console.log(`Seleccionaste: ${planta}`);
+    plantaSeleccionada.value = planta;
 };
 </script>
 
@@ -43,5 +45,15 @@ const seleccionarPlanta = (planta) => {
     100% {
         background-position: 0% 50%;
     }
+}
+
+.planta-1 {
+    /* Puedes agregar estilos específicos para la planta 1 */
+    display: block;
+}
+
+.planta-2 {
+    /* Estilos para la planta 2 */
+    display: block;
 }
 </style>
