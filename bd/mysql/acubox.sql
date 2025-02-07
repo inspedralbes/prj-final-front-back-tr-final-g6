@@ -28,14 +28,14 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `aula` (
-  `id` int(10) NOT NULL,
-  `Curs` varchar(50) NOT NULL,
-  `Classe` varchar(50) NOT NULL,
-  `Etapa` enum('ESO','BATX', 'PFI', 'CFGM','CFGS', 'ALTRES') NOT NULL,
-  `Planta` int(2) NOT NULL,
-  `Aula` varchar(100) NOT NULL,
-  `activa` tinyint(1) NOT NULL DEFAULT 1,
-  `turn` enum('mati', 'tarda', 'mati i tarda') NOT NULL
+  `id` INT(10) AUTO_INCREMENT PRIMARY KEY,
+  `Curs` VARCHAR(50) NOT NULL,
+  `Classe` VARCHAR(50) NOT NULL,
+  `Etapa` ENUM('ESO', 'BATX', 'PFI', 'CFGM', 'CFGS', 'ALTRES') NOT NULL,
+  `Planta` INT(2) NOT NULL,
+  `Aula` VARCHAR(100) NOT NULL,
+  `activa` TINYINT(1) NOT NULL DEFAULT 1,
+  `turn` ENUM('mati', 'tarda', 'mati i tarda') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -174,13 +174,104 @@ CREATE TABLE `usuari` (
   `admin` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- Crear tabla `sensor` (si aún no existe)
+CREATE TABLE `sensor` (
+  `idSensor` INT(10) AUTO_INCREMENT PRIMARY KEY,
+  `nombre` VARCHAR(100) NOT NULL,  -- Ejemplo de columna adicional
+  `ubicacion` VARCHAR(100) NOT NULL  -- Ejemplo de columna adicional
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Crear tabla `minuto`
+CREATE TABLE `minuto` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `idAula` INT NOT NULL,
+  `idSensor` INT NOT NULL,
+  `tipus` ENUM('volum', 'temperatura', 'co2') NOT NULL,
+  `max` FLOAT NOT NULL,
+  `min` FLOAT NOT NULL,
+  `average` FLOAT NOT NULL,
+  `datetime` DATETIME NOT NULL,
+  FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
+  FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Crear tabla `hora`
+CREATE TABLE `hora` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `idAula` INT NOT NULL,
+  `idSensor` INT NOT NULL,
+  `tipus` ENUM('volum', 'temperatura', 'co2') NOT NULL,
+  `max` FLOAT NOT NULL,
+  `min` FLOAT NOT NULL,
+  `average` FLOAT NOT NULL,
+  `datetime` DATETIME NOT NULL,
+  FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
+  FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Crear tabla `dias`
+CREATE TABLE `dias` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `idAula` INT NOT NULL,
+  `idSensor` INT NOT NULL,
+  `tipus` ENUM('volum', 'temperatura', 'co2') NOT NULL,
+  `max` FLOAT NOT NULL,
+  `min` FLOAT NOT NULL,
+  `average` FLOAT NOT NULL,
+  `datetime` DATETIME NOT NULL,
+  FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
+  FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Crear tabla `semana`
+CREATE TABLE `semana` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `idAula` INT NOT NULL,
+  `idSensor` INT NOT NULL,
+  `tipus` ENUM('volum', 'temperatura', 'co2') NOT NULL,
+  `max` FLOAT NOT NULL,
+  `min` FLOAT NOT NULL,
+  `average` FLOAT NOT NULL,
+  `datetime` DATETIME NOT NULL,
+  FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
+  FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Crear tabla `mes`
+CREATE TABLE `mes` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `idAula` INT NOT NULL,
+  `idSensor` INT NOT NULL,
+  `tipus` ENUM('volum', 'temperatura', 'co2') NOT NULL,
+  `max` FLOAT NOT NULL,
+  `min` FLOAT NOT NULL,
+  `average` FLOAT NOT NULL,
+  `datetime` DATETIME NOT NULL,
+  FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
+  FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Crear tabla `curso`
+CREATE TABLE `curso` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `idAula` INT NOT NULL,
+  `idSensor` INT NOT NULL,
+  `tipus` ENUM('volum', 'temperatura', 'co2') NOT NULL,
+  `max` FLOAT NOT NULL,
+  `min` FLOAT NOT NULL,
+  `average` FLOAT NOT NULL,
+  `datetime` DATETIME NOT NULL,
+  FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
+  FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Bolcament de dades per a la taula `usuari`
 --
 
 INSERT INTO `usuari` (`id`, `nom`, `correu`, `contrasenya`, `admin`) VALUES
-(1, 'admin', 'admin@admin.com', 'admin', 1),
-(2, 'professor', 'prof@prof.com', 'prof', 0);
+(1, 'admin', 'admin@admin.com', MD5('admin'), 1),
+(2, 'professor', 'prof@prof.com', MD5('prof'), 0);
 
 --
 -- Índexs per a les taules bolcades
@@ -189,8 +280,8 @@ INSERT INTO `usuari` (`id`, `nom`, `correu`, `contrasenya`, `admin`) VALUES
 --
 -- Índexs per a la taula `aula`
 --
-ALTER TABLE `aula`
-  ADD PRIMARY KEY (`id`);
+-- ALTER TABLE `aula`
+--   ADD PRIMARY KEY (`id`);
 
 --
 -- Índexs per a la taula `usuari`
