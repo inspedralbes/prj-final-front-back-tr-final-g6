@@ -27,6 +27,7 @@ const getInterpolatedColor = (value, min, max) => {
 };
 
 onMounted(() => {
+const image = './PLANTA 1.png';
   const imageObj = new Image();
 
   imageObj.onload = function() {
@@ -111,7 +112,7 @@ onMounted(() => {
     layer.batchDraw();
   };
 
-  imageObj.src = props.imageUrl; // Usar la URL de la imagen pasada como prop
+  imageObj.src = image // Cambiar a la ruta correcta de la imagen en tu proyecto
 });
 </script>
 
@@ -131,7 +132,6 @@ onMounted(() => {
   padding: 0;
   margin: 0;
   overflow: hidden;
-  background-color: transparent;
 }
 
 .popup {

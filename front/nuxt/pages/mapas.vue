@@ -7,18 +7,23 @@
             </button>
         </div>
         <div class="w-full max-w-full lg:max-w-full bg-white p-6 pt-2 rounded-lg shadow-lg text-center flex justify-center items-center">
-            <div :class="['w-full h-[80vh] max-w-[98vw] flex justify-center items-center ml-[-93px] mr-[-93px]', { 'planta-1': plantaSeleccionada === 'PLANTA 1', 'planta-2': plantaSeleccionada === 'PLANTA 2' }]">
-                <Mapaplanta v-if="plantaSeleccionada === 'PLANTA 1'" />
-                <Mapaplanta v-if="plantaSeleccionada === 'PLANTA 2'" />
-                <!-- Añadir más mapas según las plantas -->
-            </div>
+            <Mapaplanta1 v-if="plantaSeleccionada === 'PLANTA 1'" />
+            <Mapaplanta2 v-if="plantaSeleccionada === 'PLANTA 2'" />
+            <Mapaplanta3 v-if="plantaSeleccionada === 'PLANTA 3'" />
+            <MapaPlantaBaixa v-if="plantaSeleccionada === 'PLANTA BAJA'" />
+            <MapaPlantaSubterranea v-if="plantaSeleccionada === 'PLANTA SUBTERRANEA'" />
         </div>
     </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import Mapaplanta from '~/components/plantes/MapaPlanta-1.vue';
+
+import Mapaplanta1 from '~/components/plantes/MapaPlanta-1.vue';
+import Mapaplanta2 from '~/components/plantes/MapaPlanta-2.vue';
+import Mapaplanta3 from '~/components/plantes/MapaPlanta-3.vue';
+import MapaPlantaBaixa from '~/components/plantes/MapaPlantaBaixa.vue';
+import MapaPlantaSubterranea from '~/components/plantes/MapaPlantaSubterranea.vue';
 
 const plantas = ['PLANTA BAJA', 'PLANTA 1', 'PLANTA 2', 'PLANTA 3', 'PLANTA SUBTERRANEA'];
 const plantaSeleccionada = ref('');
