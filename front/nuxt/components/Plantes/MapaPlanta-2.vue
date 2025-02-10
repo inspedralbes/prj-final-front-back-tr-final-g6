@@ -67,15 +67,14 @@ const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight) *
       { x: 344, y: 385, info: "3R ESO B", popupX: 599, popupY: 350 },
       { x: 420, y: 376, info: "3R ESO D", popupX: 180, popupY: 550 },
       { x: 488, y: 266, info: "2N ESO E", popupX: 299, popupY: 540 },
+      { x: 638, y: 253, info: "3R ESO F", popupX: 540, popupY: 530 },
+      
+      { x: 816, y: 250, info: "1R BTX A", popupX: 920, popupY: 490 },
+      { x: 964, y: 264, info: "1R BTX B", popupX: 1100, popupY: 500 },
+      { x: 1118, y: 280, info: "2N SMX A3 / ASIX-B1", popupX: 1190, popupY: 490 },
+      { x: 1111, y: 386, info: "1R BTX E", popupX: 1290, popupY: 490 },
+      { x: 1034, y: 377, info: "1R BTX D", popupX: 1300, popupY: 350 },
 
-      { x: 250, y: 164, info: "2N ESO F", popupX: 540, popupY: 530 },
-      { x: 250, y: 164, info: "1R SMIX B1", popupX: 920, popupY: 490 },
-      { x: 250, y: 164, info: "PFI 2", popupX: 1100, popupY: 500 },
-      { x: 250, y: 164, info: "1R SMIX A1", popupX: 1190, popupY: 490 },
-      { x: 250, y: 164, info: "1R DAM", popupX: 1290, popupY: 490 },
-      { x: 250, y: 164, info: "1R SMIX A2", popupX: 1300, popupY: 350 },
-      { x: 250, y: 168, info: "1 SMIX", popupX: 1440, popupY: 360 },
-      { x: 250, y: 164, info: "1SMX A3", popupX: 1430, popupY: 530 },
     ].map(point => ({
       ...point,
       enabled: Math.random() > 0.5,
