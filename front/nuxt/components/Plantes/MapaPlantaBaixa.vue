@@ -27,7 +27,7 @@ const getInterpolatedColor = (value, min, max) => {
 };
 
 onMounted(() => {
-const image = './PLANTA 1.png';
+const image = './PB.png';
   const imageObj = new Image();
 
   imageObj.onload = function() {

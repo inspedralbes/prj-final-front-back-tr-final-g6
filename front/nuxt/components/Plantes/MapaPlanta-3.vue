@@ -27,7 +27,7 @@ const getInterpolatedColor = (value, min, max) => {
 };
 
 onMounted(() => {
-const image = './PLANTA 1.png';
+const image = './PLANTA 3.png';
   const imageObj = new Image();
 
   imageObj.onload = function() {
@@ -36,11 +36,11 @@ const image = './PLANTA 1.png';
 
     const canvasWidth = stageRef.value.offsetWidth;
     const canvasHeight = stageRef.value.offsetHeight;
-    const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight);
+const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight) * 1.3;
     const scaledWidth = imgWidth * scaleFactor;
     const scaledHeight = imgHeight * scaleFactor;
     const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 2;
+    const y = (canvasHeight - scaledHeight) / 1;
 
     const stage = new Konva.Stage({
       container: stageRef.value,
