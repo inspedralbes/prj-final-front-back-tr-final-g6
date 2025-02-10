@@ -401,6 +401,8 @@ const getPreviousTime = (unit) => {
   return previousTime.toISOString();
 };
 
+// --- Programació dels càlculs ---
+
 // Programar l'execució cada minut
 schedule.scheduleJob('* * * * *', () => {
   const temps = getPreviousTime('minute');
@@ -510,6 +512,43 @@ schedule.scheduleJob('0 0 * * *', () => {
     .catch(error => {
       console.error('Script error (day):', error);
     });
+});
+
+// Get mitjanes de dades
+app.post('/api/getMapa', async (req, res) => {
+  const { aules, tipus, data } = req.body;
+
+  if (!aules || !tipus || !data) {
+    return res.status(400).json({ message: 'aules, tipus i data són necessaris' });
+  }
+
+  const formattedDate = `${data}%`;
+  const response = [];
+
+  for (const aula of aules) {
+    const query = `
+      SELECT idAula, average 
+      FROM dia 
+      WHERE idAula = ? AND tipus = ? AND datetime LIKE ?
+      ORDER BY datetime DESC
+    `;
+
+    try {
+      const [results] = await connexioBD.promise().execute(query, [aula, tipus, formattedDate]);
+
+      results.forEach(row => {
+        response.push({
+          aula: row.idAula,
+          valor: row.average
+        });
+      });
+    } catch (err) {
+      console.error('Error en la consulta a la base de dades:', err);
+      return res.status(500).json({ message: 'Error en la consulta a la base de dades' });
+    }
+  }
+
+  res.json(response);
 });
 
 server.listen(PORT, () => {

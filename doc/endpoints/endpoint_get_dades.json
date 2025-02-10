@@ -1,0 +1,26 @@
+{
+    "endpoint": "/api/getMapa",
+    "method": "POST",
+    "description": "Authenticate a user",
+    "request": {
+        "contentType": "application/json",
+        "body": {
+            "aules": "list of string",
+            "tipusData": "string",
+            "data": "string"
+        }
+    },
+    "response": {
+        "200": {
+            "mitjanes": [
+                {
+                    "valor": "double",
+                    "aula": "string"
+                }
+            ]
+        },
+        "400": {
+            "description": "Invalid request"
+        }
+    }
+}
