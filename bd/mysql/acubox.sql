@@ -182,7 +182,7 @@ CREATE TABLE `sensor` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Crear tabla `minuto`
-CREATE TABLE `minuto` (
+CREATE TABLE `minut` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `idAula` INT NOT NULL,
   `idSensor` INT NOT NULL,
@@ -190,7 +190,7 @@ CREATE TABLE `minuto` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` DATETIME NOT NULL,
+  `datetime` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -204,13 +204,13 @@ CREATE TABLE `hora` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` DATETIME NOT NULL,
+  `datetime` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Crear tabla `dias`
-CREATE TABLE `dias` (
+CREATE TABLE `dia` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `idAula` INT NOT NULL,
   `idSensor` INT NOT NULL,
@@ -218,13 +218,13 @@ CREATE TABLE `dias` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` DATETIME NOT NULL,
+  `datetime` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Crear tabla `semana`
-CREATE TABLE `semana` (
+CREATE TABLE `setmana` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `idAula` INT NOT NULL,
   `idSensor` INT NOT NULL,
@@ -232,7 +232,7 @@ CREATE TABLE `semana` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` DATETIME NOT NULL,
+  `datetime` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -246,13 +246,13 @@ CREATE TABLE `mes` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` DATETIME NOT NULL,
+  `datetime` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Crear tabla `curso`
-CREATE TABLE `curso` (
+CREATE TABLE `curs` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `idAula` INT NOT NULL,
   `idSensor` INT NOT NULL,
@@ -260,7 +260,7 @@ CREATE TABLE `curso` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` DATETIME NOT NULL,
+  `datetime` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

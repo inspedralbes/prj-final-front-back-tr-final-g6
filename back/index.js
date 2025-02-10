@@ -13,6 +13,7 @@ import fs from 'fs';
 import cors from 'cors';
 import { spawn } from 'node:child_process';
 import dotenv from 'dotenv';
+import schedule from 'node-schedule';
 
 app.use(cors());
 app.use(express.json());
@@ -343,7 +344,7 @@ app.put('/api/aules/:id/activa', (req, res) => {
 
 // Endponit per Python
 
-const executePythonScript = (script) => {
+const executePythonScript = (script, temps, interval) => {
   return new Promise((resolve, reject) => {
     const scriptPath = path.join(__dirname, 'scripts', script);
 
@@ -351,7 +352,7 @@ const executePythonScript = (script) => {
       return reject(`Script not found: ${script}`);
     };
 
-    const process = spawn('./venv/bin/python3', [scriptPath]);
+    const process = spawn('./venv/bin/python3', [scriptPath, interval, temps]);
 
     let output = '';
     let error = '';
@@ -378,19 +379,137 @@ const executePythonScript = (script) => {
   });
 };
 
-app.post('/api/execute', async (req, res) => {
-  const { script } = req.body;
+// Funció per obtenir el temps en el format desitjat
+const getPreviousTime = (unit) => {
+  const now = new Date();
+  let previousTime;
 
-  if (!script || typeof script !== 'string') {
-      return res.status(400).json({ message: 'Entrada invàlida' });
+  switch (unit) {
+    case 'minute':
+      previousTime = new Date(now.getTime() - 60000); // 1 minut abans
+      break;
+    case 'hour':
+      previousTime = new Date(now.getTime() - 3600000); // 1 hora abans
+      break;
+    case 'day':
+      previousTime = new Date(now.getTime() - 86400000); // 1 dia abans
+      break;
+    default:
+      previousTime = now;
   }
 
-  try {
-      const output = await executePythonScript(script);
-      res.json({ message: 'Script executat amb èxit', output });
-  } catch (error) {
-      res.status(500).json({ message: `Error en l'execució de l'script`, error });
-  }
+  return previousTime.toISOString();
+};
+
+// Programar l'execució cada minut
+schedule.scheduleJob('* * * * *', () => {
+  const temps = getPreviousTime('minute');
+  executePythonScript('agregacio.py', temps, 'minut')
+    .then(output => {
+      const data = JSON.parse(output);
+
+      console.log('Dades a inserir: ', data);
+
+      const query = `
+        INSERT INTO minut (idAula, idSensor, tipus, max, min, average, datetime)
+        VALUES 
+        (?, 1, 'volum', ?, ?, ?, ?),
+        (?, 1, 'temperatura', ?, ?, ?, ?);
+      `;
+
+      data.forEach(item => {
+        const values = [
+          item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.date,
+          item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.date
+        ];
+
+        connexioBD.execute(query, values, (err, results) => {
+          if (err) {
+            console.error('Error en la inserció a la base de dades:', err);
+          } else {
+            console.log('Dades inserides correctament a la taula minut');
+            console.log('Dades inserides: ', results);
+          }
+        });
+      });
+    })
+    .catch(error => {
+      console.error('Script error (minute):', error);
+    });
+});
+
+// Programar l'execució cada hora
+schedule.scheduleJob('0 * * * *', () => {
+  const temps = getPreviousTime('hour');
+  executePythonScript('agregacio.py', temps, 'hora')
+    .then(output => {
+      const data = JSON.parse(output);
+
+      console.log('Dades a inserir: ', data);
+
+      const query = `
+        INSERT INTO hora (idAula, idSensor, tipus, max, min, average, datetime)
+        VALUES 
+        (?, 1, 'volum', ?, ?, ?, ?),
+        (?, 1, 'temperatura', ?, ?, ?, ?);
+      `;
+
+      data.forEach(item => {
+        const values = [
+          item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.date,
+          item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.date
+        ];
+
+        connexioBD.execute(query, values, (err, results) => {
+          if (err) {
+            console.error('Error en la inserció a la base de dades:', err);
+          } else {
+            console.log('Dades inserides correctament a la taula hora');
+            console.log('Dades inserides: ', results);
+          }
+        });
+      });
+    })
+    .catch(error => {
+      console.error('Script error (hour):', error);
+    });
+});
+
+// Programar l'execució cada dia
+schedule.scheduleJob('0 0 * * *', () => {
+  const temps = getPreviousTime('day');
+  executePythonScript('agregacio.py', temps, 'dia')
+    .then(output => {
+      const data = JSON.parse(output);
+
+      console.log('Dades a inserir: ', data);
+
+      const query = `
+        INSERT INTO dia (idAula, idSensor, tipus, max, min, average, datetime)
+        VALUES 
+        (?, 1, 'volum', ?, ?, ?, ?),
+        (?, 1, 'temperatura', ?, ?, ?, ?);
+      `;
+
+      data.forEach(item => {
+        const values = [
+          item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.date,
+          item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.date
+        ];
+
+        connexioBD.execute(query, values, (err, results) => {
+          if (err) {
+            console.error('Error en la inserció a la base de dades:', err);
+          } else {
+            console.log('Dades inserides correctament a la taula dia');
+            console.log('Dades inserides: ', results);
+          }
+        });
+      });
+    })
+    .catch(error => {
+      console.error('Script error (day):', error);
+    });
 });
 
 server.listen(PORT, () => {
