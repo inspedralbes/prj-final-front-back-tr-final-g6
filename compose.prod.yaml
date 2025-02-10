@@ -1,19 +1,14 @@
 version: '3.8'
 
 services:
-  prfg6-front:
-    image: node:23-bullseye
-    container_name: nuxt
-    working_dir: /usr/src/app
+  nuxt:
+    build:
+      context: ./front/nuxt
+      dockerfile: prod.Dockerfile
     volumes:
-      - ./front/nuxt:/usr/src/app
+      - ./front/nuxt:/home/node/app
     ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-    command: bash -c "npm install --no-bin-links && npm run generate"
-    depends_on:
-      - prfg6-back
+      - "80:3000"
 
   prfg6-back:
     build:
@@ -23,6 +18,7 @@ services:
     working_dir: /usr/src/app
     ports:
       - 3020:3020
+    command: "node index.js"
     environment:
       - NODE_ENV=production
     depends_on:

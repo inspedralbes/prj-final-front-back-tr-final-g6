@@ -1,4 +1,8 @@
-const URL = 'http://localhost:3020';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const URL = process.env.URL_PROD || 'http://localhost:3020';
 
 // Login
 export async function login(correu, contrasenya) {
