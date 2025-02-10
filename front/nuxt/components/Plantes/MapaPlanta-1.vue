@@ -40,7 +40,7 @@ const image = './PLANTA 1.png';
     const scaledWidth = imgWidth * scaleFactor;
     const scaledHeight = imgHeight * scaleFactor;
     const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 2;
+    const y = (canvasHeight - scaledHeight) / 10;
 
     const stage = new Konva.Stage({
       container: stageRef.value,

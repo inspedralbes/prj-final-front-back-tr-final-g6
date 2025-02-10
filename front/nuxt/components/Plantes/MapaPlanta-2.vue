@@ -40,7 +40,7 @@ const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight) *
     const scaledWidth = imgWidth * scaleFactor;
     const scaledHeight = imgHeight * scaleFactor;
     const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 2;
+    const y = (canvasHeight - scaledHeight) / 1;
 
     const stage = new Konva.Stage({
       container: stageRef.value,
@@ -62,19 +62,20 @@ const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight) *
     layer.add(konvaImage);
 
     const points = [
-      { x: 179, y: 164, info: "2N ESO A", popupX: 175, popupY: 350 },
-      { x: 268, y: 156, info: "2N ESO C", popupX: 320, popupY: 350 },
-      { x: 494, y: 135, info: "2N ESO E", popupX: 599, popupY: 350 },
-      { x: 189, y: 288, info: "2N ESO B", popupX: 180, popupY: 550 },
-      { x: 279, y: 280, info: "2N ESO D", popupX: 299, popupY: 540 },
-      { x: 458, y: 265, info: "2N ESO F", popupX: 540, popupY: 530 },
-      { x: 735, y: 260, info: "1R SMIX B1", popupX: 920, popupY: 490 },
-      { x: 824, y: 268, info: "PFI 2", popupX: 1100, popupY: 500 },
-      { x: 915, y: 274, info: "1R SMIX A1", popupX: 1190, popupY: 490 },
-      { x: 1003, y: 283, info: "1R DAM", popupX: 1290, popupY: 490 },
-      { x: 1016, y: 160, info: "1R SMIX A2", popupX: 1300, popupY: 350 },
-      { x: 1103, y: 168, info: "1 SMIX", popupX: 1440, popupY: 360 },
-      { x: 1095, y: 294, info: "1SMX A3", popupX: 1430, popupY: 530 },
+      { x: 333, y: 280, info: "3 ESO A", popupX: 175, popupY: 350 },
+      { x: 412, y: 275, info: "3R ESO C", popupX: 320, popupY: 350 },
+      { x: 344, y: 385, info: "3R ESO B", popupX: 599, popupY: 350 },
+      { x: 420, y: 376, info: "3R ESO D", popupX: 180, popupY: 550 },
+      { x: 488, y: 266, info: "2N ESO E", popupX: 299, popupY: 540 },
+
+      { x: 250, y: 164, info: "2N ESO F", popupX: 540, popupY: 530 },
+      { x: 250, y: 164, info: "1R SMIX B1", popupX: 920, popupY: 490 },
+      { x: 250, y: 164, info: "PFI 2", popupX: 1100, popupY: 500 },
+      { x: 250, y: 164, info: "1R SMIX A1", popupX: 1190, popupY: 490 },
+      { x: 250, y: 164, info: "1R DAM", popupX: 1290, popupY: 490 },
+      { x: 250, y: 164, info: "1R SMIX A2", popupX: 1300, popupY: 350 },
+      { x: 250, y: 168, info: "1 SMIX", popupX: 1440, popupY: 360 },
+      { x: 250, y: 164, info: "1SMX A3", popupX: 1430, popupY: 530 },
     ].map(point => ({
       ...point,
       enabled: Math.random() > 0.5,
