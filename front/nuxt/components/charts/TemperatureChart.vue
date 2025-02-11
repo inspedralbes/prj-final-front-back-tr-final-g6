@@ -1,29 +1,46 @@
 <template>
-    <Line :options="chartOptions" :data="chartData" />
+    <Line :options="chartOptions" :data="formattedData" />
 </template>
 
 <script setup>
+import { ref, watch, defineProps } from 'vue';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale } from 'chart.js';
 
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale);
 
-const chartData = {
-    labels: ['Setembre', 'Octubre', 'Novembre', 'Desembre', 'Gener', 'Febrer', 'Març', 'Abril', 'Maig', 'Juny'],
-    datasets: [
-        {
-            label: "Temperatura Estimada a l'Aula (°C)",
-            data: [27, 21, 17, 13, 12, 14, 18, 21, 26, 31],
-            borderColor: '#1E90FF',
-            backgroundColor: 'rgba(30, 144, 255, 0.2)',
-            pointBackgroundColor: '#1E90FF',
-            pointBorderColor: '#fff',
-            pointRadius: 5,
-            fill: true,
-            tension: 0.2
-        }
-    ]
-};
+const props = defineProps({
+    data: {
+        type: Array,
+        default: () => []
+    }
+});
+
+const formattedData = ref({
+    labels: [],
+    datasets: []
+});
+
+watch(props.data, (newData) => {
+    if (newData && newData.length > 0) {
+        formattedData.value = {
+            labels: newData.map(item => new Date(item.dataIni).toLocaleDateString()), // Ajusta esto según la estructura de tus datos
+            datasets: [
+                {
+                    label: "Temperatura Estimada a l'Aula (°C)",
+                    data: newData.map(item => item.average), // Ajusta esto según la estructura de tus datos
+                    borderColor: '#1E90FF',
+                    backgroundColor: 'rgba(30, 144, 255, 0.2)',
+                    pointBackgroundColor: '#1E90FF',
+                    pointBorderColor: '#fff',
+                    pointRadius: 5,
+                    fill: true,
+                    tension: 0.2
+                }
+            ]
+        };
+    }
+}, { immediate: true });
 
 const chartOptions = {
     responsive: true,
@@ -39,7 +56,7 @@ const chartOptions = {
         tooltip: {
             callbacks: {
                 label: function(tooltipItem) {
-                    return `Mes: ${tooltipItem.label}, Temperatura: ${tooltipItem.raw}°C`;
+                    return `Día: ${tooltipItem.label}, Temperatura: ${tooltipItem.raw}°C`;
                 }
             }
         },
@@ -55,7 +72,7 @@ const chartOptions = {
         x: {
             title: {
                 display: true,
-                text: 'Mesos',
+                text: 'Días',
                 font: {
                     size: 14
                 }
