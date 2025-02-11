@@ -1,4 +1,3 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 import Aura from '@primevue/themes/aura'
 
 export default defineNuxtConfig({
@@ -14,6 +13,12 @@ export default defineNuxtConfig({
     "primeicons/primeicons.css",
     "tailwindcss/tailwind.css"
   ],
+  runtimeConfig: {
+    public: {
+      URL: process.env.NUXT_PUBLIC_URL || 'http://localhost:3020',
+      URL_PROD: process.env.NUXT_PUBLIC_URL_PROD || 'http://dev.acubox.cat:3020'
+    }
+  },
   primevue: {
     options: {
       theme: {

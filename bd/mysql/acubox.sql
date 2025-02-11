@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 07-02-2025 a las 09:45:39
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Temps de generació: 23-01-2025 a les 08:28:04
+-- Versió del servidor: 10.4.32-MariaDB
+-- Versió de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de datos: `acoubox`
+-- Base de dades: `acubox`
 --
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `aula`
+-- Estructura de la taula `aula`
 --
 
 CREATE TABLE `aula` (
@@ -39,7 +39,7 @@ CREATE TABLE `aula` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `aula`
+-- Bolcament de dades per a la taula `aula`
 --
 
 INSERT INTO `aula` (`id`, `Curs`, `Classe`, `Etapa`, `Planta`, `Aula`, `activa`, `turn`) VALUES
@@ -113,7 +113,7 @@ INSERT INTO `aula` (`id`, `Curs`, `Classe`, `Etapa`, `Planta`, `Aula`, `activa`,
 (68, 'Taller Hardware', '', 'ALTRES', -2, 'HW', 1, 'mati'),
 (69, 'Aula Musica 1', '', 'ALTRES', -2, 'MUS 1', 1, 'mati'),
 (70, 'Aula Musica 2', '', 'ALTRES', -2, 'MUS 2', 1, 'mati'),
-(71, "Sala d\'actes", '', 'ALTRES', -2, '', 0, 'mati i tarda'),
+(71, "Sala d'actes", '', 'ALTRES', -2, '', 0, 'mati i tarda'),
 (72, '', 'Aula Robotica', 'ALTRES', -1, '', 0, 'mati'),
 (73, '', 'Tecnologia 2', 'ALTRES', -1, '', 0, 'mati'),
 (74, '', 'Projecció', 'ALTRES', -1, '', 0, 'mati'),
@@ -163,97 +163,7 @@ INSERT INTO `aula` (`id`, `Curs`, `Classe`, `Etapa`, `Planta`, `Aula`, `activa`,
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `dias`
---
-
-CREATE TABLE `dias` (
-  `id` int(11) NOT NULL,
-  `aula_id` int(11) DEFAULT NULL,
-  `temperatura_max` decimal(5,2) DEFAULT NULL,
-  `temperatura_min` decimal(5,2) DEFAULT NULL,
-  `temperatura_media` decimal(5,2) DEFAULT NULL,
-  `ocupacion_max` int(11) DEFAULT NULL,
-  `ocupacion_min` int(11) DEFAULT NULL,
-  `ocupacion_media` decimal(5,2) DEFAULT NULL,
-  `fecha` date DEFAULT curdate()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `hora`
---
-
-CREATE TABLE `hora` (
-  `id` int(11) NOT NULL,
-  `aula_id` int(11) DEFAULT NULL,
-  `temperatura_max` decimal(5,2) DEFAULT NULL,
-  `temperatura_min` decimal(5,2) DEFAULT NULL,
-  `temperatura_media` decimal(5,2) DEFAULT NULL,
-  `ocupacion_max` int(11) DEFAULT NULL,
-  `ocupacion_min` int(11) DEFAULT NULL,
-  `ocupacion_media` decimal(5,2) DEFAULT NULL,
-  `fecha` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `mes`
---
-
-CREATE TABLE `mes` (
-  `id` int(11) NOT NULL,
-  `aula_id` int(11) DEFAULT NULL,
-  `temperatura_max` decimal(5,2) DEFAULT NULL,
-  `temperatura_min` decimal(5,2) DEFAULT NULL,
-  `temperatura_media` decimal(5,2) DEFAULT NULL,
-  `ocupacion_max` int(11) DEFAULT NULL,
-  `ocupacion_min` int(11) DEFAULT NULL,
-  `ocupacion_media` decimal(5,2) DEFAULT NULL,
-  `fecha` date DEFAULT curdate()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `minuto`
---
-
-CREATE TABLE `minuto` (
-  `id` int(11) NOT NULL,
-  `aula_id` int(11) DEFAULT NULL,
-  `temperatura_max` decimal(5,2) DEFAULT NULL,
-  `temperatura_min` decimal(5,2) DEFAULT NULL,
-  `temperatura_media` decimal(5,2) DEFAULT NULL,
-  `ocupacion_max` int(11) DEFAULT NULL,
-  `ocupacion_min` int(11) DEFAULT NULL,
-  `ocupacion_media` decimal(5,2) DEFAULT NULL,
-  `fecha` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `semana`
---
-
-CREATE TABLE `semana` (
-  `id` int(11) NOT NULL,
-  `aula_id` int(11) DEFAULT NULL,
-  `temperatura_max` decimal(5,2) DEFAULT NULL,
-  `temperatura_min` decimal(5,2) DEFAULT NULL,
-  `temperatura_media` decimal(5,2) DEFAULT NULL,
-  `ocupacion_max` int(11) DEFAULT NULL,
-  `ocupacion_min` int(11) DEFAULT NULL,
-  `ocupacion_media` decimal(5,2) DEFAULT NULL,
-  `fecha` date DEFAULT curdate()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `usuari`
+-- Estructura de la taula `usuari`
 --
 
 CREATE TABLE `usuari` (
@@ -280,7 +190,8 @@ CREATE TABLE `minut` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` VARCHAR(255) NOT NULL,
+  `dataIni` VARCHAR(255) NOT NULL,
+  `dataFi` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -294,7 +205,8 @@ CREATE TABLE `hora` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` VARCHAR(255) NOT NULL,
+  `dataIni` VARCHAR(255) NOT NULL,
+  `dataFi` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -308,7 +220,8 @@ CREATE TABLE `dia` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` VARCHAR(255) NOT NULL,
+  `dataIni` VARCHAR(255) NOT NULL,
+  `dataFi` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -322,7 +235,8 @@ CREATE TABLE `setmana` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` VARCHAR(255) NOT NULL,
+  `dataIni` VARCHAR(255) NOT NULL,
+  `dataFi` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -336,7 +250,8 @@ CREATE TABLE `mes` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` VARCHAR(255) NOT NULL,
+  `dataIni` VARCHAR(255) NOT NULL,
+  `dataFi` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -350,7 +265,8 @@ CREATE TABLE `curs` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` VARCHAR(255) NOT NULL,
+  `dataIni` VARCHAR(255) NOT NULL,
+  `dataFi` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -360,8 +276,8 @@ CREATE TABLE `curs` (
 --
 
 INSERT INTO `usuari` (`id`, `nom`, `correu`, `contrasenya`, `admin`) VALUES
-(1, 'admin', 'admin@admin.com', MD5('admin'), 1),
-(2, 'professor', 'prof@prof.com', MD5('prof'), 0);
+(1, 'admin', 'admin@admin.com', 'admin', 1),
+(2, 'professor', 'prof@prof.com', 'prof', 0);
 
 --
 -- Índexs per a les taules bolcades
@@ -380,84 +296,20 @@ ALTER TABLE `usuari`
   ADD PRIMARY KEY (`id`);
 
 --
--- AUTO_INCREMENT de las tablas volcadas
+-- AUTO_INCREMENT per les taules bolcades
 --
 
 --
--- AUTO_INCREMENT de la tabla `aula`
+-- AUTO_INCREMENT per la taula `aula`
 --
 ALTER TABLE `aula`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=117;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
 
 --
--- AUTO_INCREMENT de la tabla `dias`
---
-ALTER TABLE `dias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `hora`
---
-ALTER TABLE `hora`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `mes`
---
-ALTER TABLE `mes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `minuto`
---
-ALTER TABLE `minuto`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `semana`
---
-ALTER TABLE `semana`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `usuari`
+-- AUTO_INCREMENT per la taula `usuari`
 --
 ALTER TABLE `usuari`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- Restricciones para tablas volcadas
---
-
---
--- Filtros para la tabla `dias`
---
-ALTER TABLE `dias`
-  ADD CONSTRAINT `dias_ibfk_1` FOREIGN KEY (`aula_id`) REFERENCES `aula` (`id`) ON DELETE CASCADE;
-
---
--- Filtros para la tabla `hora`
---
-ALTER TABLE `hora`
-  ADD CONSTRAINT `hora_ibfk_1` FOREIGN KEY (`aula_id`) REFERENCES `aula` (`id`) ON DELETE CASCADE;
-
---
--- Filtros para la tabla `mes`
---
-ALTER TABLE `mes`
-  ADD CONSTRAINT `mes_ibfk_1` FOREIGN KEY (`aula_id`) REFERENCES `aula` (`id`) ON DELETE CASCADE;
-
---
--- Filtros para la tabla `minuto`
---
-ALTER TABLE `minuto`
-  ADD CONSTRAINT `minuto_ibfk_1` FOREIGN KEY (`aula_id`) REFERENCES `aula` (`id`) ON DELETE CASCADE;
-
---
--- Filtros para la tabla `semana`
---
-ALTER TABLE `semana`
-  ADD CONSTRAINT `semana_ibfk_1` FOREIGN KEY (`aula_id`) REFERENCES `aula` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
