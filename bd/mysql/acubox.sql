@@ -190,7 +190,8 @@ CREATE TABLE `minut` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` VARCHAR(255) NOT NULL,
+  `dataIni` VARCHAR(255) NOT NULL,
+  `dataFi` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -204,7 +205,8 @@ CREATE TABLE `hora` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` VARCHAR(255) NOT NULL,
+  `dataIni` VARCHAR(255) NOT NULL,
+  `dataFi` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -218,7 +220,8 @@ CREATE TABLE `dia` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` VARCHAR(255) NOT NULL,
+  `dataIni` VARCHAR(255) NOT NULL,
+  `dataFi` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -232,7 +235,8 @@ CREATE TABLE `setmana` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` VARCHAR(255) NOT NULL,
+  `dataIni` VARCHAR(255) NOT NULL,
+  `dataFi` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -246,7 +250,8 @@ CREATE TABLE `mes` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` VARCHAR(255) NOT NULL,
+  `dataIni` VARCHAR(255) NOT NULL,
+  `dataFi` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -260,7 +265,8 @@ CREATE TABLE `curs` (
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
-  `datetime` VARCHAR(255) NOT NULL,
+  `dataIni` VARCHAR(255) NOT NULL,
+  `dataFi` VARCHAR(255) NOT NULL,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`),
   FOREIGN KEY (`idSensor`) REFERENCES `sensor`(`idSensor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

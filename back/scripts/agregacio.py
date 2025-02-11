@@ -70,7 +70,8 @@ try:
         max_temperature = result["maxTemperature"]
         min_temperature = result["minTemperature"]
         output.append({
-            "date": start_time.isoformat() + "/" + temps_datetime.isoformat(),
+            "dataIni": start_time.isoformat(),
+            "dataFi": temps_datetime.isoformat(),
             "aula": aula,
             "averageVolume": average_volume if average_volume is not None else None,
             "maxVolume": max_volume if max_volume is not None else None,
