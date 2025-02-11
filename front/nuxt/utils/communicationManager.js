@@ -1,13 +1,12 @@
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const URL = process.env.URL_PROD || 'http://localhost:3020';
+export function getBaseUrl() {
+    const config = useRuntimeConfig();
+    return config.public.URL;
+}
 
 // Login
 export async function login(correu, contrasenya) {
     try {
-        const response = await fetch(`${URL}/login`, {
+        const response = await fetch(`${getBaseUrl()}/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -32,7 +31,7 @@ export async function login(correu, contrasenya) {
 
 export async function getTotesAulas() {
     try {
-        const response = await fetch(`${URL}/getAulas`);
+        const response = await fetch(`${getBaseUrl()}/getAulas`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -50,7 +49,7 @@ export async function getTotesAulas() {
 
 export async function getAulas() {
     try {
-        const response = await fetch(`${URL}/aulas`);
+        const response = await fetch(`${getBaseUrl()}/aulas`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -68,7 +67,7 @@ export async function getAulas() {
 
 export async function getAulaById(id) {
     try {
-        const response = await fetch(`${URL}/aula/${id}`);
+        const response = await fetch(`${getBaseUrl()}/aula/${id}`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -88,7 +87,7 @@ export async function getAulaById(id) {
 
 export async function getUsuaris() {
     try {
-        const response = await fetch(`${URL}/usuaris`);
+        const response = await fetch(`${getBaseUrl()}/usuaris`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -112,7 +111,7 @@ export async function getUsuariById() {
     }
 
     try {
-        const response = await fetch(`${URL}/usuari/${userId}`);
+        const response = await fetch(`${getBaseUrl()}/usuari/${userId}`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -133,7 +132,7 @@ export async function createAula(curs, classe, etapa) {
         throw new Error("curs, classe i etapa són necessaris");
     }
 
-    const response = await fetch(`${URL}/createAula`, {
+    const response = await fetch(`${getBaseUrl()}/createAula`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ curs, classe, etapa })
@@ -149,7 +148,7 @@ export async function createAula(curs, classe, etapa) {
 
 export async function updateAula(id, aula) {
     try {
-        const response = await fetch(`${URL}/updateAula/${id}`, {
+        const response = await fetch(`${getBaseUrl()}/updateAula/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -172,7 +171,7 @@ export async function updateAula(id, aula) {
 
 export async function deleteAula(id) {
     try {
-        const response = await fetch(`${URL}/deleteAula/${id}`, {
+        const response = await fetch(`${getBaseUrl()}/deleteAula/${id}`, {
             method: 'DELETE',
         });
 
@@ -192,7 +191,7 @@ export async function deleteAula(id) {
 
 export async function habilitarAula(aula) {
     try {
-        const response = await fetch(`${URL}/api/aules/${aula.id}/activa`, {
+        const response = await fetch(`${getBaseUrl()}/api/aules/${aula.id}/activa`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
