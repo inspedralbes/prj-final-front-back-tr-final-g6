@@ -20,8 +20,8 @@
                             </router-link>
                         </li>
                         <li class="px-4 py-3 hover:bg-gray-100 transition-colors">
-                            <router-link to="/configuracion" class="block text-sm font-medium text-gray-700">
-                                Configuración
+                            <router-link to="/mapas" class="block text-sm font-medium text-gray-700">
+                                Mapas
                             </router-link>
                         </li>
                         <li v-if="isAdmin" class="px-4 py-3 hover:bg-gray-100 transition-colors">

@@ -1,36 +1,52 @@
 <template>
-    <div class="min-h-screen flex flex-col items-center p-8 animated-bg bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1]">
-        <h1 class="text-5xl font-bold text-white mb-10 animate__animated animate__fadeIn">Mapes</h1>
-        <div class="buttons mb-8 flex space-x-6">
-            <button v-for="planta in plantas" :key="planta" @click="seleccionarPlanta(planta)" class="px-8 py-4 text-lg font-semibold bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                {{ planta }}
-            </button>
-        </div>
-        <div class="w-full max-w-full lg:max-w-full bg-white p-8 pt-4 rounded-xl shadow-2xl text-center flex justify-center items-center">
-            <Mapaplanta1 v-if="plantaSeleccionada === 'PLANTA 1'" />
-            <Mapaplanta2 v-if="plantaSeleccionada === 'PLANTA 2'" />
-            <Mapaplanta3 v-if="plantaSeleccionada === 'PLANTA 3'" />
-            <MapaPlantaBaixa v-if="plantaSeleccionada === 'PLANTA BAJA'" />
-            <MapaPlantaSubterranea v-if="plantaSeleccionada === 'PLANTA SUBTERRANEA'" />
+    <div>
+        <Header />
+        <div class="min-h-screen flex flex-col items-center p-8 animated-bg bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1]">
+            <h1 class="text-5xl font-bold text-white mb-10 animate__animated animate__fadeIn">Mapes</h1>
+            <div class="buttons mb-8 flex space-x-6">
+                <button v-for="planta in plantas" :key="planta" @click="seleccionarPlanta(planta)" class="px-8 py-4 text-lg font-semibold bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                    {{ planta }}
+                </button>
+                <button v-if="isAdmin" @click="goToCreatePage" class="px-8 py-4 text-lg font-semibold bg-green-600 text-white rounded-full shadow-lg hover:bg-green-700 transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                    Crear Mapa
+                </button>
+            </div>
+            <div class="w-full max-w-full lg:max-w-full bg-white p-8 pt-4 rounded-xl shadow-2xl text-center flex justify-center items-center">
+                <Mapaplanta1 v-if="plantaSeleccionada === 'PLANTA 1'" />
+                <Mapaplanta2 v-if="plantaSeleccionada === 'PLANTA 2'" />
+                <Mapaplanta3 v-if="plantaSeleccionada === 'PLANTA 3'" />
+                <MapaPlantaBaixa v-if="plantaSeleccionada === 'PLANTA BAJA'" />
+                <MapaPlantaSubterranea v-if="plantaSeleccionada === 'PLANTA SUBTERRANEA'" />
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '~/stores/userStore';
 
-import Mapaplanta1 from '~/components/plantes/MapaPlanta-1.vue';
-import Mapaplanta2 from '~/components/plantes/MapaPlanta-2.vue';
-import Mapaplanta3 from '~/components/plantes/MapaPlanta-3.vue';
-import MapaPlantaBaixa from '~/components/plantes/MapaPlantaBaixa.vue';
-import MapaPlantaSubterranea from '~/components/plantes/MapaPlantaSubterranea.vue';
+import Mapaplanta1 from '~/components/Plantes/MapaPlanta-1.vue';
+import Mapaplanta2 from '~/components/Plantes/MapaPlanta-2.vue';
+import Mapaplanta3 from '~/components/Plantes/MapaPlanta-3.vue';
+import MapaPlantaBaixa from '~/components/Plantes/MapaPlantaBaixa.vue';
+import MapaPlantaSubterranea from '~/components/Plantes/MapaPlantaSubterranea.vue';
 
 const plantas = ['PLANTA BAJA', 'PLANTA 1', 'PLANTA 2', 'PLANTA 3', 'PLANTA SUBTERRANEA'];
 const plantaSeleccionada = ref('PLANTA 1'); // Valor predeterminado para mostrar "PLANTA 1" al inicio
 
+const router = useRouter();
+const userStore = useUserStore();
+const isAdmin = userStore.isAdmin;
+
 const seleccionarPlanta = (planta) => {
     console.log(`Seleccionaste: ${planta}`);
     plantaSeleccionada.value = planta;
+};
+
+const goToCreatePage = () => {
+    router.push('/create');
 };
 </script>
 
