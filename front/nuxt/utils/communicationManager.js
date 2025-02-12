@@ -62,7 +62,7 @@ export async function getTotesAulas() {
         const data = await response.json();
         return data;
 
-    } catch (error) {
+    } catch (error)        {
         console.error(error);
         throw new Error(error.message || 'Hubo un error en la solicitud');
     }
@@ -85,8 +85,6 @@ export async function getAulas() {
         throw new Error(error.message || 'Hubo un error en la solicitud');
     }
 }
-
-
 
 export async function getAulaById(id) {
     try {
@@ -149,8 +147,6 @@ export async function getUsuariById() {
     }
 }
 
-
-
 export async function createAula(curs, classe, etapa) {
     if (!curs || !classe || !etapa) {
         throw new Error("curs, classe i etapa són necessaris");
@@ -169,9 +165,6 @@ export async function createAula(curs, classe, etapa) {
 
     return await response.json();
 }
-
-
-
 
 export async function updateAula(id, aula) {
     try {
@@ -196,9 +189,6 @@ export async function updateAula(id, aula) {
     }
 }
 
-
-
-
 export async function deleteAula(id) {
     try {
         const response = await fetch(`${getBaseUrl()}/deleteAula/${id}`, {
@@ -219,9 +209,6 @@ export async function deleteAula(id) {
     }
 }
 
-
-
-
 export async function habilitarAula(aula) {
     try {
         const response = await fetch(`${getBaseUrl()}/api/aules/${aula.id}/activa`, {
@@ -235,6 +222,34 @@ export async function habilitarAula(aula) {
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Error al habilitar el aula');
+        }
+
+        const data = await response.json();
+        return data;
+
+    } catch (error) {
+        console.error(error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+
+}
+
+//GET MAPA
+
+export async function getMapa(bodyRequest) {
+    try {
+
+        const response = await fetch(`${getBaseUrl()}/api/getMapa`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bodyRequest)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al obtener las aulas');
         }
 
         const data = await response.json();
