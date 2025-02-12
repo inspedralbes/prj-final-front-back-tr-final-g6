@@ -8,7 +8,18 @@ services:
     volumes:
       - ./front/nuxt:/home/node/app
     ports:
-      - "80:3000"
+      - "3000:3000"
+  prfg6-mysql:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: prf-g6
+    volumes:
+      - mysql-bd:/var/lib/mysql:rw
+      - ./bd/mysql/acubox.sql:/docker-entrypoint-initdb.d/acubox.sql
+    ports:
+      - 3306:3306
 
   prfg6-back:
     build:
@@ -36,17 +47,6 @@ services:
     volumes:
       - mongo-bd:/data/db
 
-  prfg6-mysql:
-    image: mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: prf-g6
-    volumes:
-      - mysql-bd:/var/lib/mysql:rw
-      - ./bd/mysql/acubox.sql:/docker-entrypoint-initdb.d/acubox.sql
-    ports:
-      - 3306:3306
 
   portainer:
     image: portainer/portainer-ce:latest
