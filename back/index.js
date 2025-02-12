@@ -401,6 +401,8 @@ const getPreviousTime = (unit) => {
   return previousTime.toISOString();
 };
 
+// --- Programació dels càlculs ---
+
 // Programar l'execució cada minut
 schedule.scheduleJob('* * * * *', () => {
   const temps = getPreviousTime('minute');
@@ -411,16 +413,16 @@ schedule.scheduleJob('* * * * *', () => {
       console.log('Dades a inserir: ', data);
 
       const query = `
-        INSERT INTO minut (idAula, idSensor, tipus, max, min, average, datetime)
+        INSERT INTO minut (idAula, idSensor, tipus, max, min, average, dataIni, dataFi)
         VALUES 
-        (?, 1, 'volum', ?, ?, ?, ?),
-        (?, 1, 'temperatura', ?, ?, ?, ?);
+        (?, 1, 'volum', ?, ?, ?, ?, ?),
+        (?, 1, 'temperatura', ?, ?, ?, ?, ?);
       `;
 
       data.forEach(item => {
         const values = [
-          item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.date,
-          item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.date
+          item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.dataIni, item.dataFi,
+          item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.dataIni, item.dataFi
         ];
 
         connexioBD.execute(query, values, (err, results) => {
@@ -448,16 +450,16 @@ schedule.scheduleJob('0 * * * *', () => {
       console.log('Dades a inserir: ', data);
 
       const query = `
-        INSERT INTO hora (idAula, idSensor, tipus, max, min, average, datetime)
+        INSERT INTO hora (idAula, idSensor, tipus, max, min, average, dataIni, dataFi)
         VALUES 
-        (?, 1, 'volum', ?, ?, ?, ?),
-        (?, 1, 'temperatura', ?, ?, ?, ?);
+        (?, 1, 'volum', ?, ?, ?, ?, ?),
+        (?, 1, 'temperatura', ?, ?, ?, ?, ?);
       `;
 
       data.forEach(item => {
         const values = [
-          item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.date,
-          item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.date
+          item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.dataIni, item.dataFi,
+          item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.dataIni, item.dataFi
         ];
 
         connexioBD.execute(query, values, (err, results) => {
@@ -485,16 +487,16 @@ schedule.scheduleJob('0 0 * * *', () => {
       console.log('Dades a inserir: ', data);
 
       const query = `
-        INSERT INTO dia (idAula, idSensor, tipus, max, min, average, datetime)
+        INSERT INTO dia (idAula, idSensor, tipus, max, min, average, dataIni, dataFi)
         VALUES 
-        (?, 1, 'volum', ?, ?, ?, ?),
-        (?, 1, 'temperatura', ?, ?, ?, ?);
+        (?, 1, 'volum', ?, ?, ?, ?, ?),
+        (?, 1, 'temperatura', ?, ?, ?, ?, ?);
       `;
 
       data.forEach(item => {
         const values = [
-          item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.date,
-          item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.date
+          item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.dataIni, item.dataFi,
+          item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.dataIni, item.dataFi
         ];
 
         connexioBD.execute(query, values, (err, results) => {
@@ -510,6 +512,70 @@ schedule.scheduleJob('0 0 * * *', () => {
     .catch(error => {
       console.error('Script error (day):', error);
     });
+});
+
+// Get mitjanes de dades
+app.post('/api/getMapa', async (req, res) => {
+  const { aules, tipus, data } = req.body;
+
+  if (!aules || !tipus || !data) {
+    return res.status(400).json({ message: 'aules, tipus i data són necessaris' });
+  }
+
+  const formattedDate = `${data}%`;
+  const response = [];
+
+  const promises = aules.map(aula => {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT idAula, average 
+        FROM dia 
+        WHERE idAula = ? AND tipus = ? AND dataIni LIKE ?
+      `;
+
+      connexioBD.execute(query, [aula, tipus, formattedDate], (err, results) => {
+        if (err) {
+          console.error('Error en la consulta a la base de dades:', err);
+          return reject('Error en la consulta a la base de dades');
+        }
+        console.log('Dades rebudes de la base de dades: ', results);
+        if (results.length > 0) {
+          response.push(results[0]);
+        }
+        resolve();
+      });
+    });
+  });
+
+  try {
+    await Promise.all(promises);
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+});
+
+// Get dades per gràfics
+app.post('/api/getDades', (req, res) => {
+  const { taula, tipus, idAula, dataIni, dataFi } = req.body;
+
+  if (!taula || !tipus || !idAula || !dataIni || !dataFi) {
+    return res.status(400).json({ message: 'taula, tipus, idAula, dataIni i dataFi són necessaris' });
+  }
+
+  const query = `
+    SELECT idAula, average, max, min, dataIni
+    FROM ${taula}
+    WHERE idAula = ? AND tipus = ? AND dataIni BETWEEN ? AND ?
+  `;
+
+  connexioBD.execute(query, [idAula, tipus, dataIni, dataFi], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err);
+      return res.status(500).json({ message: 'Error en la consulta a la base de dades' });
+    }
+    res.json(results);
+  });
 });
 
 server.listen(PORT, () => {

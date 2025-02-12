@@ -56,7 +56,8 @@ const items = [
 ];
 
 const ranges = [
-    { label: 'Actual', value: 'actual' },
+    { label: 'Minuts', value: 'minuts' },
+    { label: 'Horas', value: 'hours' },
     { label: 'Diario', value: 'daily' },
     { label: 'Semanal', value: 'weekly' },
     { label: 'Mensual', value: 'monthly' },
@@ -64,7 +65,7 @@ const ranges = [
 ];
 
 const selectedChart = ref('Temperatura');
-const selectedRange = ref('actual');
+const selectedRange = ref('minuts');
 
 const currentChart = computed(() => {
     const item = items.find((i) => i.label === selectedChart.value);
