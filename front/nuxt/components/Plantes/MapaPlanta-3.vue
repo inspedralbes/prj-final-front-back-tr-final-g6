@@ -61,19 +61,20 @@ const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight) *
     layer.add(konvaImage);
 
     const points = [
-      { x: 179, y: 164, info: "2N ESO A", popupX: 175, popupY: 350 },
-      { x: 268, y: 156, info: "2N ESO C", popupX: 320, popupY: 350 },
-      { x: 494, y: 135, info: "2N ESO E", popupX: 599, popupY: 350 },
-      { x: 189, y: 288, info: "2N ESO B", popupX: 180, popupY: 550 },
-      { x: 279, y: 280, info: "2N ESO D", popupX: 299, popupY: 540 },
-      { x: 458, y: 265, info: "2N ESO F", popupX: 540, popupY: 530 },
-      { x: 735, y: 260, info: "1R SMIX B1", popupX: 920, popupY: 490 },
-      { x: 824, y: 268, info: "PFI 2", popupX: 1100, popupY: 500 },
-      { x: 915, y: 274, info: "1R SMIX A1", popupX: 1190, popupY: 490 },
-      { x: 1003, y: 283, info: "1R DAM", popupX: 1290, popupY: 490 },
-      { x: 1016, y: 160, info: "1R SMIX A2", popupX: 1300, popupY: 350 },
-      { x: 1103, y: 168, info: "1 SMIX", popupX: 1440, popupY: 360 },
-      { x: 1095, y: 294, info: "1SMX A3", popupX: 1430, popupY: 530 },
+      { x: 342, y: 315, info: "2N BTX A", popupX: 175, popupY: 350 },
+      { x: 418, y: 307, info: "2N BTX B", popupX: 320, popupY: 350 },
+      { x: 495, y: 301, info: "2N BTX C", popupX: 599, popupY: 350 },
+      { x: 569, y: 294, info: "2N BTX E", popupX: 180, popupY: 550 },
+      { x: 645, y: 287, info: "1 BTX IB", popupX: 299, popupY: 540 },
+      { x: 487, y: 408, info: "2N BTX D", popupX: 540, popupY: 530 },
+      { x: 570, y: 400, info: "2N BTX IB", popupX: 920, popupY: 490 },
+
+      { x: 811, y: 392, info: "2 DAW / 2DAM-VI", popupX: 1100, popupY: 500 },
+      { x: 886, y: 398, info: "2SMX-A2 / 2 ASX-B2", popupX: 1190, popupY: 490 },
+      { x: 840, y: 288, info: "2SMX-A1 / 2ASX-B1", popupX: 1290, popupY: 490 },
+      { x: 1046, y: 305, info: "1DAW / 1ASX-B2", popupX: 1300, popupY: 350 },
+      { x: 1122, y: 310, info: "2DAM / CERV", popupX: 1440, popupY: 360 },
+
     ].map(point => ({
       ...point,
       enabled: Math.random() > 0.5,

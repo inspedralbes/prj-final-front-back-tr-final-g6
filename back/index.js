@@ -514,6 +514,14 @@ schedule.scheduleJob('0 0 * * *', () => {
     });
 });
 
+
+
+
+
+
+
+
+
 // Get mitjanes de dades
 app.post('/api/getMapa', async (req, res) => {
   const { aules, tipus, data } = req.body;
@@ -554,6 +562,64 @@ app.post('/api/getMapa', async (req, res) => {
     res.status(500).json({ message: error });
   }
 });
+
+
+
+
+
+
+
+app.get('/api/getMapa', async (req, res) => {
+  // Obtener los parámetros de la URL (query string)
+  const { aules, tipus, data } = req.query;
+
+  if (!aules || !tipus || !data) {
+    return res.status(400).json({ message: 'aules, tipus i data són necessaris' });
+  }
+
+  // Si 'aules' es una cadena, convertirla a un array
+  const aulesArray = Array.isArray(aules) ? aules : [aules];
+
+  // Formatear la fecha para la consulta
+  const formattedDate = `${data}%`;
+  const response = [];
+
+  // Crear las promesas para cada aula
+  const promises = aulesArray.map(aula => {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT idAula, average 
+        FROM dia 
+        WHERE idAula = ? AND tipus = ? AND dataIni LIKE ?
+      `;
+
+      connexioBD.execute(query, [aula, tipus, formattedDate], (err, results) => {
+        if (err) {
+          console.error('Error en la consulta a la base de dades:', err);
+          return reject('Error en la consulta a la base de dades');
+        }
+        console.log('Dades rebudes de la base de dades: ', results);
+        if (results.length > 0) {
+          response.push(results[0]);
+        }
+        resolve();
+      });
+    });
+  });
+
+  try {
+    await Promise.all(promises);
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+});
+
+
+
+
+
+
 
 // Get dades per gràfics
 app.post('/api/getDades', (req, res) => {

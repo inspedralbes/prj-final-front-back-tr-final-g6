@@ -82,28 +82,32 @@ onMounted(async () => {
 
     layer.add(konvaImage);
 
-    const points = [
-      { x: 179, y: 164, idAula: "2N ESO A", popupX: 175, popupY: 350 },
-      { x: 268, y: 156, idAula: "2N ESO C", popupX: 320, popupY: 350 },
-      { x: 494, y: 135, idAula: "2N ESO E", popupX: 599, popupY: 350 },
-      { x: 189, y: 288, idAula: "2N ESO B", popupX: 180, popupY: 550 },
-      { x: 279, y: 280, idAula: "2N ESO D", popupX: 299, popupY: 540 },
-      { x: 458, y: 265, idAula: "2N ESO F", popupX: 540, popupY: 530 },
-      { x: 735, y: 260, idAula: "1R SMIX B1", popupX: 920, popupY: 490 },
-      { x: 824, y: 268, idAula: "PFI 2", popupX: 1100, popupY: 500 },
-      { x: 915, y: 274, idAula: "1R SMIX A1", popupX: 1190, popupY: 490 },
-      { x: 1003, y: 283, idAula: "1R DAM", popupX: 1290, popupY: 490 },
-      { x: 1016, y: 160, idAula: "1R SMIX A2", popupX: 1300, popupY: 350 },
-      { x: 1103, y: 168, idAula: "1 SMIX", popupX: 1440, popupY: 360 },
-      { x: 1095, y: 294, idAula: "1SMX A3", popupX: 1430, popupY: 530 },
-    ].map(point => {
-      const aula = aulaData.value.find(a => a.idAula === point.idAula);
-      return {
-        ...point,
-        enabled: aula !== undefined,
-        volumen: aula ? aula.average : 0
-      };
-    });
+
+
+const points = [
+  { x: 179, y: 164, idAula: "2N ESO A", popupX: 175, popupY: 350 },
+  { x: 268, y: 156, idAula: "2N ESO C", popupX: 320, popupY: 350 },
+  { x: 494, y: 135, idAula: "2N ESO E", popupX: 599, popupY: 350 },
+  { x: 189, y: 288, idAula: "2N ESO B", popupX: 180, popupY: 550 },
+  { x: 279, y: 280, idAula: "2N ESO D", popupX: 299, popupY: 540 },
+  { x: 458, y: 265, idAula: "2N ESO F", popupX: 540, popupY: 530 },
+  { x: 735, y: 260, idAula: "1R SMIX B1", popupX: 920, popupY: 490 },
+  { x: 824, y: 268, idAula: "PFI 2", popupX: 1100, popupY: 500 },
+  { x: 915, y: 274, idAula: "1R SMIX A1", popupX: 1190, popupY: 490 },
+  { x: 1003, y: 283, idAula: "1R DAM", popupX: 1290, popupY: 490 },
+  { x: 1016, y: 160, idAula: "1R SMIX A2", popupX: 1300, popupY: 350 },
+  { x: 1103, y: 168, idAula: "1 SMIX", popupX: 1440, popupY: 360 },
+  { x: 1095, y: 294, idAula: "1SMX A3", popupX: 1430, popupY: 530 },
+].map(point => {
+  const aula = aulaData.value.find(a => a.idAula === point.idAula);
+  return {
+    ...point,
+    enabled: aula !== undefined,  // Habilitar solo si hay datos
+    volumen: aula ? aula.average : 0,  // Asignar el volumen si hay datos, de lo contrario 0
+  };
+});
+
+
 
     const minVolumen = Math.min(...points.map(p => p.volumen));
     const maxVolumen = Math.max(...points.map(p => p.volumen));
