@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref, defineProps } from "vue";
 import Konva from "konva";
+import axios from "axios";
 
 // Recibe la URL de la imagen como prop
 const props = defineProps({
@@ -15,6 +16,24 @@ const showPopup = ref(false);
 const popupInfo = ref("");
 const popupPosition = ref({ x: 0, y: 0 });
 
+const aulaData = ref([]);
+
+// Función para obtener los datos reales del backend
+const fetchData = async () => {
+  try {
+    const response = await axios.post("http://localhost:3000/api/getMapa", {
+      aules: ["2N ESO A", "2N ESO C", "2N ESO E", "2N ESO B", "2N ESO D", "2N ESO F", "1R SMIX B1", "PFI 2", "1R SMIX A1", "1R DAM", "1R SMIX A2", "1 SMIX", "1SMX A3"],
+      tipus: "sonido",  // Ajusta según lo que almacenes en la BD
+      data: "2025-02-12" // Sustituye por la fecha real
+    });
+    
+    aulaData.value = response.data;
+    console.log("Datos recibidos:", aulaData.value);
+  } catch (error) {
+    console.error("Error al obtener datos:", error);
+  }
+};
+
 const closePopup = () => {
   showPopup.value = false;
 };
@@ -26,8 +45,10 @@ const getInterpolatedColor = (value, min, max) => {
   return `rgb(${red}, 0, ${blue})`;
 };
 
-onMounted(() => {
-const image = './PLANTA 1.png';
+onMounted(async () => {
+  await fetchData(); // Obtener datos antes de renderizar el mapa
+
+  const image = './PLANTA 1.png';
   const imageObj = new Image();
 
   imageObj.onload = function() {
@@ -62,24 +83,27 @@ const image = './PLANTA 1.png';
     layer.add(konvaImage);
 
     const points = [
-      { x: 179, y: 164, info: "2N ESO A", popupX: 175, popupY: 350 },
-      { x: 268, y: 156, info: "2N ESO C", popupX: 320, popupY: 350 },
-      { x: 494, y: 135, info: "2N ESO E", popupX: 599, popupY: 350 },
-      { x: 189, y: 288, info: "2N ESO B", popupX: 180, popupY: 550 },
-      { x: 279, y: 280, info: "2N ESO D", popupX: 299, popupY: 540 },
-      { x: 458, y: 265, info: "2N ESO F", popupX: 540, popupY: 530 },
-      { x: 735, y: 260, info: "1R SMIX B1", popupX: 920, popupY: 490 },
-      { x: 824, y: 268, info: "PFI 2", popupX: 1100, popupY: 500 },
-      { x: 915, y: 274, info: "1R SMIX A1", popupX: 1190, popupY: 490 },
-      { x: 1003, y: 283, info: "1R DAM", popupX: 1290, popupY: 490 },
-      { x: 1016, y: 160, info: "1R SMIX A2", popupX: 1300, popupY: 350 },
-      { x: 1103, y: 168, info: "1 SMIX", popupX: 1440, popupY: 360 },
-      { x: 1095, y: 294, info: "1SMX A3", popupX: 1430, popupY: 530 },
-    ].map(point => ({
-      ...point,
-      enabled: Math.random() > 0.5,
-      volumen: Math.random() * 100
-    }));
+      { x: 179, y: 164, idAula: "2N ESO A", popupX: 175, popupY: 350 },
+      { x: 268, y: 156, idAula: "2N ESO C", popupX: 320, popupY: 350 },
+      { x: 494, y: 135, idAula: "2N ESO E", popupX: 599, popupY: 350 },
+      { x: 189, y: 288, idAula: "2N ESO B", popupX: 180, popupY: 550 },
+      { x: 279, y: 280, idAula: "2N ESO D", popupX: 299, popupY: 540 },
+      { x: 458, y: 265, idAula: "2N ESO F", popupX: 540, popupY: 530 },
+      { x: 735, y: 260, idAula: "1R SMIX B1", popupX: 920, popupY: 490 },
+      { x: 824, y: 268, idAula: "PFI 2", popupX: 1100, popupY: 500 },
+      { x: 915, y: 274, idAula: "1R SMIX A1", popupX: 1190, popupY: 490 },
+      { x: 1003, y: 283, idAula: "1R DAM", popupX: 1290, popupY: 490 },
+      { x: 1016, y: 160, idAula: "1R SMIX A2", popupX: 1300, popupY: 350 },
+      { x: 1103, y: 168, idAula: "1 SMIX", popupX: 1440, popupY: 360 },
+      { x: 1095, y: 294, idAula: "1SMX A3", popupX: 1430, popupY: 530 },
+    ].map(point => {
+      const aula = aulaData.value.find(a => a.idAula === point.idAula);
+      return {
+        ...point,
+        enabled: aula !== undefined,
+        volumen: aula ? aula.average : 0
+      };
+    });
 
     const minVolumen = Math.min(...points.map(p => p.volumen));
     const maxVolumen = Math.max(...points.map(p => p.volumen));
@@ -101,7 +125,7 @@ const image = './PLANTA 1.png';
 
       circle.on('click', () => {
         if (!point.enabled) return;
-        popupInfo.value = `${point.info} - Volumen: ${point.volumen.toFixed(2)}`;
+        popupInfo.value = `${point.idAula} - Volumen: ${point.volumen.toFixed(2)}`;
         showPopup.value = true;
         popupPosition.value = { x: point.popupX, y: point.popupY };
       });
@@ -112,7 +136,7 @@ const image = './PLANTA 1.png';
     layer.batchDraw();
   };
 
-  imageObj.src = image // Cambiar a la ruta correcta de la imagen en tu proyecto
+  imageObj.src = image; // Cambiar a la ruta correcta de la imagen en tu proyecto
 });
 </script>
 

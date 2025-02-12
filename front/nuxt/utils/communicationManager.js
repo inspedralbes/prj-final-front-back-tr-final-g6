@@ -3,7 +3,28 @@ export function getBaseUrl() {
     return config.public.URL;
 }
 
+// Nueva función para probar la conexión con la API
+export async function fetchTest() {
+    try {
+        const response = await fetch(`${getBaseUrl()}/test`);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error en la prueba de conexión');
+        }
+
+        const data = await response.json();
+        console.log('Conexión exitosa:', data);
+        return data;
+
+    } catch (error) {
+        console.error('Error en la prueba de conexión:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
 // Login
+
 export async function login(correu, contrasenya) {
     try {
         const response = await fetch(`${getBaseUrl()}/login`, {
@@ -65,6 +86,8 @@ export async function getAulas() {
     }
 }
 
+
+
 export async function getAulaById(id) {
     try {
         const response = await fetch(`${getBaseUrl()}/aula/${id}`);
@@ -83,8 +106,7 @@ export async function getAulaById(id) {
     }
 }
 
-//Usuarios
-
+// Usuarios
 export async function getUsuaris() {
     try {
         const response = await fetch(`${getBaseUrl()}/usuaris`);
@@ -127,6 +149,8 @@ export async function getUsuariById() {
     }
 }
 
+
+
 export async function createAula(curs, classe, etapa) {
     if (!curs || !classe || !etapa) {
         throw new Error("curs, classe i etapa són necessaris");
@@ -146,6 +170,9 @@ export async function createAula(curs, classe, etapa) {
     return await response.json();
 }
 
+
+
+
 export async function updateAula(id, aula) {
     try {
         const response = await fetch(`${getBaseUrl()}/updateAula/${id}`, {
@@ -153,7 +180,7 @@ export async function updateAula(id, aula) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(aula) // Asegúrate de enviar los datos correctamente
+            body: JSON.stringify(aula)
         });
 
         if (!response.ok) {
@@ -168,6 +195,9 @@ export async function updateAula(id, aula) {
         throw new Error('Error en actualizar el aula');
     }
 }
+
+
+
 
 export async function deleteAula(id) {
     try {
@@ -188,6 +218,9 @@ export async function deleteAula(id) {
         throw new Error(error.message || 'Hubo un error en la solicitud');
     }
 }
+
+
+
 
 export async function habilitarAula(aula) {
     try {
