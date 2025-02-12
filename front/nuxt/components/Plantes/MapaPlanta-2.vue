@@ -40,7 +40,7 @@ const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight) *
     const scaledWidth = imgWidth * scaleFactor;
     const scaledHeight = imgHeight * scaleFactor;
     const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 1;
+    const y = (canvasHeight - scaledHeight) / 3.3;
 
     const stage = new Konva.Stage({
       container: stageRef.value,

@@ -40,7 +40,7 @@ const image = './SUBTERRANEO.png';
     const scaledWidth = imgWidth * scaleFactor;
     const scaledHeight = imgHeight * scaleFactor;
     const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 0.1;
+    const y = (canvasHeight - scaledHeight) / 1.3;
 
     const stage = new Konva.Stage({
       container: stageRef.value,

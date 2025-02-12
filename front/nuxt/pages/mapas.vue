@@ -6,7 +6,7 @@
                 {{ planta }}
             </button>
         </div>
-        <div class="w-full max-w-full lg:max-w-full bg-white p-8 pt-4 rounded-xl shadow-2xl text-center flex justify-center items-center">
+        <div class="map-container w-full max-w-full lg:max-w-full bg-white p-8 pt-4 rounded-xl shadow-2xl text-center flex justify-center items-center">
             <Mapaplanta1 v-if="plantaSeleccionada === 'PLANTA 1'" />
             <Mapaplanta2 v-if="plantaSeleccionada === 'PLANTA 2'" />
             <Mapaplanta3 v-if="plantaSeleccionada === 'PLANTA 3'" />
@@ -91,5 +91,16 @@ button:focus {
 
 button:focus-visible {
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para recortar la imagen */
+.map-container {
+    height: 500px; /* Ajusta la altura según lo necesario */
+    overflow: hidden; /* Oculta el contenido que se desborda */
+}
+
+.map-container img {
+    width: 100%;
+    object-fit: cover; /* Asegura que la imagen se recorte y ajuste proporcionalmente */
 }
 </style>
