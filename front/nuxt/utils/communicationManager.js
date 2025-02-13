@@ -266,4 +266,29 @@ export async function getMapa(bodyRequest) {
       console.error("Error en la solicitud:", error);
       throw new Error(error.message || 'Hubo un error en la solicitud');
     }
-  }
+}
+
+export async function getDades(taula, tipus, idAula, dataIni, dataFi) {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/getDades`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ taula, tipus, idAula, dataIni, dataFi }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al obtener los datos');
+        }
+
+        const data = await response.json();
+        return data;
+
+    } catch (error) {
+        console.error(error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+

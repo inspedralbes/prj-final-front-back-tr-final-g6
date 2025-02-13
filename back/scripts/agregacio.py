@@ -85,7 +85,7 @@ try:
     print(json.dumps(output, indent=4))
 
 except pymongo.errors.ServerSelectionTimeoutError as err:
-    print("Error connecting to MongoDB:", err)
+    print(json.dumps({"error": f"Error connecting to MongoDB: {err}"}))
 
 finally:
     # Tancar la connexió
