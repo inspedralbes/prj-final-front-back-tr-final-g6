@@ -113,7 +113,7 @@ const image = './PLANTA 3.png';
     layer.batchDraw();
   };
 
-  imageObj.src = image // Cambiar a la ruta correcta de la imagen en tu proyecto
+  imageObj.src = image
 });
 </script>
 

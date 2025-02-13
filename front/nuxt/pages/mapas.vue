@@ -69,7 +69,7 @@ import MapaPlantaBaixa from '~/components/plantes/MapaPlantaBaixa.vue';
 import MapaPlantaSubterranea from '~/components/plantes/MapaPlantaSubterranea.vue';
 
 const plantas = ['PLANTA BAJA', 'PLANTA 1', 'PLANTA 2', 'PLANTA 3', 'PLANTA SUBTERRANEA'];
-const plantaSeleccionada = ref('PLANTA 1'); // Valor predeterminado para mostrar "PLANTA 1" al inicio
+const plantaSeleccionada = ref('PLANTA 1');
 
 const seleccionarPlanta = (planta) => {
     console.log(`Seleccionaste: ${planta}`);
@@ -151,14 +151,14 @@ button:focus-visible {
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
 }
 
-/* Estilos para recortar la imagen */
+
 .map-container {
-    height: 500px; /* Ajusta la altura según lo necesario */
-    overflow: hidden; /* Oculta el contenido que se desborda */
+    height: 500px;
+    overflow: hidden;
 }
 
 .map-container img {
     width: 100%;
-    object-fit: cover; /* Asegura que la imagen se recorte y ajuste proporcionalmente */
+    object-fit: cover;
 }
 </style>

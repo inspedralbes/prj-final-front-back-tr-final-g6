@@ -1,9 +1,9 @@
 <script setup>
 import { onMounted, ref, defineProps } from "vue";
 import Konva from "konva";
-import { getMapa } from "@/utils/CommunicationManager"; // Asegúrate de que la ruta sea correcta
+import { getMapa } from "@/utils/CommunicationManager";
 
-// Recibe la URL de la imagen como prop
+
 const props = defineProps({
   imageUrl: {
     type: String,
@@ -18,7 +18,7 @@ const popupPosition = ref({ x: 0, y: 0 });
 
 const aulaData = ref([]);
 
-// Función para obtener los datos reales del backend usando fetch
+
 const fetchData = async () => {
   try {
     const bodyRequest = {
@@ -27,13 +27,13 @@ const fetchData = async () => {
         "1R SMIX B1", "PFI 2", "1R SMIX A1", "1R DAM", "1R SMIX A2", "1 SMIX", 
         "1SMX A3"
       ],
-      tipus: "sonido",  // Ajusta según lo que almacenes en la BD
-      data: "2025-02-12" // Sustituye por la fecha real
+      tipus: "sonido", 
+      data: "2025-02-12" 
     };
 
     // Obtener datos desde el backend
     const response = await getMapa(bodyRequest);
-    aulaData.value = response; // Asignar los datos obtenidos
+    aulaData.value = response;
     console.log("Datos recibidos:", aulaData.value);
   } catch (error) {
     console.error("Error al obtener datos:", error);
@@ -52,7 +52,7 @@ const getInterpolatedColor = (value, min, max) => {
 };
 
 onMounted(async () => {
-  await fetchData(); // Obtener datos antes de renderizar el mapa
+  await fetchData();
 
   const image = './PLANTA 1.png';
   const imageObj = new Image();
@@ -88,7 +88,7 @@ onMounted(async () => {
 
     layer.add(konvaImage);
 
-    // Usamos los datos de aulaData para crear los puntos
+
     const points = [
       { x: 179, y: 164, idAula: "2N ESO A", popupX: 175, popupY: 350 },
       { x: 268, y: 156, idAula: "2N ESO C", popupX: 320, popupY: 350 },
@@ -108,7 +108,7 @@ onMounted(async () => {
       const enabled = aula !== undefined;
       const volumen = aula ? aula.average : 0;
 
-      // Comprobamos el estado habilitado y el volumen
+
       console.log(`Aula: ${point.idAula}, Habilitado: ${enabled}, Volumen: ${volumen}`);
 
       return {
@@ -118,17 +118,17 @@ onMounted(async () => {
       };
     });
 
-    // Asegurémonos de que hay datos de volumen y que están correctamente asignados
+
     console.log("Puntos procesados:", points);
 
     const minVolumen = Math.min(...points.map(p => p.volumen));
     const maxVolumen = Math.max(...points.map(p => p.volumen));
 
     points.forEach(point => {
-      // Cambiar color en función del volumen, si está habilitado
+
       const color = point.enabled
         ? getInterpolatedColor(point.volumen, minVolumen, maxVolumen)
-        : "gray"; // Gris si no tiene datos
+        : "gray";
 
       const circle = new Konva.Circle({
         x: x + point.x * scaleFactor,
@@ -140,9 +140,9 @@ onMounted(async () => {
         draggable: false,
       });
 
-      // Hacer clic solo si el punto está habilitado
+
       circle.on('click', () => {
-        if (!point.enabled) return; // No hacer nada si el punto está deshabilitado
+        if (!point.enabled) return;
         popupInfo.value = `${point.idAula} - Volumen: ${point.volumen.toFixed(2)}`;
         showPopup.value = true;
         popupPosition.value = { x: point.popupX, y: point.popupY };
@@ -154,7 +154,7 @@ onMounted(async () => {
     layer.batchDraw();
   };
 
-  imageObj.src = image; // Cambiar a la ruta correcta de la imagen en tu proyecto
+  imageObj.src = image;
 });
 </script>
 

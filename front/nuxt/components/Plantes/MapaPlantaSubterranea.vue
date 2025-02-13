@@ -2,7 +2,7 @@
 import { onMounted, ref, defineProps } from "vue";
 import Konva from "konva";
 
-// Recibe la URL de la imagen como prop
+
 const props = defineProps({
   imageUrl: {
     type: String,
@@ -112,7 +112,7 @@ const image = './SUBTERRANEO.png';
     layer.batchDraw();
   };
 
-  imageObj.src = image // Cambiar a la ruta correcta de la imagen en tu proyecto
+  imageObj.src = image
 });
 </script>
 

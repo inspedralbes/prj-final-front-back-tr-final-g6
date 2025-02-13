@@ -2,7 +2,7 @@
 import { onMounted, ref, defineProps } from "vue";
 import Konva from "konva";
 
-// Recibe la URL de la imagen como prop
+
 const props = defineProps({
   imageUrl: {
     type: String,

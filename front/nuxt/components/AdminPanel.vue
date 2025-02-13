@@ -3,7 +3,7 @@
         <Header />
         <div
             class="min-h-screen bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1] flex flex-col items-center p-8 animated-bg">
-            <!-- Filtres -->
+
             <div class="flex space-x-4">
             <button @click="navigateToMapas"
                 class="px-4 py-2 my-4 bg-emerald-700 text-white rounded-lg hover:bg-blue-600 transition-all">
@@ -231,13 +231,13 @@ const navigateToMapas = () => {
 
 const handleCreateAula = async () => {
     try {
-        // Aquí pasamos los valores de newAula
+
         await createAula(newAula.value.Curs, newAula.value.Classe, newAula.value.Etapa);
         alert('Aula creada correctament!');
-        // Limpia el formulario después de crear
+
         newAula.value = { Curs: '', Classe: '', Etapa: '', Planta: 0, Aula: '', activa: 0, turn: '' };
         showCreateAulaForm.value = false;
-        // Recarga las aulas para mostrar la nueva
+        
         aulas.value = await getTotesAulas();
     } catch (error) {
         console.error("Error al crear el aula:", error.message);

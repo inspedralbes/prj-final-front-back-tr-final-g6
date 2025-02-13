@@ -15,7 +15,7 @@ import Button from 'primevue/button';
 </script>
 
 <style scoped>
-/* Botón personalizado */
+
 .custom-button:hover {
     transform: scale(1.1);
     box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
