@@ -13,6 +13,7 @@
     "@pinia/nuxt": "^0.9.0",
     "@primevue/nuxt-module": "^4.2.5",
     "@primevue/themes": "^4.2.5",
+    "@rollup/rollup-linux-x64-gnu": "^4.34.6",
     "canvas": "^3.1.0",
     "chart.js": "^4.4.7",
     "fabric": "^6.5.4",

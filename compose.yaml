@@ -2,6 +2,9 @@ services:
   prfg6-front:
     image: node:23-bullseye
     container_name: nuxt
+    build:
+      context: ./front/nuxt
+      dockerfile: develop.Dockerfile
     working_dir: /usr/src/app
     volumes:
       - ./front/nuxt:/usr/src/app
@@ -10,7 +13,6 @@ services:
     environment:
       - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true
-    command: bash -c "echo INI && npm install --no-bin-links && npm run dev"
     links:
       - prfg6-back
 
