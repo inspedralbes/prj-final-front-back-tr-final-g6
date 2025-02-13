@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref, defineProps } from "vue";
 import Konva from "konva";
+import { getMapa } from "@/utils/CommunicationManager";
 
 
 const props = defineProps({

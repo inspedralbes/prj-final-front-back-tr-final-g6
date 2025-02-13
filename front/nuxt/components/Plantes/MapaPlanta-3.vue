@@ -1,6 +1,8 @@
 <script setup>
 import { onMounted, ref, defineProps } from "vue";
 import Konva from "konva";
+import { getMapa } from "@/utils/CommunicationManager";
+
 
 // Recibe la URL de la imagen como prop
 const props = defineProps({
