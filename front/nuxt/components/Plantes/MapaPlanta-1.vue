@@ -101,24 +101,34 @@ onMounted(async () => {
       { x: 915, y: 274, idAula: "1R SMIX A1", popupX: 1190, popupY: 490 },
       { x: 1003, y: 283, idAula: "1R DAM", popupX: 1290, popupY: 490 },
       { x: 1016, y: 160, idAula: "1R SMIX A2", popupX: 1300, popupY: 350 },
-      { x: 1103, y: 168, idAula: "1 SMIX", popupX: 1440, popupY: 360 },
+      { x: 1103, y: 168, idAula: "1R SMIX", popupX: 1440, popupY: 360 },
       { x: 1095, y: 294, idAula: "1SMX A3", popupX: 1430, popupY: 530 },
     ].map(point => {
       const aula = aulaData.value.find(a => a.idAula === point.idAula);
+      const enabled = aula !== undefined;
+      const volumen = aula ? aula.average : 0;
+
+      // Comprobamos el estado habilitado y el volumen
+      console.log(`Aula: ${point.idAula}, Habilitado: ${enabled}, Volumen: ${volumen}`);
+
       return {
         ...point,
-        enabled: aula !== undefined,  // Habilitar solo si hay datos
-        volumen: aula ? aula.average : 0,  // Asignar el volumen si hay datos, de lo contrario 0
+        enabled: enabled,
+        volumen: volumen,
       };
     });
+
+    // Asegurémonos de que hay datos de volumen y que están correctamente asignados
+    console.log("Puntos procesados:", points);
 
     const minVolumen = Math.min(...points.map(p => p.volumen));
     const maxVolumen = Math.max(...points.map(p => p.volumen));
 
     points.forEach(point => {
+      // Cambiar color en función del volumen, si está habilitado
       const color = point.enabled
         ? getInterpolatedColor(point.volumen, minVolumen, maxVolumen)
-        : "gray";
+        : "gray"; // Gris si no tiene datos
 
       const circle = new Konva.Circle({
         x: x + point.x * scaleFactor,
@@ -130,8 +140,9 @@ onMounted(async () => {
         draggable: false,
       });
 
+      // Hacer clic solo si el punto está habilitado
       circle.on('click', () => {
-        if (!point.enabled) return;
+        if (!point.enabled) return; // No hacer nada si el punto está deshabilitado
         popupInfo.value = `${point.idAula} - Volumen: ${point.volumen.toFixed(2)}`;
         showPopup.value = true;
         popupPosition.value = { x: point.popupX, y: point.popupY };
