@@ -1,44 +1,6 @@
 <template>
-    <header class="bg-gray-900 p-4 shadow-lg text-white">
-        <div class="max-w-10xl flex items-center justify-between">
-            <router-link to="/aulas" class="flex items-center hover:opacity-80 transition-opacity">
-                <img src="../public/logo.jpg" alt="Logo" class="w-14 h-14 rounded-full mr-3" />
-            </router-link>
-
-            <div class="relative">
-                <button @click="toggleMenu"
-                    class="flex items-center text-white px-4 py-2 rounded-md shadow-md transition-colors">
-                    <i class="pi pi-bars mr-2 text-xl"></i> Menú
-                </button>
-
-                <div v-if="isMenuVisible"
-                    class="absolute right-0 mt-2 bg-white text-black shadow-lg rounded-md w-48 z-50 overflow-hidden border border-blue-500">
-                    <ul>
-                        <li class="px-4 py-3 hover:bg-gray-100 transition-colors">
-                            <router-link to="/aulas" class="block text-sm font-medium text-gray-700">
-                                Ir a Aulas
-                            </router-link>
-                        </li>
-                        <li class="px-4 py-3 hover:bg-gray-100 transition-colors">
-                            <router-link to="/configuracion" class="block text-sm font-medium text-gray-700">
-                                Configuración
-                            </router-link>
-                        </li>
-                        <li v-if="isAdmin" class="px-4 py-3 hover:bg-gray-100 transition-colors">
-                            <router-link to="/admin" class="block text-sm font-medium text-gray-700">
-                                Admin
-                            </router-link>
-                        </li>
-                        <li class="px-4 py-3 hover:bg-gray-100 transition-colors">
-                            <button @click="logout" class="block text-sm font-medium text-gray-700">
-                                Cerrar Sesión
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </header>
+    <div>
+    <Header />
 
     <div class="min-h-screen flex flex-col items-center p-8 animated-bg bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1]">
         <h1 class="text-5xl font-bold text-white mb-10 animate__animated animate__fadeIn">Mapes</h1>
@@ -54,6 +16,7 @@
             <MapaPlantaBaixa v-if="plantaSeleccionada === 'PLANTA BAJA'" />
             <MapaPlantaSubterranea v-if="plantaSeleccionada === 'PLANTA SUBTERRANEA'" />
         </div>
+    </div>
     </div>
 </template>
 
