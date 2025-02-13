@@ -404,115 +404,115 @@ const getPreviousTime = (unit) => {
 // --- Programació dels càlculs ---
 
 // Programar l'execució cada minut
-schedule.scheduleJob('* * * * *', () => {
-  const temps = getPreviousTime('minute');
-  executePythonScript('agregacio.py', temps, 'minut')
-    .then(output => {
-      const data = JSON.parse(output);
+// schedule.scheduleJob('* * * * *', () => {
+//   const temps = getPreviousTime('minute');
+//   executePythonScript('agregacio.py', temps, 'minut')
+//     .then(output => {
+//       const data = JSON.parse(output);
 
-      console.log('Dades a inserir: ', data);
+//       console.log('Dades a inserir: ', data);
 
-      const query = `
-        INSERT INTO minut (idAula, idSensor, tipus, max, min, average, dataIni, dataFi)
-        VALUES 
-        (?, 1, 'volum', ?, ?, ?, ?, ?),
-        (?, 1, 'temperatura', ?, ?, ?, ?, ?);
-      `;
+//       const query = `
+//         INSERT INTO minut (idAula, idSensor, tipus, max, min, average, dataIni, dataFi)
+//         VALUES 
+//         (?, 1, 'volum', ?, ?, ?, ?, ?),
+//         (?, 1, 'temperatura', ?, ?, ?, ?, ?);
+//       `;
 
-      data.forEach(item => {
-        const values = [
-          item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.dataIni, item.dataFi,
-          item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.dataIni, item.dataFi
-        ];
+//       data.forEach(item => {
+//         const values = [
+//           item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.dataIni, item.dataFi,
+//           item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.dataIni, item.dataFi
+//         ];
 
-        connexioBD.execute(query, values, (err, results) => {
-          if (err) {
-            console.error('Error en la inserció a la base de dades:', err);
-          } else {
-            console.log('Dades inserides correctament a la taula minut');
-            console.log('Dades inserides: ', results);
-          }
-        });
-      });
-    })
-    .catch(error => {
-      console.error('Script error (minute):', error);
-    });
-});
+//         connexioBD.execute(query, values, (err, results) => {
+//           if (err) {
+//             console.error('Error en la inserció a la base de dades:', err);
+//           } else {
+//             console.log('Dades inserides correctament a la taula minut');
+//             console.log('Dades inserides: ', results);
+//           }
+//         });
+//       });
+//     })
+//     .catch(error => {
+//       console.error('Script error (minute):', error);
+//     });
+// });
 
-// Programar l'execució cada hora
-schedule.scheduleJob('0 * * * *', () => {
-  const temps = getPreviousTime('hour');
-  executePythonScript('agregacio.py', temps, 'hora')
-    .then(output => {
-      const data = JSON.parse(output);
+// // Programar l'execució cada hora
+// schedule.scheduleJob('0 * * * *', () => {
+//   const temps = getPreviousTime('hour');
+//   executePythonScript('agregacio.py', temps, 'hora')
+//     .then(output => {
+//       const data = JSON.parse(output);
 
-      console.log('Dades a inserir: ', data);
+//       console.log('Dades a inserir: ', data);
 
-      const query = `
-        INSERT INTO hora (idAula, idSensor, tipus, max, min, average, dataIni, dataFi)
-        VALUES 
-        (?, 1, 'volum', ?, ?, ?, ?, ?),
-        (?, 1, 'temperatura', ?, ?, ?, ?, ?);
-      `;
+//       const query = `
+//         INSERT INTO hora (idAula, idSensor, tipus, max, min, average, dataIni, dataFi)
+//         VALUES 
+//         (?, 1, 'volum', ?, ?, ?, ?, ?),
+//         (?, 1, 'temperatura', ?, ?, ?, ?, ?);
+//       `;
 
-      data.forEach(item => {
-        const values = [
-          item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.dataIni, item.dataFi,
-          item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.dataIni, item.dataFi
-        ];
+//       data.forEach(item => {
+//         const values = [
+//           item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.dataIni, item.dataFi,
+//           item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.dataIni, item.dataFi
+//         ];
 
-        connexioBD.execute(query, values, (err, results) => {
-          if (err) {
-            console.error('Error en la inserció a la base de dades:', err);
-          } else {
-            console.log('Dades inserides correctament a la taula hora');
-            console.log('Dades inserides: ', results);
-          }
-        });
-      });
-    })
-    .catch(error => {
-      console.error('Script error (hour):', error);
-    });
-});
+//         connexioBD.execute(query, values, (err, results) => {
+//           if (err) {
+//             console.error('Error en la inserció a la base de dades:', err);
+//           } else {
+//             console.log('Dades inserides correctament a la taula hora');
+//             console.log('Dades inserides: ', results);
+//           }
+//         });
+//       });
+//     })
+//     .catch(error => {
+//       console.error('Script error (hour):', error);
+//     });
+// });
 
-// Programar l'execució cada dia
-schedule.scheduleJob('0 0 * * *', () => {
-  const temps = getPreviousTime('day');
-  executePythonScript('agregacio.py', temps, 'dia')
-    .then(output => {
-      const data = JSON.parse(output);
+// // Programar l'execució cada dia
+// schedule.scheduleJob('0 0 * * *', () => {
+//   const temps = getPreviousTime('day');
+//   executePythonScript('agregacio.py', temps, 'dia')
+//     .then(output => {
+//       const data = JSON.parse(output);
 
-      console.log('Dades a inserir: ', data);
+//       console.log('Dades a inserir: ', data);
 
-      const query = `
-        INSERT INTO dia (idAula, idSensor, tipus, max, min, average, dataIni, dataFi)
-        VALUES 
-        (?, 1, 'volum', ?, ?, ?, ?, ?),
-        (?, 1, 'temperatura', ?, ?, ?, ?, ?);
-      `;
+//       const query = `
+//         INSERT INTO dia (idAula, idSensor, tipus, max, min, average, dataIni, dataFi)
+//         VALUES 
+//         (?, 1, 'volum', ?, ?, ?, ?, ?),
+//         (?, 1, 'temperatura', ?, ?, ?, ?, ?);
+//       `;
 
-      data.forEach(item => {
-        const values = [
-          item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.dataIni, item.dataFi,
-          item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.dataIni, item.dataFi
-        ];
+//       data.forEach(item => {
+//         const values = [
+//           item.aula, item.maxVolume, item.minVolume, item.averageVolume, item.dataIni, item.dataFi,
+//           item.aula, item.maxTemperature, item.minTemperature, item.averageTemperature, item.dataIni, item.dataFi
+//         ];
 
-        connexioBD.execute(query, values, (err, results) => {
-          if (err) {
-            console.error('Error en la inserció a la base de dades:', err);
-          } else {
-            console.log('Dades inserides correctament a la taula dia');
-            console.log('Dades inserides: ', results);
-          }
-        });
-      });
-    })
-    .catch(error => {
-      console.error('Script error (day):', error);
-    });
-});
+//         connexioBD.execute(query, values, (err, results) => {
+//           if (err) {
+//             console.error('Error en la inserció a la base de dades:', err);
+//           } else {
+//             console.log('Dades inserides correctament a la taula dia');
+//             console.log('Dades inserides: ', results);
+//           }
+//         });
+//       });
+//     })
+//     .catch(error => {
+//       console.error('Script error (day):', error);
+//     });
+// });
 
 
 
@@ -524,10 +524,10 @@ schedule.scheduleJob('0 0 * * *', () => {
 
 // Get mitjanes de dades
 app.post('/api/getMapa', async (req, res) => {
-  const { aules, tipus, data } = req.body;
+  const { aules, tipus, data, sensorPosition } = req.body;
 
-  if (!aules || !tipus || !data) {
-    return res.status(400).json({ message: 'aules, tipus i data són necessaris' });
+  if (!aules || !tipus || !data || !sensorPosition) {
+    return res.status(400).json({ message: 'aules, tipus, data i sensorPosition són necessaris' });
   }
 
   const formattedDate = `${data}%`;
@@ -557,63 +557,83 @@ app.post('/api/getMapa', async (req, res) => {
 
   try {
     await Promise.all(promises);
-    res.json(response);
-  } catch (error) {
-    res.status(500).json({ message: error });
-  }
-});
 
+    // Guardar la posición del sensor en la base de datos
+    const insertQuery = `
+  INSERT INTO sensor (idAula, x, y) VALUES (?, ?, ?)
+  ON DUPLICATE KEY UPDATE x = VALUES(x), y = VALUES(y)
+`;
 
-
-
-
-
-
-app.get('/api/getMapa', async (req, res) => {
-  // Obtener los parámetros de la URL (query string)
-  const { aules, tipus, data } = req.query;
-
-  if (!aules || !tipus || !data) {
-    return res.status(400).json({ message: 'aules, tipus i data són necessaris' });
-  }
-
-  // Si 'aules' es una cadena, convertirla a un array
-  const aulesArray = Array.isArray(aules) ? aules : [aules];
-
-  // Formatear la fecha para la consulta
-  const formattedDate = `${data}%`;
-  const response = [];
-
-  // Crear las promesas para cada aula
-  const promises = aulesArray.map(aula => {
-    return new Promise((resolve, reject) => {
-      const query = `
-        SELECT idAula, average 
-        FROM dia 
-        WHERE idAula = ? AND tipus = ? AND dataIni LIKE ?
-      `;
-
-      connexioBD.execute(query, [aula, tipus, formattedDate], (err, results) => {
-        if (err) {
-          console.error('Error en la consulta a la base de dades:', err);
-          return reject('Error en la consulta a la base de dades');
-        }
-        console.log('Dades rebudes de la base de dades: ', results);
-        if (results.length > 0) {
-          response.push(results[0]);
-        }
-        resolve();
+    const sensorPromises = sensorPosition.map(position => {
+      return new Promise((resolve, reject) => {
+        connexioBD.execute(insertQuery, [position.idAula, position.x, position.y], (err, results) => {
+          if (err) {
+            console.error('Error al guardar la posición del sensor:', err);
+            return reject(`Error al guardar la posición del sensor: ${err.message}`);
+          }
+          resolve();
+        });
       });
     });
-  });
 
-  try {
-    await Promise.all(promises);
+    await Promise.all(sensorPromises);
+
     res.json(response);
   } catch (error) {
     res.status(500).json({ message: error });
   }
 });
+
+
+
+
+
+
+// app.get('/api/getMapa', async (req, res) => {
+//   // Obtener los parámetros de la URL (query string)
+//   const { aules, tipus, data } = req.query;
+
+//   if (!aules || !tipus || !data) {
+//     return res.status(400).json({ message: 'aules, tipus i data són necessaris' });
+//   }
+
+//   // Si 'aules' es una cadena, convertirla a un array
+//   const aulesArray = Array.isArray(aules) ? aules : [aules];
+
+//   // Formatear la fecha para la consulta
+//   const formattedDate = `${data}%`;
+//   const response = [];
+
+//   // Crear las promesas para cada aula
+//   const promises = aulesArray.map(aula => {
+//     return new Promise((resolve, reject) => {
+//       const query = `
+//         SELECT idAula, average 
+//         FROM dia 
+//         WHERE idAula = ? AND tipus = ? AND dataIni LIKE ?
+//       `;
+
+//       connexioBD.execute(query, [aula, tipus, formattedDate], (err, results) => {
+//         if (err) {
+//           console.error('Error en la consulta a la base de dades:', err);
+//           return reject('Error en la consulta a la base de dades');
+//         }
+//         console.log('Dades rebudes de la base de dades: ', results);
+//         if (results.length > 0) {
+//           response.push(results[0]);
+//         }
+//         resolve();
+//       });
+//     });
+//   });
+
+//   try {
+//     await Promise.all(promises);
+//     res.json(response);
+//   } catch (error) {
+//     res.status(500).json({ message: error });
+//   }
+// });
 
 
 

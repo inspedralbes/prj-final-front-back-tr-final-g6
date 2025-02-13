@@ -62,11 +62,11 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '~/stores/userStore';
 
-import Mapaplanta1 from '~/components/plantes/MapaPlanta-1.vue';
-import Mapaplanta2 from '~/components/plantes/MapaPlanta-2.vue';
-import Mapaplanta3 from '~/components/plantes/MapaPlanta-3.vue';
-import MapaPlantaBaixa from '~/components/plantes/MapaPlantaBaixa.vue';
-import MapaPlantaSubterranea from '~/components/plantes/MapaPlantaSubterranea.vue';
+import Mapaplanta1 from '~/components/Plantes/MapaPlanta-1.vue';
+import Mapaplanta2 from '~/components/Plantes/MapaPlanta-2.vue';
+import Mapaplanta3 from '~/components/Plantes/MapaPlanta-3.vue';
+import MapaPlantaBaixa from '~/components/Plantes/MapaPlantaBaixa.vue';
+import MapaPlantaSubterranea from '~/components/Plantes/MapaPlantaSubterranea.vue';
 
 const plantas = ['PLANTA BAJA', 'PLANTA 1', 'PLANTA 2', 'PLANTA 3', 'PLANTA SUBTERRANEA'];
 const plantaSeleccionada = ref('PLANTA 1');

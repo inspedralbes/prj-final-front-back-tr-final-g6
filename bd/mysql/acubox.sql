@@ -178,7 +178,11 @@ CREATE TABLE `usuari` (
 CREATE TABLE `sensor` (
   `idSensor` INT(10) AUTO_INCREMENT PRIMARY KEY,
   `nombre` VARCHAR(100) NOT NULL,  -- Ejemplo de columna adicional
-  `ubicacion` VARCHAR(100) NOT NULL  -- Ejemplo de columna adicional
+  `ubicacion` VARCHAR(100) NOT NULL,  -- Ejemplo de columna adicional
+  `x` INT NOT NULL,  -- Coordenada x del sensor
+  `y` INT NOT NULL,  -- Coordenada y del sensor
+  `idAula` INT NOT NULL,
+  FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Crear tabla `minuto`

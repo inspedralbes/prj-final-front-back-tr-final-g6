@@ -239,31 +239,31 @@ export async function habilitarAula(aula) {
 
 export async function getMapa(bodyRequest) {
     try {
-        console.log("Enviando solicitud con bodyRequest:", bodyRequest);
-
-        const baseUrl = getBaseUrl();  // Verifica la URL base
-        console.log("Base URL:", baseUrl);  // Agregado para verificar la URL
-        const response = await fetch(`${baseUrl}/api/getMapa`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(bodyRequest)
-        });
-
-        if (!response.ok) {
-            console.error("Error al obtener la respuesta:", response.statusText);
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al obtener las aulas');
-        } else {
-            const textResponse = await response.text();
-            console.log("Respuesta como texto:", textResponse);  // Ver la respuesta como texto antes de convertirla a JSON
-            const data = JSON.parse(textResponse);  // Parseamos manualmente si es necesario
-            console.log("Respuesta del backend:", data);
-            return data;
-        }
+      console.log("Enviando solicitud con bodyRequest:", bodyRequest);
+  
+      const baseUrl = getBaseUrl();  // Verifica la URL base
+      console.log("Base URL:", baseUrl);  // Agregado para verificar la URL
+      const response = await fetch(`${baseUrl}/api/getMapa`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(bodyRequest)
+      });
+  
+      if (!response.ok) {
+        console.error("Error al obtener la respuesta:", response.statusText);
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al obtener las aulas');
+      } else {
+        const textResponse = await response.text();
+        console.log("Respuesta como texto:", textResponse);  // Ver la respuesta como texto antes de convertirla a JSON
+        const data = JSON.parse(textResponse);  // Parseamos manualmente si es necesario
+        console.log("Respuesta del backend:", data);
+        return data;
+      }
     } catch (error) {
-        console.error("Error en la solicitud:", error);
-        throw new Error(error.message || 'Hubo un error en la solicitud');
+      console.error("Error en la solicitud:", error);
+      throw new Error(error.message || 'Hubo un error en la solicitud');
     }
-}
+  }

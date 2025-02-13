@@ -1,8 +1,7 @@
 <script setup>
 import { onMounted, ref, defineProps } from "vue";
 import Konva from "konva";
-import { getMapa } from "@/utils/CommunicationManager";
-
+import { getMapa } from "@/utils/communicationManager";
 
 // Recibe la URL de la imagen como prop
 const props = defineProps({
@@ -120,11 +119,13 @@ const image = './PLANTA 3.png';
 </script>
 
 <template>
-  <div ref="stageRef" class="canvas-container"></div>
+  <div>
+    <div ref="stageRef" class="canvas-container"></div>
 
-  <div v-if="showPopup" class="popup" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
-    <p>{{ popupInfo }}</p>
-    <button @click="closePopup" class="close-btn">X</button>
+    <div v-if="showPopup" class="popup" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
+      <p>{{ popupInfo }}</p>
+      <button @click="closePopup" class="close-btn">X</button>
+    </div>
   </div>
 </template>
 

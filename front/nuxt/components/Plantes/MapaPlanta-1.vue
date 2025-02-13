@@ -1,8 +1,7 @@
 <script setup>
 import { onMounted, ref, defineProps } from "vue";
 import Konva from "konva";
-import { getMapa } from "@/utils/CommunicationManager";
-
+import { getMapa } from "@/utils/communicationManager";
 
 const props = defineProps({
   imageUrl: {
@@ -18,18 +17,32 @@ const popupPosition = ref({ x: 0, y: 0 });
 
 const aulaData = ref([]);
 
-
 const fetchData = async () => {
   try {
     const bodyRequest = {
-      aules: [
-        "2N ESO A", "2N ESO C", "2N ESO E", "2N ESO B", "2N ESO D", "2N ESO F", 
-        "1R SMIX B1", "PFI 2", "1R SMIX A1", "1R DAM", "1R SMIX A2", "1 SMIX", 
+      "aules": [
+        "2N ESO A", "2N ESO C", "2N ESO E", "2N ESO B", "2N ESO D", "2N ESO F",
+        "1R SMIX B1", "PFI 2", "1R SMIX A1", "1R DAM", "1R SMIX A2", "1 SMIX",
         "1SMX A3"
       ],
-      tipus: "sonido", 
-      data: "2025-02-12" 
-    };
+      "data": "2025-02-12",
+      "sensorPosition": [
+        { "idAula": "2N ESO A", "x": 179, "y": 164 },
+        { "idAula": "2N ESO C", "x": 268, "y": 156 },
+        { "idAula": "2N ESO E", "x": 494, "y": 135 },
+        { "idAula": "2N ESO B", "x": 189, "y": 288 },
+        { "idAula": "2N ESO D", "x": 279, "y": 280 },
+        { "idAula": "2N ESO F", "x": 458, "y": 265 },
+        { "idAula": "1R SMIX B1", "x": 735, "y": 260 },
+        { "idAula": "PFI 2", "x": 824, "y": 268 },
+        { "idAula": "1R SMIX A1", "x": 915, "y": 274 },
+        { "idAula": "1R DAM", "x": 1003, "y": 283 },
+        { "idAula": "1R SMIX A2", "x": 1016, "y": 160 },
+        { "idAula": "1R SMIX", "x": 1103, "y": 168 },
+        { "idAula": "1SMX A3", "x": 1095, "y": 294 }
+      ],
+      "tipus": "volum"
+    }
 
     // Obtener datos desde el backend
     const response = await getMapa(bodyRequest);
@@ -57,7 +70,7 @@ onMounted(async () => {
   const image = './PLANTA 1.png';
   const imageObj = new Image();
 
-  imageObj.onload = function() {
+  imageObj.onload = function () {
     const imgWidth = imageObj.width;
     const imgHeight = imageObj.height;
 
@@ -88,7 +101,6 @@ onMounted(async () => {
 
     layer.add(konvaImage);
 
-
     const points = [
       { x: 179, y: 164, idAula: "2N ESO A", popupX: 175, popupY: 350 },
       { x: 268, y: 156, idAula: "2N ESO C", popupX: 320, popupY: 350 },
@@ -108,7 +120,6 @@ onMounted(async () => {
       const enabled = aula !== undefined;
       const volumen = aula ? aula.average : 0;
 
-
       console.log(`Aula: ${point.idAula}, Habilitado: ${enabled}, Volumen: ${volumen}`);
 
       return {
@@ -118,14 +129,12 @@ onMounted(async () => {
       };
     });
 
-
     console.log("Puntos procesados:", points);
 
     const minVolumen = Math.min(...points.map(p => p.volumen));
     const maxVolumen = Math.max(...points.map(p => p.volumen));
 
     points.forEach(point => {
-
       const color = point.enabled
         ? getInterpolatedColor(point.volumen, minVolumen, maxVolumen)
         : "gray";
@@ -139,7 +148,6 @@ onMounted(async () => {
         strokeWidth: 2,
         draggable: false,
       });
-
 
       circle.on('click', () => {
         if (!point.enabled) return;
@@ -159,11 +167,13 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div ref="stageRef" class="canvas-container"></div>
+  <div>
+    <div ref="stageRef" class="canvas-container"></div>
 
-  <div v-if="showPopup" class="popup" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
-    <p>{{ popupInfo }}</p>
-    <button @click="closePopup" class="close-btn">X</button>
+    <div v-if="showPopup" class="popup" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
+      <p>{{ popupInfo }}</p>
+      <button @click="closePopup" class="close-btn">X</button>
+    </div>
   </div>
 </template>
 
