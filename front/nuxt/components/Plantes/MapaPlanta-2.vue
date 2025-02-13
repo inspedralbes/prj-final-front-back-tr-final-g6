@@ -117,13 +117,11 @@ const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight) *
 </script>
 
 <template>
-  <div>
-    <div ref="stageRef" class="canvas-container"></div>
+  <div ref="stageRef" class="canvas-container"></div>
 
-    <div v-if="showPopup" class="popup" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
-      <p>{{ popupInfo }}</p>
-      <button @click="closePopup" class="close-btn">X</button>
-    </div>
+  <div v-if="showPopup" class="popup" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
+    <p>{{ popupInfo }}</p>
+    <button @click="closePopup" class="close-btn">X</button>
   </div>
 </template>
 

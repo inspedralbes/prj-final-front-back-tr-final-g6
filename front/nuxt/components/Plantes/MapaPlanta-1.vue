@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref, defineProps } from "vue";
 import Konva from "konva";
-import { getMapa } from "@/utils/communicationManager";
+import { getMapa } from "@/utils/CommunicationManager";
 
 const props = defineProps({
   imageUrl: {
@@ -167,13 +167,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
-    <div ref="stageRef" class="canvas-container"></div>
+  <div ref="stageRef" class="canvas-container"></div>
 
-    <div v-if="showPopup" class="popup" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
-      <p>{{ popupInfo }}</p>
-      <button @click="closePopup" class="close-btn">X</button>
-    </div>
+  <div v-if="showPopup" class="popup" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
+    <p>{{ popupInfo }}</p>
+    <button @click="closePopup" class="close-btn">X</button>
   </div>
 </template>
 
