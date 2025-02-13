@@ -34,6 +34,10 @@ const connexioBD = mysql2.createConnection({
 
 function connectToDB() {
   connexioBD.connect(err => {
+    console.log(process.env.MYSQL_HOST);
+    console.log(process.env.MYSQL_USER);
+    console.log(process.env.MYSQL_PASSWORD);
+    console.log(process.env.MYSQL_DATABASE);
     if (err) {
       console.error('Error de connexió a la base de dades: ' + err.stack);
       return;

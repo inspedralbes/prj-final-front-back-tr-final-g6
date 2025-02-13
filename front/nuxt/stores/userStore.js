@@ -27,10 +27,14 @@ export const useUserStore = defineStore('user', () => {
     // Computado para obtener el id del usuario
     const userId = computed(() => user.value?.id);
 
+    // Computado para verificar si el usuario es administrador
+    const isAdmin = computed(() => user.value?.admin === 1);
+
     return {
         user,
         setUser,
         logout,
         userId,  // Exponemos el id del usuario
+        isAdmin, // Exponemos si el usuario es administrador
     };
 });

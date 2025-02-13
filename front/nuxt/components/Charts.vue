@@ -12,7 +12,6 @@
                 </div>
             </div>
 
-
             <div class="w-full mb-6 flex justify-center gap-4 items-center">
                 <div class="flex gap-4">
                     <Button v-for="item in items" :key="item.label" :label="item.label" :icon="item.icon"
@@ -22,12 +21,12 @@
 
                 <Dropdown v-model="selectedRange" :options="ranges" optionLabel="label" optionValue="value"
                     class="w-40 bg-white rounded-md shadow-md p-2" placeholder="Selecciona el Rango"
-                    style="background-color: #f0f4f8; border-radius: 8px; padding: 8px;" />
+                    style="background-color: #f0f4f8; border-radius: 8px; padding: 8px;" disabled />
             </div>
 
             <div class="w-full bg-white p-6 rounded-lg shadow-lg">
                 <div class="h-[400px]">
-                    <component :is="currentChart" />
+                    <component :is="currentChart" :data="chartData" />
                 </div>
             </div>
         </div>
@@ -43,11 +42,12 @@ import Dropdown from 'primevue/dropdown';
 import TemperatureChart from './charts/TemperatureChart.vue';
 import Co2Chart from './charts/Co2Chart.vue';
 import VolumeChart from './charts/VolumeChart.vue';
-import { getAulaById } from '~/utils/communicationManager';
+import { getAulaById, getDades } from '~/utils/communicationManager';
 
 const route = useRoute();
 const aulaId = route.params.id;
 const aula = ref(null);
+const chartData = ref([]);
 
 const items = [
     { label: 'Temperatura', icon: 'pi pi-home', component: TemperatureChart },
@@ -65,7 +65,7 @@ const ranges = [
 ];
 
 const selectedChart = ref('Temperatura');
-const selectedRange = ref('minuts');
+const selectedRange = ref('daily'); // Cambiado a "diario"
 
 const currentChart = computed(() => {
     const item = items.find((i) => i.label === selectedChart.value);
@@ -78,8 +78,12 @@ onMounted(async () => {
         if (!aula.value) {
             console.log('No se encontraron datos para el aula');
         }
+
+        const dades = await getDades('dia', 'volum', aulaId, '2025-02-10T00:00:00', '2025-02-15T00:00:00');
+        chartData.value = dades || [];
+
     } catch (error) {
-        console.error('Error al obtener el aula:', error);
+        console.error('Error al obtener el aula o los datos:', error);
     }
 });
 </script>
