@@ -21,7 +21,7 @@
 
                 <Dropdown v-model="selectedRange" :options="ranges" optionLabel="label" optionValue="value"
                     class="w-40 bg-white rounded-md shadow-md p-2" placeholder="Selecciona el Rango"
-                    style="background-color: #f0f4f8; border-radius: 8px; padding: 8px;" />
+                    style="background-color: #f0f4f8; border-radius: 8px; padding: 8px;" disabled />
             </div>
 
             <div class="w-full bg-white p-6 rounded-lg shadow-lg">
@@ -65,7 +65,7 @@ const ranges = [
 ];
 
 const selectedChart = ref('Temperatura');
-const selectedRange = ref('minuts');
+const selectedRange = ref('daily'); // Cambiado a "diario"
 
 const currentChart = computed(() => {
     const item = items.find((i) => i.label === selectedChart.value);
