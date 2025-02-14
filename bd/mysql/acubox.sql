@@ -283,6 +283,19 @@ INSERT INTO `usuari` (`id`, `nom`, `correu`, `contrasenya`, `admin`) VALUES
 (1, 'admin', 'admin@admin.com', 'admin', 1),
 (2, 'professor', 'prof@prof.com', 'prof', 0);
 
+INSERT INTO `dia` (`id`, `idAula`, `idSensor`, `tipus`, `max`, `min`, `average`, `dataIni`, `dataFi`) VALUES
+(1, 1, 1, 'volum', 30, 10, 20, '2025-02-10 00:00:00', '2025-02-11 00:00:00'),
+(2, 1, 1, 'volum', 100, 50, 75, '2025-02-11 00:00:00', '2025-02-12 00:00:00'),
+(3, 1, 1, 'volum', 50, 2, 34, '2025-02-12 00:00:00', '2025-02-13 00:00:00'),
+(4, 1, 1, 'volum', 38, 12, 20, '2025-02-13 00:00:00', '2025-02-14 00:00:00'),
+(5, 1, 1, 'volum', 100, 50, 75, '2025-02-14 00:00:00', '2025-02-15 00:00:00');
+
+INSERT INTO `sensor` (`idSensor`, `nombre`, `ubicacion`, `x`, `y`, `idAula`) VALUES
+(1, 'sensor1', 'aula1', 1, 1, 1),
+(2, 'sensor2', 'aula1', 2, 2, 1),
+(3, 'sensor3', 'aula1', 3, 3, 1),
+(4, 'sensor4', 'aula1', 4, 4, 1),
+(5, 'sensor5', 'aula1', 5, 5, 1);
 --
 -- Índexs per a les taules bolcades
 --
