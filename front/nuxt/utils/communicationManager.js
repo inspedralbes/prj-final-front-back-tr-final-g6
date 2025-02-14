@@ -256,10 +256,7 @@ export async function getMapa(bodyRequest) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Error al obtener las aulas');
       } else {
-        const textResponse = await response.text();
-        console.log("Respuesta como texto:", textResponse);  // Ver la respuesta como texto antes de convertirla a JSON
-        const data = JSON.parse(textResponse);  // Parseamos manualmente si es necesario
-        console.log("Respuesta del backend:", data);
+        const data = await response.json();
         return data;
       }
     } catch (error) {
