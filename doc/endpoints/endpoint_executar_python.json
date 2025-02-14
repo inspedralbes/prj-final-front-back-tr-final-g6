@@ -1,0 +1,26 @@
+{
+    "endpoint": "/api/execute",
+    "method": "POST",
+    "description": "Executa un script de Python enviat pel client",
+    "request": {
+        "contentType": "application/json",
+        "body": {
+            "script": "string"
+        }
+    },
+    "response": {
+        "200": {
+            "description": "Execució correcta",
+            "body": {
+                "message": "Script executat amb èxit",
+                "output": "string"
+            }
+        },
+        "400": {
+            "description": "Entrada invàlida"
+        },
+        "500": {
+            "description": "Error en l'execució de l'script"
+        }
+    }
+}

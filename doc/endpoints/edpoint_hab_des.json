@@ -1,0 +1,21 @@
+{
+    "endpoint": "/api/aules/{id}/habilitar",
+    "method": "GET",
+    "description": "Consulta si el aula está activa o desactivada sin modificarlo",
+    "request": {
+        "params": {
+            "id": "id de l'aula a consultar (integer)"
+        }
+    },
+    "response": {
+        "200": {
+            "description": "Estado del aula obtenido correctamente ✅",
+            "body": {
+                "estado": "activo o desactivado"
+            }
+        },
+        "404": {
+            "description": "Aula no encontrada ❌"
+        }
+    }
+}
