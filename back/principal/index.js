@@ -348,40 +348,40 @@ app.put('/api/aules/:id/activa', (req, res) => {
 
 // Endponit per Python
 
-const executePythonScript = (script, temps, interval) => {
-  return new Promise((resolve, reject) => {
-    const scriptPath = path.join(__dirname, 'scripts', script);
+// const executePythonScript = (script, temps, interval) => {
+//   return new Promise((resolve, reject) => {
+//     const scriptPath = path.join(__dirname, 'scripts', script);
 
-    if (!fs.existsSync(scriptPath)) {
-      return reject(`Script not found: ${script}`);
-    };
+//     if (!fs.existsSync(scriptPath)) {
+//       return reject(`Script not found: ${script}`);
+//     };
 
-    const process = spawn('./venv/bin/python3', [scriptPath, interval, temps]);
+//     const process = spawn('./venv/bin/python3', [scriptPath, interval, temps]);
 
-    let output = '';
-    let error = '';
+//     let output = '';
+//     let error = '';
 
-    process.stdout.on('data', (data) => {
-      output += data.toString();
-    });
+//     process.stdout.on('data', (data) => {
+//       output += data.toString();
+//     });
 
-    process.stderr.on('data', (data) => {
-      error += data.toString();
-    });
+//     process.stderr.on('data', (data) => {
+//       error += data.toString();
+//     });
 
-    process.on('close', (code) => {
-      if (code === 0) {
-        resolve(output);
-      } else {
-        reject(error);
-      }
-    });
+//     process.on('close', (code) => {
+//       if (code === 0) {
+//         resolve(output);
+//       } else {
+//         reject(error);
+//       }
+//     });
 
-    process.on('error', (err) => {
-      reject(`Failed to start process: ${err.message} ~ ${err.stack}`);
-    });
-  });
-};
+//     process.on('error', (err) => {
+//       reject(`Failed to start process: ${err.message} ~ ${err.stack}`);
+//     });
+//   });
+// };
 
 // Funció per obtenir el temps en el format desitjat
 const getPreviousTime = (unit) => {
