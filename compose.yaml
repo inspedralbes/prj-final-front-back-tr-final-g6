@@ -19,11 +19,11 @@ services:
   prfg6-back:
      container_name: back
      build: 
-       dockerfile: ./back/develop.Dockerfile
+       dockerfile: ./back/principal/develop.Dockerfile
        context: .
      command: sh -c "/usr/bin/python3 -m venv venv && ./venv/bin/pip install -r requirements.txt && cp .env.DEV .env && npm install --no-bin-links && nodemon -L index.js"
      volumes:
-       - ./back:/usr/src/app
+       - ./back/principal:/usr/src/app
      working_dir: /usr/src/app
      ports: 
        - 3020:3020
@@ -77,6 +77,16 @@ services:
       - prfg6-mysql
         # condition: service_healthy
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
 volumes:
   mysql-bd:
   mongo-bd:
+  rabbitmq_data:
