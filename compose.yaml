@@ -15,6 +15,8 @@ services:
       - CHOKIDAR_USEPOLLING=true
     links:
       - prfg6-back
+    networks:
+      - general
 
   prfg6-back:
      container_name: back
@@ -30,6 +32,36 @@ services:
      depends_on:
        - prfg6-mysql
        - prfg6-mongodb
+     networks:
+       - general
+    
+  prfg6-sensor:
+     container_name: sensor-back
+     build: 
+       dockerfile: ./back/services/develop.Dockerfile
+       context: .     
+     command: sh -c "cp .env.DEV .env && nodemon -L index.js"
+     volumes:
+       - ./back/services/sensor:/usr/src/app
+     working_dir: /usr/src/app
+     networks:
+       - general
+
+  prfg6-dbinsert:
+      container_name: dbinsert-back
+      build: 
+        dockerfile: ./back/services/develop.Dockerfile
+        context: .     
+      command: sh -c "cp .env.DEV .env && nodemon -L index.js"
+      volumes:
+        - ./back/services/dbinsert:/usr/src/app
+      working_dir: /usr/src/app
+      depends_on:
+        - prfg6-mongodb
+        - prfg6-sensor
+      networks:
+        - general
+          
 
   prfg6-mongodb:
     image: mongo
@@ -41,6 +73,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
       - mongo-bd:/data/db
+    networks:
+      - general
 
   mongo-express:
     image: mongo-express
@@ -54,6 +88,8 @@ services:
       ME_CONFIG_BASICAUTH: false
     depends_on:
       - prfg6-mongodb
+    networks:
+      - general
 
   prfg6-mysql:
     image: mysql
@@ -66,6 +102,8 @@ services:
       - ./bd/mysql/acubox.sql:/docker-entrypoint-initdb.d/acubox.sql
     ports:
       - 3306:3306
+    networks:
+      - general
   adminer:
     image: adminer
     restart: always
@@ -76,6 +114,8 @@ services:
     depends_on:
       - prfg6-mysql
         # condition: service_healthy
+    networks:
+      - general
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -85,8 +125,15 @@ services:
       - 15672:15672
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - general
 
 volumes:
   mysql-bd:
   mongo-bd:
   rabbitmq_data:
+
+networks:
+    general:
+      driver: bridge
+      name: general
