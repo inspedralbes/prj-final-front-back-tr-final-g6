@@ -5,9 +5,9 @@
 <script setup>
 import { ref, watch, defineProps } from 'vue';
 import { Bar } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, LineElement, CategoryScale, LinearScale, PointElement, LineController, BarController } from 'chart.js';
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, LineElement, CategoryScale, LinearScale, PointElement, LineController, BarController);
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
 const props = defineProps({
     data: {
@@ -24,36 +24,28 @@ const formattedData = ref({
 watch(props.data, (newData) => {
     if (newData && newData.length > 0) {
         formattedData.value = {
-            labels: newData.map(item => new Date(item.dataIni).toLocaleDateString()), // Ajusta esto según la estructura de tus datos
+            labels: newData.map(item => new Date(item.dataIni).toLocaleDateString()),
             datasets: [
                 {
-                    type: 'bar',
-                    label: "Mínimo de Decibels (dB)",
-                    data: newData.map(item => item.min), // Ajusta esto según la estructura de tus datos
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                    stack: 'combined',
-                    barThickness: 80
+                    label: "Mínim (dB)",
+                    data: newData.map(item => item.min),
+                    backgroundColor: 'rgba(16, 185, 129, 0.7)', // Teal
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 1
                 },
                 {
-                    type: 'bar',
-                    label: "Máximo de Decibels (dB)",
-                    data: newData.map(item => item.max - item.min), // Ajusta esto según la estructura de tus datos
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1,
-                    stack: 'combined',
-                    barThickness: 80
+                    label: "Màxim (dB)",
+                    data: newData.map(item => item.max),
+                    backgroundColor: 'rgba(239, 68, 68, 0.7)', // Red
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 1
                 },
                 {
-                    type: 'line',
-                    label: "Media de Decibels (dB)",
-                    data: newData.map(item => item.average), // Ajusta esto según la estructura de tus datos
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 2,
-                    fill: false
+                    label: "Mitjana (dB)",
+                    data: newData.map(item => item.average),
+                    backgroundColor: 'rgba(99, 102, 241, 0.7)', // Indigo
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    borderWidth: 1
                 }
             ]
         };
@@ -64,55 +56,58 @@ const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-        title: {
-            display: true,
-            text: "Máximo, Mínimo y Media de Decibels a l'Aula (dB)"
+        legend: {
+            labels: {
+                color: '#E5E7EB',
+                font: {
+                    size: 14
+                }
+            }
         },
         tooltip: {
+            backgroundColor: '#1F2937',
+            titleColor: '#E5E7EB',
+            bodyColor: '#E5E7EB',
+            borderColor: '#374151',
+            borderWidth: 1,
+            padding: 12,
             callbacks: {
-                label: function(tooltipItem) {
-                    const dataset = tooltipItem.dataset;
-                    const value = dataset.data[tooltipItem.dataIndex];
-                    if (dataset.label === "Media de Decibels (dB)") {
-                        return `Media: ${value} dB`;
-                    } else if (dataset.label === "Máximo de Decibels (dB)") {
-                        const min = tooltipItem.chart.data.datasets[0].data[tooltipItem.dataIndex];
-                        return `Máximo: ${value + min} dB`;
-                    } else {
-                        return `Mínimo: ${value} dB`;
-                    }
+                label: function (context) {
+                    return ` ${context.dataset.label}: ${context.raw} dB`;
                 }
             }
         }
     },
     scales: {
         x: {
-            stacked: true,
-            title: { 
-                display: true, 
-                text: 'Días',
-                font: {
-                    size: 14
-                }
+            grid: {
+                color: '#374151',
+                display: false
+            },
+            ticks: {
+                color: '#9CA3AF'
+            },
+            title: {
+                display: true,
+                text: 'Data',
+                color: '#9CA3AF'
             }
         },
         y: {
-            stacked: true,
-            title: { 
-                display: true, 
+            grid: {
+                color: '#374151'
+            },
+            ticks: {
+                color: '#9CA3AF',
+                stepSize: 10
+            },
+            title: {
+                display: true,
                 text: 'Decibels (dB)',
-                font: {
-                    size: 14
-                }
+                color: '#9CA3AF'
             },
             min: 0,
-            max: 100,
-            ticks: {
-                stepSize: 10,
-                font: {
-                    size: 12
-                }
-            }
+            max: 100
         }
     }
 };

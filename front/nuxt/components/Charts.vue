@@ -1,30 +1,60 @@
 <template>
-    <div
-        class="min-h-screen bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1] flex items-start justify-center mt-0 animated-bg">
-        <div class="p-6 w-full max-w-4xl flex flex-col items-center flex-grow">
+    <div class="min-h-screen bg-slate-900 flex flex-col">
+        <!-- Gradient Header Section -->
+        <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6">
+            <div class="max-w-7xl mx-auto flex flex-col items-center">
+                <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">
+                    Detalls de l'Aula
+                </h1>
+                <p class="text-teal-200 font-medium">
+                    Institut Pedralbes • Monitorització en temps real
+                </p>
+            </div>
+        </div>
 
-            <div v-if="aula" class="w-full p-6 mb-6">
-                <div class="flex items-center justify-center space-x-8 text-lg text-white">
-                    <p><strong>Clase:</strong> {{ aula.Classe || 'Sin clase' }}</p>
-                    <p><strong>Etapa:</strong> {{ aula.Etapa }}</p>
-                    <p><strong>Planta:</strong> {{ aula.Planta }}</p>
-                    <p><strong>Aula:</strong> {{ aula.Aula }}</p>
+        <!-- Aula Info Section -->
+        <div class="w-full max-w-7xl mx-auto px-4 py-6">
+            <div v-if="aula" class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="p-4 bg-slate-700/50 rounded-lg">
+                        <p class="text-sm text-teal-400 font-medium">Classe</p>
+                        <p class="text-lg font-semibold text-white">{{ aula.Classe || 'Sense classe' }}</p>
+                    </div>
+                    <div class="p-4 bg-slate-700/50 rounded-lg">
+                        <p class="text-sm text-teal-400 font-medium">Etapa</p>
+                        <p class="text-lg font-semibold text-white">{{ aula.Etapa }}</p>
+                    </div>
+                    <div class="p-4 bg-slate-700/50 rounded-lg">
+                        <p class="text-sm text-teal-400 font-medium">Planta</p>
+                        <p class="text-lg font-semibold text-white">{{ aula.Planta }}</p>
+                    </div>
+                    <div class="p-4 bg-slate-700/50 rounded-lg">
+                        <p class="text-sm text-teal-400 font-medium">Aula</p>
+                        <p class="text-lg font-semibold text-white">{{ aula.Aula }}</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="w-full mb-6 flex justify-center gap-4 items-center">
-                <div class="flex gap-4">
-                    <Button v-for="item in items" :key="item.label" :label="item.label" :icon="item.icon"
-                        @click="selectedChart = item.label"
-                        class="p-button p-button-rounded p-button-outlined bg-indigo-600 text-white font-bold uppercase py-3 px-6 focus:outline-none hover:scale-105 hover:shadow-lg transition-all duration-300" />
-                </div>
+            <!-- Chart Controls -->
+            <div class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div class="flex flex-wrap gap-2">
+                        <Button v-for="item in items" :key="item.label" :label="item.label" :icon="item.icon"
+                            @click="selectedChart = item.label" :class="{
+                                'bg-teal-600 border-teal-600': selectedChart === item.label,
+                                'bg-slate-700 border-slate-600': selectedChart !== item.label
+                            }" class="text-white font-medium py-2 px-4 rounded-lg border transition-all duration-300 hover:scale-[1.02]" />
+                    </div>
 
-                <Dropdown v-model="selectedRange" :options="ranges" optionLabel="label" optionValue="value"
-                    class="w-40 bg-white rounded-md shadow-md p-2" placeholder="Selecciona el Rango"
-                    style="background-color: #f0f4f8; border-radius: 8px; padding: 8px;" disabled />
+                    <Dropdown v-model="selectedRange" :options="ranges" optionLabel="label" optionValue="value"
+                        class="w-48 [&>div]:bg-slate-700 [&>div]:border-slate-600 [&>div]:text-white"
+                        panelClass="bg-slate-700 border border-slate-600 text-white"
+                        placeholder="Selecciona el Rango" />
+                </div>
             </div>
 
-            <div class="w-full bg-white p-6 rounded-lg shadow-lg">
+            <!-- Chart Container -->
+            <div class="bg-slate-800 rounded-lg p-6 shadow-lg">
                 <div class="h-[400px]">
                     <component :is="currentChart" :data="chartData" />
                 </div>
@@ -50,22 +80,22 @@ const aula = ref(null);
 const chartData = ref([]);
 
 const items = [
-    { label: 'Temperatura', icon: 'pi pi-home', component: TemperatureChart },
-    { label: 'Co2', icon: 'pi pi-chart-line', component: Co2Chart },
-    { label: 'Volum', icon: 'pi pi-list', component: VolumeChart },
+    { label: 'Temperatura', icon: 'pi pi-thermometer', component: TemperatureChart },
+    { label: 'CO₂', icon: 'pi pi-chart-line', component: Co2Chart },
+    { label: 'Volum', icon: 'pi pi-volume-up', component: VolumeChart },
 ];
 
 const ranges = [
     { label: 'Minuts', value: 'minuts' },
-    { label: 'Horas', value: 'hours' },
-    { label: 'Diario', value: 'daily' },
-    { label: 'Semanal', value: 'weekly' },
+    { label: 'Hores', value: 'hours' },
+    { label: 'Diari', value: 'daily' },
+    { label: 'Setmanal', value: 'weekly' },
     { label: 'Mensual', value: 'monthly' },
-    { label: 'Curso', value: 'course' },
+    { label: 'Curs', value: 'course' },
 ];
 
 const selectedChart = ref('Temperatura');
-const selectedRange = ref('daily'); // Cambiado a "diario"
+const selectedRange = ref('daily');
 
 const currentChart = computed(() => {
     const item = items.find((i) => i.label === selectedChart.value);
@@ -76,44 +106,58 @@ onMounted(async () => {
     try {
         aula.value = await getAulaById(aulaId);
         if (!aula.value) {
-            console.log('No se encontraron datos para el aula');
+            console.log('No es van trobar dades per a aquesta aula');
         }
 
         const dades = await getDades('dia', 'volum', aulaId, '2025-02-10T00:00:00', '2025-02-15T00:00:00');
         chartData.value = dades || [];
 
     } catch (error) {
-        console.error('Error al obtener el aula o los datos:', error);
+        console.error('Error en obtenir les dades:', error);
     }
 });
 </script>
 
 <style scoped>
+/* Smooth transitions for interactive elements */
 button {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
 }
 
-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+/* Dropdown styling */
+:deep(.p-dropdown) {
+    background: rgb(51, 65, 85);
+    border: 1px solid rgb(71, 85, 105);
+    transition: all 0.3s ease;
 }
 
-.animated-bg {
-    background-size: 200% 200%;
-    animation: move-bg 6s ease infinite;
+:deep(.p-dropdown:not(.p-disabled).p-focus) {
+    box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2);
+    border-color: rgb(45, 212, 191);
 }
 
-@keyframes move-bg {
-    0% {
-        background-position: 0% 50%;
-    }
+:deep(.p-dropdown .p-dropdown-label) {
+    color: white;
+    padding: 0.5rem;
+}
 
-    50% {
-        background-position: 100% 50%;
-    }
+:deep(.p-dropdown .p-dropdown-trigger) {
+    color: rgb(148, 163, 184);
+    width: 2.5rem;
+}
 
-    100% {
-        background-position: 0% 50%;
-    }
+:deep(.p-dropdown-panel .p-dropdown-items .p-dropdown-item) {
+    color: white;
+    padding: 0.75rem 1rem;
+}
+
+:deep(.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight) {
+    background: rgba(45, 212, 191, 0.1);
+    color: rgb(45, 212, 191);
+}
+
+:deep(.p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover) {
+    background: rgb(51, 65, 85);
+    color: white;
 }
 </style>

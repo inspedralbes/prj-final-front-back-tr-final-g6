@@ -24,16 +24,18 @@ const formattedData = ref({
 watch(props.data, (newData) => {
     if (newData && newData.length > 0) {
         formattedData.value = {
-            labels: newData.map(item => new Date(item.dataIni).toLocaleDateString()), // Ajusta esto según la estructura de tus datos
+            labels: newData.map(item => new Date(item.dataIni).toLocaleDateString()),
             datasets: [
                 {
-                    label: "Temperatura Estimada a l'Aula (°C)",
-                    data: newData.map(item => item.average), // Ajusta esto según la estructura de tus datos
-                    borderColor: '#1E90FF',
-                    backgroundColor: 'rgba(30, 144, 255, 0.2)',
-                    pointBackgroundColor: '#1E90FF',
-                    pointBorderColor: '#fff',
-                    pointRadius: 5,
+                    label: "Temperatura (°C)",
+                    data: newData.map(item => item.average),
+                    borderColor: '#3B82F6', // Blue-500
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#3B82F6',
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     fill: true,
                     tension: 0.2
                 }
@@ -46,57 +48,57 @@ const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-        title: {
-            display: true,
-            text: "Temperatura Estimada a l'Aula (°C)",
-            font: {
-                size: 18
-            }
-        },
-        tooltip: {
-            callbacks: {
-                label: function(tooltipItem) {
-                    return `Día: ${tooltipItem.label}, Temperatura: ${tooltipItem.raw}°C`;
+        legend: {
+            labels: {
+                color: '#E5E7EB',
+                font: {
+                    size: 14
                 }
             }
         },
-        legend: {
-            labels: {
-                font: {
-                    size: 14
+        tooltip: {
+            backgroundColor: '#1F2937',
+            titleColor: '#E5E7EB',
+            bodyColor: '#E5E7EB',
+            borderColor: '#374151',
+            borderWidth: 1,
+            padding: 12,
+            callbacks: {
+                label: function (context) {
+                    return ` ${context.dataset.label}: ${context.raw}°C`;
                 }
             }
         }
     },
     scales: {
         x: {
+            grid: {
+                color: '#374151'
+            },
+            ticks: {
+                color: '#9CA3AF'
+            },
             title: {
                 display: true,
-                text: 'Días',
-                font: {
-                    size: 14
-                }
-            },
-            grid: {
-                display: false
+                text: 'Data',
+                color: '#9CA3AF'
             }
         },
         y: {
+            grid: {
+                color: '#374151'
+            },
+            ticks: {
+                color: '#9CA3AF',
+                stepSize: 5
+            },
             title: {
                 display: true,
                 text: 'Temperatura (°C)',
-                font: {
-                    size: 14
-                }
+                color: '#9CA3AF'
             },
             min: 10,
-            max: 35,
-            ticks: {
-                stepSize: 5,
-                font: {
-                    size: 12
-                }
-            },
+            max: 35
         }
     }
 };

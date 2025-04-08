@@ -1,132 +1,168 @@
 <template>
-    <div
-        class="min-h-screen bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1] flex flex-col items-center justify-start animated-bg">
-
-        <div class="mt-[42px] w-full sm:w-2/3 lg:w-1/2 mb-6 flex items-center justify-center space-x-4">
+    <div class="min-h-screen bg-slate-900 flex flex-col">
+      <!-- Gradient Header Section -->
+      <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6">
+        <div class="max-w-7xl mx-auto flex flex-col items-center">
+          <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">
+            Monitorització d'Aules
+          </h1>
+          <p class="text-teal-200 font-medium">
+            Institut Pedralbes • Visualització de totes les aules
+          </p>
+        </div>
+      </div>
+  
+      <!-- Search and Filter Controls -->
+      <div class="w-full max-w-7xl mx-auto px-4 py-6">
+        <div class="flex flex-col sm:flex-row items-center gap-4 w-full">
+          <div class="relative flex-grow">
             <input v-model="searchQuery" type="text" placeholder="Buscar Aula..."
-                class="w-full p-3 rounded-lg border border-gray-300" />
-
-            <Dropdown v-model="selectedEtapa" :options="etapas" option-label="label" option-value="value"
-                placeholder="Filtrar Etapa" class="w-full sm:w-48" />
-
-            <button v-if="searchQuery || selectedEtapa" @click="clearFilters"
-                class="ml-2 p-2 rounded-full bg-gray-300 hover:bg-gray-400 text-white">
-                <span class="text-lg">&times;</span>
-            </button>
+              class="w-full p-3 pl-10 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 absolute left-3 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+  
+          <div class="w-full sm:w-64">
+            <div class="relative">
+              <select 
+                v-model="selectedEtapa"
+                class="custom-select appearance-none w-full p-3 pr-10 rounded-lg bg-slate-800 border border-slate-700 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all"
+              >
+                <option :value="null">Totes les etapes</option>
+                <option v-for="etapa in etapas" :key="etapa.value" :value="etapa.value">
+                  {{ etapa.name }}
+                </option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
+  
+          <button v-if="searchQuery || selectedEtapa" @click="clearFilters"
+            class="whitespace-nowrap p-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-colors flex items-center justify-center border border-slate-700">
+            <span class="text-lg mr-1">&times;</span>
+            <span class="text-sm">Netejar</span>
+          </button>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-6">
-            <NuxtLink v-for="aula in filteredAulas" :key="aula.id" :to="`/aulas/${aula.id}`" class="card-container">
-                <Card class="custom-card">
-                    <template #header>
-                        <img alt="user header" src="https://primefaces.org/cdn/primevue/images/usercard.png"
-                            class="rounded-t-lg" />
-                    </template>
-                    <template #title>
-                        <div class="text-center text-xl font-semibold text-gray-900 dark:text-white">
-                            {{ aula.Curs || 'Sin clase' }}
-                        </div>
-                    </template>
-                    <template #subtitle>
-                        <div class="text-center text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Etapa: {{ aula.Etapa }}
-                        </div>
-                    </template>
-                    <template #content>
-                        <p class="text-gray-900 dark:text-white text-center mt-4">
-                            Pis {{ aula.Planta }} - Classe: {{ aula.Aula }}
-                        </p>
-                    </template>
-                </Card>
-            </NuxtLink>
+      </div>
+  
+      <!-- Aulas Grid -->
+      <div class="flex-grow w-full max-w-7xl mx-auto px-4 pb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <NuxtLink v-for="aula in filteredAulas" :key="aula.id" :to="`/aulas/${aula.id}`" class="card-link">
+            <div class="h-full bg-slate-800 rounded-xl shadow-lg hover:shadow-xl border border-slate-700 hover:border-teal-500 transition-all duration-300 flex flex-col">
+              <!-- Card Header -->
+              <div class="relative h-56 bg-gradient-to-br from-teal-700 to-blue-800 rounded-t-xl flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-28 w-28 text-white opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                </svg>
+                <span class="absolute bottom-4 right-4 bg-slate-900/90 text-white text-sm px-3 py-1 rounded-full font-medium">
+                  Pis {{ aula.Planta }}
+                </span>
+              </div>
+              
+              <!-- Card Content -->
+              <div class="flex-grow p-6 flex flex-col">
+                <div class="text-center text-2xl font-bold text-white mb-2">
+                  {{ aula.Curs || 'Sense classe' }}
+                </div>
+                <div class="text-center text-lg font-medium text-teal-400 mb-4">
+                  {{ aula.Etapa }}
+                </div>
+                <p class="text-slate-300 text-center text-xl font-medium mb-6">
+                  {{ aula.Aula }}
+                </p>
+                <div class="mt-auto flex justify-center">
+                  <span class="inline-flex items-center px-5 py-2.5 bg-slate-700/80 hover:bg-slate-700 text-teal-400 text-base font-medium rounded-full transition-colors">
+                    Veure detalls
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </NuxtLink>
         </div>
+      </div>
     </div>
-</template>
-
-<script setup>
-import { ref, onMounted, computed } from 'vue';
-import Card from 'primevue/card';
-import Dropdown from 'primevue/dropdown';
-import { getAulas } from '~/utils/communicationManager';
-
-const aulas = ref([]);
-const searchQuery = ref('');
-const selectedEtapa = ref(null);
-
-const etapas = [
-    { label: 'ESO', value: 'ESO' },
-    { label: 'BATX', value: 'BATX' },
-    { label: 'PFI', value: 'PFI' },
-    { label: 'CFGM', value: 'CFGM' },
-    { label: 'CFGS', value: 'CFGS' },
-    { label: 'ALTRES', value: 'ALTRES' }
-];
-
-onMounted(async () => {
+  </template>
+  
+  <script setup>
+  import { ref, onMounted, computed } from 'vue';
+  import { getAulas } from '~/utils/communicationManager';
+  
+  const aulas = ref([]);
+  const searchQuery = ref('');
+  const selectedEtapa = ref(null);
+  
+  const etapas = [
+    { name: 'ESO', value: 'ESO' },
+    { name: 'BATX', value: 'BATX' },
+    { name: 'PFI', value: 'PFI' },
+    { name: 'CFGM', value: 'CFGM' },
+    { name: 'CFGS', value: 'CFGS' },
+    { name: 'ALTRES', value: 'ALTRES' }
+  ];
+  
+  onMounted(async () => {
     try {
-        aulas.value = await getAulas();
+      aulas.value = await getAulas();
     } catch (error) {
-        console.error('Error al cargar las aulas:', error.message);
+      console.error('Error al cargar las aulas:', error.message);
     }
-});
-
-const filteredAulas = computed(() => {
+  });
+  
+  const filteredAulas = computed(() => {
     let filtered = aulas.value.filter(aula => {
-        const matchesSearch = aula.Curs.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            aula.Classe.toLowerCase().includes(searchQuery.value.toLowerCase());
-        return matchesSearch;
+      const matchesSearch = aula.Curs?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        aula.Aula?.toLowerCase().includes(searchQuery.value.toLowerCase());
+      return matchesSearch;
     });
-
+  
     if (selectedEtapa.value) {
-        filtered = filtered.filter(aula => aula.Etapa === selectedEtapa.value);
+      filtered = filtered.filter(aula => aula.Etapa === selectedEtapa.value);
     }
-
+  
     return filtered;
-});
-
-const clearFilters = () => {
+  });
+  
+  const clearFilters = () => {
     searchQuery.value = '';
     selectedEtapa.value = null;
-};
-</script>
-
-<style scoped>
-.animated-bg {
-    background-size: 200% 200%;
-    animation: move-bg 6s ease infinite;
-}
-
-@keyframes move-bg {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-.card-container {
-    border: 1px solid black;
-    border-radius: 10px;
-    background: white;
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease-in-out;
-    overflow: hidden;
-}
-
-.card-container:hover {
-    transform: scale(1.03);
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
-}
-
-.custom-card {
-    display: flex;
-    flex-direction: column;
+  };
+  </script>
+  
+  <style scoped>
+  .card-link {
+    border-radius: 0.75rem;
+    transition: transform 0.3s ease;
+    display: block;
     height: 100%;
-}
-</style>
+  }
+  
+  .card-link:hover {
+    transform: translateY(-5px);
+  }
+  
+  .custom-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none;
+  }
+  
+  .custom-select option {
+    background-color: rgb(30, 41, 59);
+    color: white;
+    padding: 0.5rem;
+  }
+  
+  .custom-select:focus {
+    box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2);
+  }
+  </style>
