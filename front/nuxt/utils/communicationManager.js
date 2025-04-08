@@ -1,6 +1,6 @@
 export function getBaseUrl() {
     const config = useRuntimeConfig();
-    return config.public.URL_PROD;
+    return config.public.URL;
 }
 
 // Nueva función para probar la conexión con la API
