@@ -16,7 +16,9 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libgif-dev \
     librsvg2-dev \
-    libpangocairo-1.0-0
+    libpangocairo-1.0-0 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Build
 FROM base as build
@@ -26,5 +28,11 @@ RUN npm install
 RUN npm install @rollup/rollup-linux-x64-gnu
 COPY --link . .
 
-# Command to run the applicationd
+# Ensure postinstall script runs
+RUN npm run postinstall
+
+# Expose the application port
+EXPOSE ${PORT}
+
+# Command to run the application
 CMD ["npm", "run", "dev"]
