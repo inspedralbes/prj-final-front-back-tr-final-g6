@@ -49,6 +49,7 @@ function connectToDB() {
 
 connectToDB();
 
+/*
 const __dirname = dirname(fileURLToPath(import.meta.url));
 fs.readdirSync(path.join(__dirname, 'services')).forEach(file => {
   services.push({ id: uuidv4(), name: file, state: 'tancat', logs: [], errorLogs: [], process: null });
@@ -84,7 +85,7 @@ fs.readdirSync(path.join(__dirname, 'services')).forEach(file => {
     console.log(`File not found: ${error}`);
   }
 });
-
+*/
 app.get('/services', (req, res) => {
   res.send(services);
 });
