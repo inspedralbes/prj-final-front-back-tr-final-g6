@@ -44,6 +44,8 @@ services:
      volumes:
        - ./back/services/sensor:/usr/src/app
      working_dir: /usr/src/app
+     depends_on:
+       - rabbitmq
      networks:
        - general
 
