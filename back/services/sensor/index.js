@@ -23,7 +23,7 @@ async function sendMessage(volume, temperature, id_aula, date) {
     const msg = { volume, temperature, id_aula, date};
   
     try {
-      const connection = await amqp.connect('amqp://localhost');
+      const connection = await amqp.connect(process.env.RABBITMQ_URL);
       const channel = await connection.createChannel();
   
       await channel.assertQueue(queue, { durable: false });
