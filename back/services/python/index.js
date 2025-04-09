@@ -2,10 +2,12 @@ import express from 'express';
 import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { __dirname } from '../../principal';
 
 const app = express();
-const port = 3000;
+const port = 3022;
+
+// Use the current working directory as the base path in the Docker container
+const __dirname = path.resolve('/usr/src/app');
 
 app.use(express.json());
 

@@ -18,11 +18,11 @@ services:
       - prfg6-back
 
   prfg6-back:
-     container_name: back
+     container_name: back-principal
      build: 
        dockerfile: ./back/principal/develop.Dockerfile
        context: .
-     command: sh -c "/usr/bin/python3 -m venv venv && ./venv/bin/pip install -r requirements.txt && cp .env.DEV .env && npm install --no-bin-links && nodemon -L index.js"
+     command: sh -c "cp .env.DEV .env && npm install --no-bin-links && nodemon -L index.js"
      volumes:
        - ./back/principal:/usr/src/app
      working_dir: /usr/src/app
@@ -31,6 +31,22 @@ services:
      depends_on:
        - prfg6-mysql
        - prfg6-mongodb
+       - prfg6-python
+  
+  prfg6-python:
+    container_name: python-server
+    build:
+      context: ./back/services/python
+      dockerfile: develop.Dockerfile
+    volumes:
+      - ./back/services/python:/usr/src/app
+    working_dir: /usr/src/app
+    ports:
+      - 3022:3022
+    depends_on:
+      - prfg6-mysql
+    # networks:
+    #   - general
 
   prfg6-mongodb:
     image: mongo

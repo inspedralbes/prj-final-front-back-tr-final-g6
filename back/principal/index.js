@@ -49,41 +49,41 @@ function connectToDB() {
 
 connectToDB();
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-fs.readdirSync(path.join(__dirname, 'services')).forEach(file => {
-  services.push({ id: uuidv4(), name: file, state: 'tancat', logs: [], errorLogs: [], process: null });
+// const __dirname = dirname(fileURLToPath(import.meta.url));
+// fs.readdirSync(path.join(__dirname, 'services')).forEach(file => {
+//   services.push({ id: uuidv4(), name: file, state: 'tancat', logs: [], errorLogs: [], process: null });
 
-  try {
-    let data = fs.readFileSync(path.join(__dirname, 'logs') + `/${file}.log`, 'utf8');
+//   try {
+//     let data = fs.readFileSync(path.join(__dirname, 'logs') + `/${file}.log`, 'utf8');
 
-    let splitData = data.toString().split('||\n');
+//     let splitData = data.toString().split('||\n');
 
-    splitData.forEach(element => {
-      if (element.length === 0) return;
-      const parsedElement = JSON.parse(element);
+//     splitData.forEach(element => {
+//       if (element.length === 0) return;
+//       const parsedElement = JSON.parse(element);
 
-      services.find(service => service.name === file).logs.push(parsedElement);
-    });
-  } catch (error) {
-    console.log(`File not found: ${error}`);
-  }
+//       services.find(service => service.name === file).logs.push(parsedElement);
+//     });
+//   } catch (error) {
+//     console.log(`File not found: ${error}`);
+//   }
 
 
-  try {
-    let data = fs.readFileSync(path.join(__dirname, 'logs') + `/${file}.error.log`, 'utf8');
+//   try {
+//     let data = fs.readFileSync(path.join(__dirname, 'logs') + `/${file}.error.log`, 'utf8');
 
-    let splitData = data.toString().split('||\n');
+//     let splitData = data.toString().split('||\n');
 
-    splitData.forEach(element => {
-      if (element.length === 0) return;
-      const parsedElement = JSON.parse(element);
+//     splitData.forEach(element => {
+//       if (element.length === 0) return;
+//       const parsedElement = JSON.parse(element);
 
-      services.find(service => service.name === file).errorLogs.push(parsedElement);
-    });
-  } catch (error) {
-    console.log(`File not found: ${error}`);
-  }
-});
+//       services.find(service => service.name === file).errorLogs.push(parsedElement);
+//     });
+//   } catch (error) {
+//     console.log(`File not found: ${error}`);
+//   }
+// });
 
 app.get('/services', (req, res) => {
   res.send(services);
@@ -346,46 +346,20 @@ app.put('/api/aules/:id/activa', (req, res) => {
   });
 });
 
-// Endponit per Python
-
-// const executePythonScript = (script, temps, interval) => {
-//   return new Promise((resolve, reject) => {
-//     const scriptPath = path.join(__dirname, 'scripts', script);
-
-//     if (!fs.existsSync(scriptPath)) {
-//       return reject(`Script not found: ${script}`);
-//     };
-
-//     const process = spawn('./venv/bin/python3', [scriptPath, interval, temps]);
-
-//     let output = '';
-//     let error = '';
-
-//     process.stdout.on('data', (data) => {
-//       output += data.toString();
-//     });
-
-//     process.stderr.on('data', (data) => {
-//       error += data.toString();
-//     });
-
-//     process.on('close', (code) => {
-//       if (code === 0) {
-//         resolve(output);
-//       } else {
-//         reject(error);
-//       }
-//     });
-
-//     process.on('error', (err) => {
-//       reject(`Failed to start process: ${err.message} ~ ${err.stack}`);
-//     });
-//   });
-// };
+function executePythonAgregationScript(temps, interval) {
+  return axios.post('http://python-server:3022/executeAgregation', {
+    temps,
+    interval
+  })
+    .then(response => response.data.output) // Extract the output from the response
+    .catch(error => {
+      throw new Error(`Failed to call Python server: ${error.response?.data?.error || error.message}`);
+    });
+}
 
 // Funció per obtenir el temps en el format desitjat
 const getPreviousTime = (unit) => {
-  const now = new Date();
+  const now = new Date(); 
   let previousTime;
 
   switch (unit) {
@@ -410,7 +384,7 @@ const getPreviousTime = (unit) => {
 //Programar l'execució cada minut
 schedule.scheduleJob('* * * * *', () => {
   const temps = getPreviousTime('minute');
-  executePythonScript('agregacio.py', temps, 'minut')
+  executePythonAgregationScript(temps, 'minut')
     .then(output => {
       const data = JSON.parse(output);
 
@@ -447,7 +421,7 @@ schedule.scheduleJob('* * * * *', () => {
 // Programar l'execució cada hora
 schedule.scheduleJob('0 * * * *', () => {
   const temps = getPreviousTime('hour');
-  executePythonScript('agregacio.py', temps, 'hora')
+  executePythonAgregationScript(temps, 'hora')
     .then(output => {
       const data = JSON.parse(output);
 
@@ -484,7 +458,7 @@ schedule.scheduleJob('0 * * * *', () => {
 // Programar l'execució cada dia
 schedule.scheduleJob('0 0 * * *', () => {
   const temps = getPreviousTime('day');
-  executePythonScript('agregacio.py', temps, 'dia')
+  executePythonAgregationScript(temps, 'dia')
     .then(output => {
       const data = JSON.parse(output);
 
