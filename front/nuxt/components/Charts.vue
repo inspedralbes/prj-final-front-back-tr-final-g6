@@ -69,9 +69,27 @@ import { useRoute } from 'vue-router';
 import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
 
-import TemperatureChart from './charts/TemperatureChart.vue';
-import Co2Chart from './charts/Co2Chart.vue';
-import VolumeChart from './charts/VolumeChart.vue';
+import TemperatureMinuteChart from './charts/temperatura/TemperatureMinuteChart.vue';
+import TemperatureHourChart from './charts/temperatura/TemperatureHourChart.vue';
+import TemperatureDayChart from './charts/temperatura/TemperatureDayChart.vue';
+import TemperatureWeekChart from './charts/temperatura/TemperatureWeekChart.vue';
+import TemperatureMonthChart from './charts/temperatura/TemperatureMonthChart.vue';
+import TemperatureCourseChart from './charts/temperatura/TemperatureCourseChart.vue';
+
+import Co2MinuteChart from './charts/co2/Co2MinuteChart.vue';
+import Co2HourChart from './charts/co2/Co2HourChart.vue';
+import Co2DayChart from './charts/co2/Co2DayChart.vue';
+import Co2WeekChart from './charts/co2/Co2WeekChart.vue';
+import Co2MonthChart from './charts/co2/Co2MonthChart.vue';
+import Co2CourseChart from './charts/co2/Co2CourseChart.vue';
+
+import VolumeMinuteChart from './charts/volume/VolumeMinuteChart.vue';
+import VolumeHourChart from './charts/volume/VolumeHourChart.vue';
+import VolumeDayChart from './charts/volume/VolumeDayChart.vue';
+import VolumeWeekChart from './charts/volume/VolumeWeekChart.vue';
+import VolumeMonthChart from './charts/volume/VolumeMonthChart.vue';
+import VolumeCourseChart from './charts/volume/VolumeCourseChart.vue';
+
 import { getAulaById, getDades } from '~/utils/communicationManager';
 
 const route = useRoute();
@@ -80,9 +98,9 @@ const aula = ref(null);
 const chartData = ref([]);
 
 const items = [
-    { label: 'Temperatura', icon: 'pi pi-thermometer', component: TemperatureChart },
-    { label: 'CO₂', icon: 'pi pi-chart-line', component: Co2Chart },
-    { label: 'Volum', icon: 'pi pi-volume-up', component: VolumeChart },
+    { label: 'Temperatura', icon: 'pi pi-thermometer', component: TemperatureMinuteChart },
+    { label: 'CO₂', icon: 'pi pi-chart-line', component: Co2MinuteChart },
+    { label: 'Volum', icon: 'pi pi-volume-up', component: VolumeMinuteChart },
 ];
 
 const ranges = [
@@ -109,7 +127,7 @@ onMounted(async () => {
             console.log('No es van trobar dades per a aquesta aula');
         }
 
-        const dades = await getDades('dia', 'volum', aulaId, '2025-02-10T00:00:00', '2025-02-15T00:00:00');
+        const dades = await getDades(selectedRange.value, selectedChart.toLowerCase(), aulaId, '2025-02-10T00:00:00', '2025-02-15T00:00:00');
         chartData.value = dades || [];
 
     } catch (error) {

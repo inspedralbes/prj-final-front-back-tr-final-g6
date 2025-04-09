@@ -9,6 +9,7 @@ import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, Li
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
+// Props to receive the data
 const props = defineProps({
     data: {
         type: Array,
@@ -16,11 +17,13 @@ const props = defineProps({
     }
 });
 
+// Reactive variable for formatted data
 const formattedData = ref({
     labels: [],
     datasets: []
 });
 
+// Watch for changes in the input data and format it
 watch(props.data, (newData) => {
     if (newData && newData.length > 0) {
         formattedData.value = {
@@ -52,6 +55,7 @@ watch(props.data, (newData) => {
     }
 }, { immediate: true });
 
+// Chart configuration
 const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
