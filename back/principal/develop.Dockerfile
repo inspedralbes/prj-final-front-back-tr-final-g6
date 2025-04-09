@@ -12,7 +12,7 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copia el fitxer requirements.txt dins del contenidor
-COPY back/requirements.txt ./
+#COPY requirements.txt ./
 
 # Crea un entorn virtual i instal·la les dependències de Python
 #RUN /usr/bin/python3 -m venv venv

@@ -24,7 +24,7 @@ services:
   prfg6-back:
     build:
       context: .
-      dockerfile: ./back/prod.Dockerfile
+      dockerfile: ./back/principal/prod.Dockerfile
     container_name: back
     working_dir: /usr/src/app
     ports:

@@ -1,5 +1,5 @@
-import { MongoClient } from 'mongodb';
-import dotenv from 'dotenv';
+const amqp = require('amqplib');
+const dotenv = require('dotenv');
 
 dotenv.config();
 
@@ -18,12 +18,27 @@ function getRandomAulaId() {
     return Math.floor(Math.random() * 3) + 1; // Genera un id entre 1 i 3
 }
 
-// Connexió a MongoDB
-const url = process.env.MONGO_URI;
-const dbName = process.env.MONGO_DB;
-const client = new MongoClient(url);
+async function sendMessage(volume, temperature, id_aula, date) {
+    const queue = 'SensorData';
+    const msg = { volume, temperature, id_aula, date};
+  
+    try {
+      const connection = await amqp.connect(process.env.RABBITMQ_URL);
+      const channel = await connection.createChannel();
+  
+      await channel.assertQueue(queue, { durable: false });
+      channel.sendToQueue(queue, Buffer.from(JSON.stringify(msg)));
+      console.log(`🟢 Mensaje enviado: ${msg}`);
+  
+      setTimeout(() => {
+        connection.close();
+      }, 500);
+    } catch (error) {
+      console.error('❌ Error al enviar mensaje', error);
+    }
+  }
 
-async function logData() {
+  async function logData() {
     const volume = getVolumeInDecibels();
     const temperature = getTemperatureInCelsius();
     const id_aula = getRandomAulaId();
@@ -31,18 +46,7 @@ async function logData() {
 
     console.log(`Volum: ${volume} dB, Temperatura: ${temperature}°C, Aula: ${id_aula}`);
 
-    try {
-        await client.connect();
-        const db = client.db(dbName);
-        const collection = db.collection('dades');
-
-        const result = await collection.insertOne({ volume, temperature, id_aula, date });
-        console.log(`Dades inserides amb l'ID: ${result.insertedId}`);
-    } catch (error) {
-        console.error('Error inserint les dades a MongoDB:', error);
-    } finally {
-        await client.close();
-    }
+    sendMessage(volume, temperature, id_aula, date)
 }
 
 // Configurar l'interval per executar la funció cada 10 segons
