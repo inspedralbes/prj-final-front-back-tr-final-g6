@@ -1,23 +1,7 @@
 <template>
-    <div class="min-h-screen bg-slate-900 flex flex-col">
-        <!-- Header Section -->
-        <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-8 shadow-lg">
-            <div class="max-w-7xl mx-auto flex flex-col items-center">
-                <div class="w-20 h-20 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight mb-2">
-                    Panell d'Administració
-                </h1>
-                <p class="text-teal-200 font-medium text-lg">
-                    Institut Pedralbes • Gestió d'Aules
-                </p>
-            </div>
-        </div>
+    <div class="min-h-screen bg-slate-800 flex flex-col">
+        <!-- Custom Header Component -->
+        <Header />
 
         <!-- Main Content -->
         <div class="flex-grow w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
@@ -385,26 +369,6 @@ const handleCreateAula = async () => {
 
 .custom-select:focus {
     box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2);
-}
-
-/* Gradient animation for the header */
-.bg-gradient-to-r {
-    background-size: 200% 200%;
-    animation: gradient-shift 10s ease infinite;
-}
-
-@keyframes gradient-shift {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
 }
 
 /* Toggle switch styling */

@@ -1,41 +1,63 @@
 <template>
-    <header class="bg-gray-900 p-4 shadow-lg text-white">
-        <div class="max-w-10xl flex items-center justify-between">
-            <router-link to="/aulas" class="flex items-center hover:opacity-80 transition-opacity">
-                <img src="../public/logo.jpg" alt="Logo" class="w-14 h-14 rounded-full mr-3" />
+    <header class="bg-slate-900 border-b border-slate-700 p-4 shadow-md">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Logo/Link Section -->
+            <router-link to="/aulas" class="flex items-center group transition-opacity hover:opacity-90">
+                <div
+                    class="w-12 h-12 rounded-full bg-gradient-to-r from-teal-600 to-blue-800 flex items-center justify-center mr-3 overflow-hidden">
+                    <img src="../public/logo.jpg" alt="Logo Institut Pedralbes" class="w-full h-full object-cover" />
+                </div>
+                <span class="text-xl font-semibold text-white hidden md:inline">ACOUBOX</span>
             </router-link>
 
+            <!-- Menu Dropdown -->
             <div class="relative">
                 <button @click="toggleMenu"
-                    class="flex items-center text-white px-4 py-2 rounded-md shadow-md transition-colors">
-                    <i class="pi pi-bars mr-2 text-xl"></i> Menú
+                    class="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition-all duration-200 border border-slate-600 shadow-sm">
+                    <i class="pi pi-user text-lg"></i>
+                    <span class="hidden sm:inline">Menú</span>
+                    <i class="pi pi-chevron-down text-xs transition-transform duration-200"
+                        :class="{ 'rotate-180': isMenuVisible }"></i>
                 </button>
 
-                <div v-if="isMenuVisible"
-                    class="absolute right-0 mt-2 bg-white text-black shadow-lg rounded-md w-48 z-50 overflow-hidden border border-blue-500">
-                    <ul>
-                        <li class="px-4 py-3 hover:bg-gray-100 transition-colors">
-                            <router-link to="/aulas" class="block text-sm font-medium text-gray-700">
-                                Ir a Aulas
+                <!-- Dropdown Menu -->
+                <transition enter-active-class="transition ease-out duration-100"
+                    enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
+                    leave-active-class="transition ease-in duration-75"
+                    leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
+                    <div v-if="isMenuVisible"
+                        class="absolute right-0 mt-2 w-56 origin-top-right bg-slate-800 rounded-lg shadow-lg ring-1 ring-slate-700 focus:outline-none z-50"
+                        @click.stop>
+                        <div class="py-1">
+                            <router-link to="/aulas"
+                                class="flex items-center px-4 py-3 text-slate-200 hover:bg-slate-700 transition-colors"
+                                @click="isMenuVisible = false">
+                                <i class="pi pi-home mr-3"></i>
+                                <span>Aules</span>
                             </router-link>
-                        </li>
-                        <li class="px-4 py-3 hover:bg-gray-100 transition-colors">
-                            <router-link to="/mapas" class="block text-sm font-medium text-gray-700">
-                                Mapas
+
+                            <router-link to="/mapas"
+                                class="flex items-center px-4 py-3 text-slate-200 hover:bg-slate-700 transition-colors"
+                                @click="isMenuVisible = false">
+                                <i class="pi pi-map mr-3"></i>
+                                <span>Mapes</span>
                             </router-link>
-                        </li>
-                        <li v-if="isAdmin" class="px-4 py-3 hover:bg-gray-100 transition-colors">
-                            <router-link to="/admin" class="block text-sm font-medium text-gray-700">
-                                Admin
+
+                            <router-link v-if="isAdmin" to="/admin"
+                                class="flex items-center px-4 py-3 text-slate-200 hover:bg-slate-700 transition-colors"
+                                @click="isMenuVisible = false">
+                                <i class="pi pi-cog mr-3"></i>
+                                <span>Administració</span>
                             </router-link>
-                        </li>
-                        <li class="px-4 py-3 hover:bg-gray-100 transition-colors">
-                            <button @click="logout" class="block text-sm font-medium text-gray-700">
-                                Cerrar Sesión
+
+                            <button @click="logout"
+                                class="w-full flex items-center px-4 py-3 text-slate-200 hover:bg-slate-700 transition-colors text-left">
+                                <i class="pi pi-sign-out mr-3"></i>
+                                <span>Tancar Sessió</span>
                             </button>
-                        </li>
-                    </ul>
-                </div>
+                        </div>
+                    </div>
+                </transition>
             </div>
         </div>
     </header>
@@ -57,10 +79,12 @@ const toggleMenu = () => {
 const logout = () => {
     userStore.logout();
     router.push('/login');
+    isMenuVisible.value = false;
 };
 
 const isAdmin = computed(() => userStore.user?.admin === 1);
 </script>
 
 <style scoped>
+
 </style>
