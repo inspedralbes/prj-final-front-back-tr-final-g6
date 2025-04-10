@@ -1,6 +1,5 @@
-import amqp from 'amqplib';
-import dotenv from 'dotenv';
-
+const dotenv = require('dotenv');
+const amqp = require('amqplib');
 dotenv.config();
 
 // Funció per simular la lectura del volum en decibels en una aula de secundària

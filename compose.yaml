@@ -41,7 +41,7 @@ services:
      build: 
        dockerfile: ./back/services/develop.Dockerfile
        context: .     
-     command: sh -c "cp .env.DEV .env && nodemon -L index.js"
+     command: sh -c "cp .env.DEV .env && npm install && nodemon -L index.js"
      volumes:
        - ./back/services/sensor:/usr/src/app
      working_dir: /usr/src/app
@@ -55,7 +55,7 @@ services:
       build: 
         dockerfile: ./back/services/develop.Dockerfile
         context: .     
-      command: sh -c "cp .env.DEV .env && nodemon -L index.js"
+      command: sh -c "cp .env.DEV .env && npm install && nodemon -L index.js"
       volumes:
         - ./back/services/dbinsert:/usr/src/app
       working_dir: /usr/src/app
