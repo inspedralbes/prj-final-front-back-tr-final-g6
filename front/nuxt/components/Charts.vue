@@ -55,7 +55,7 @@
 
             <!-- Chart Container -->
             <div class="bg-slate-800 rounded-lg p-6 shadow-lg">
-                <div class="h-[400px]">
+                <div class="relative h-[400px]"> <!-- Usando clases de Tailwind -->
                     <component :is="currentChart" :data="chartData" />
                 </div>
             </div>
@@ -113,7 +113,7 @@ const ranges = [
 ];
 
 const selectedChart = ref('Temperatura');
-const selectedRange = ref('daily');
+const selectedRange = ref('minuts');
 
 const currentChart = computed(() => {
     const item = items.find((i) => i.label === selectedChart.value);
@@ -132,6 +132,15 @@ onMounted(async () => {
 
     } catch (error) {
         console.error('Error en obtenir les dades:', error);
+    }
+});
+
+watch(selectedRange, async (newRange) => {
+    try {
+        const dades = await getDades(newRange, selectedChart.toLowerCase(), aulaId, '2025-02-10T00:00:00', '2025-02-15T00:00:00');
+        chartData.value = dades || [];
+    } catch (error) {
+        console.error('Error al obtener datos al cambiar el rango:', error);
     }
 });
 </script>
