@@ -1,0 +1,250 @@
+[
+    {
+        "endpoint": "/api/login",
+        "method": "POST",
+        "description": "Authenticate a user",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "correu": "string",
+                "contrasenya": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Login successful",
+                "body": {
+                    "message": "Login successful",
+                    "user": "object"
+                }
+            },
+            "400": {
+                "description": "Missing required fields"
+            },
+            "401": {
+                "description": "Invalid credentials"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules",
+        "method": "GET",
+        "description": "Get all classrooms",
+        "response": {
+            "200": {
+                "description": "List of all classrooms",
+                "body": "array"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules/actives",
+        "method": "GET",
+        "description": "Get all active classrooms",
+        "response": {
+            "200": {
+                "description": "List of active classrooms",
+                "body": "array"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules/:id",
+        "method": "GET",
+        "description": "Get a specific classroom by ID",
+        "request": {
+            "params": {
+                "id": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Classroom details",
+                "body": "object"
+            },
+            "404": {
+                "description": "Classroom not found"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules",
+        "method": "POST",
+        "description": "Create a new classroom",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "curs": "string",
+                "classe": "string",
+                "etapa": "string"
+            }
+        },
+        "response": {
+            "201": {
+                "description": "Classroom created successfully",
+                "body": {
+                    "message": "Aula creada correctament",
+                    "id": "number"
+                }
+            },
+            "400": {
+                "description": "Missing required fields"
+            },
+            "500": {
+                "description": "Database insertion error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules/:id",
+        "method": "PUT",
+        "description": "Update a classroom",
+        "request": {
+            "params": {
+                "id": "number"
+            },
+            "contentType": "application/json",
+            "body": {
+                "Curs": "string",
+                "Classe": "string",
+                "Etapa": "string",
+                "Planta": "string",
+                "Aula": "string",
+                "activa": "boolean",
+                "turn": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Classroom updated successfully",
+                "body": {
+                    "message": "Aula actualizada con éxito"
+                }
+            },
+            "500": {
+                "description": "Database update error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules/:id",
+        "method": "DELETE",
+        "description": "Delete a classroom",
+        "request": {
+            "params": {
+                "id": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Classroom deleted successfully",
+                "body": {
+                    "message": "aula esborrada correctament"
+                }
+            },
+            "404": {
+                "description": "Classroom not found"
+            },
+            "500": {
+                "description": "Database deletion error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules/:id/activa",
+        "method": "PUT",
+        "description": "Update classroom active status",
+        "request": {
+            "params": {
+                "id": "number"
+            },
+            "contentType": "application/json",
+            "body": {
+                "activa": "boolean"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Classroom status updated successfully",
+                "body": {
+                    "message": "string"
+                }
+            },
+            "400": {
+                "description": "Missing required fields"
+            },
+            "404": {
+                "description": "Classroom not found"
+            },
+            "500": {
+                "description": "Database update error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/mapa",
+        "method": "POST",
+        "description": "Get average data for multiple classrooms",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "aules": "array",
+                "tipus": "string",
+                "data": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "List of classroom averages",
+                "body": "array"
+            },
+            "400": {
+                "description": "Missing required fields"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules/:id/grafic",
+        "method": "POST",
+        "description": "Get data for charts",
+        "request": {
+            "params": {
+                "id": "number"
+            },
+            "contentType": "application/json",
+            "body": {
+                "taula": "string",
+                "tipus": "string",
+                "dataIni": "string",
+                "dataFi": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Chart data",
+                "body": "array"
+            },
+            "400": {
+                "description": "Missing required fields"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    }
+]

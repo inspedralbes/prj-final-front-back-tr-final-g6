@@ -27,7 +27,7 @@ export async function fetchTest() {
 
 export async function login(correu, contrasenya) {
     try {
-        const response = await fetch(`${getBaseUrl()}/login`, {
+        const response = await fetch(`${getBaseUrl()}/api/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ export async function login(correu, contrasenya) {
 
 export async function getTotesAulas() {
     try {
-        const response = await fetch(`${getBaseUrl()}/getAulas`);
+        const response = await fetch(`${getBaseUrl()}/api/aules`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -70,7 +70,7 @@ export async function getTotesAulas() {
 
 export async function getAulas() {
     try {
-        const response = await fetch(`${getBaseUrl()}/aulas`);
+        const response = await fetch(`${getBaseUrl()}/api/aules/actives`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -88,54 +88,11 @@ export async function getAulas() {
 
 export async function getAulaById(id) {
     try {
-        const response = await fetch(`${getBaseUrl()}/aula/${id}`);
+        const response = await fetch(`${getBaseUrl()}/api/aules/${id}`);
 
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Error al obtener el aula');
-        }
-
-        const data = await response.json();
-        return data;
-
-    } catch (error) {
-        console.error(error);
-        throw new Error(error.message || 'Hubo un error en la solicitud');
-    }
-}
-
-// Usuarios
-export async function getUsuaris() {
-    try {
-        const response = await fetch(`${getBaseUrl()}/usuaris`);
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al obtener los usuarios');
-        }
-
-        const data = await response.json();
-        return data;
-
-    } catch (error) {
-        console.error(error);
-        throw new Error(error.message || 'Hubo un error en la solicitud');
-    }
-}
-
-export async function getUsuariById() {
-    const userId = localStorage.getItem('userId');
-
-    if (!userId) {
-        throw new Error('No se encontró el ID del usuario en el almacenamiento local');
-    }
-
-    try {
-        const response = await fetch(`${getBaseUrl()}/usuari/${userId}`);
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al obtener el usuario');
         }
 
         const data = await response.json();
@@ -152,7 +109,7 @@ export async function createAula(curs, classe, etapa) {
         throw new Error("curs, classe i etapa són necessaris");
     }
 
-    const response = await fetch(`${getBaseUrl()}/createAula`, {
+    const response = await fetch(`${getBaseUrl()}/api/aules`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ curs, classe, etapa })
@@ -168,7 +125,7 @@ export async function createAula(curs, classe, etapa) {
 
 export async function updateAula(id, aula) {
     try {
-        const response = await fetch(`${getBaseUrl()}/updateAula/${id}`, {
+        const response = await fetch(`${getBaseUrl()}/api/aules/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -191,7 +148,7 @@ export async function updateAula(id, aula) {
 
 export async function deleteAula(id) {
     try {
-        const response = await fetch(`${getBaseUrl()}/deleteAula/${id}`, {
+        const response = await fetch(`${getBaseUrl()}/api/aules/${id}`, {
             method: 'DELETE',
         });
 
@@ -243,7 +200,7 @@ export async function getMapa(bodyRequest) {
   
       const baseUrl = getBaseUrl();  // Verifica la URL base
       console.log("Base URL:", baseUrl);  // Agregado para verificar la URL
-      const response = await fetch(`${baseUrl}/api/getMapa`, {
+      const response = await fetch(`${baseUrl}/api/mapa`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -265,19 +222,23 @@ export async function getMapa(bodyRequest) {
     }
 }
 
-export async function getDades(taula, tipus, idAula, dataIni, dataFi) {
+export async function getDadesGrafic(taula, tipus, idAula, dataIni, dataFi) {
+    if (!taula || !tipus || !idAula || !dataIni || !dataFi) {
+        throw new Error("taula, tipus, idAula, dataIni i dataFi són necessaris");
+    }
+
     try {
-        const response = await fetch(`${getBaseUrl()}/api/getDades`, {
+        const response = await fetch(`${getBaseUrl()}/api/aules/${idAula}/grafic`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ taula, tipus, idAula, dataIni, dataFi }),
+            body: JSON.stringify({ taula, tipus, dataIni, dataFi }),
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al obtener los datos');
+            throw new Error(errorData.message || 'Error al obtenir les dades per al gràfic');
         }
 
         const data = await response.json();
@@ -288,4 +249,3 @@ export async function getDades(taula, tipus, idAula, dataIni, dataFi) {
         throw new Error(error.message || 'Hubo un error en la solicitud');
     }
 }
-
