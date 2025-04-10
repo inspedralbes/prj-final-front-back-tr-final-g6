@@ -1,6 +1,5 @@
-const amqp = require('amqplib');
-const dotenv = require('dotenv');
-const MongoClient = require('mongodb').MongoClient;
+import amqp from 'amqplib';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -16,9 +15,9 @@ async function receiveMessage() {
   
       channel.consume(queue, (msg) => {
         const data = JSON.parse(msg.content.toString());
-        const { volume, temperature, id_aula, date } = data;
-        console.log(`🔵 Mensaje recibido - Volum: ${volume} dB, Temperatura: ${temperature}°C, Aula: ${id_aula}, Data: ${date}`);
-        insertDataToMongoDB(volume, temperature, id_aula, date);
+        const { apt_key, volume, temperature, id_sensor, date } = data;
+        console.log(`🔵 Mensaje recibido - APIKEY:${apt_key} Volum: ${volume} dB, Temperatura: ${temperature}°C, Aula: ${id_sensor}, Data: ${date}`);
+        insertDataToMongoDB(apt_key, volume, temperature, id_sensor, date);
       }, {
         noAck: true
       });
@@ -28,24 +27,21 @@ async function receiveMessage() {
   }
 
 
-async function insertDataToMongoDB(volume, temperature, id_aula, date) {
-    const url = process.env.MONGO_URI;
-    const dbName = process.env.MONGO_DB;
+async function insertDataToMongoDB(apt_key, volume, temperature, id_sensor, date) {
 
-    const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
-
-    try {
-        await client.connect();
-        const db = client.db(dbName);
-        const collection = db.collection('dades');
-
-        const result = await collection.insertOne({ volume, temperature, id_aula, date });
-        console.log(`Dades inserides amb l'ID: ${result.insertedId}`);
-    } catch (error) {
-        console.error('Error inserint les dades a MongoDB:', error);
-    } finally {
-        await client.close();
-    }
+    fetch(process.env.MONGO_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apt_key
+        },
+        body: JSON.stringify({
+            volume,
+            temperature,
+            id_sensor,
+            date
+        })
+    })
 }
 
 receiveMessage();

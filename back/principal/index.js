@@ -7,6 +7,7 @@ import { createServer } from 'http';
 import mysql2 from 'mysql2';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import MongoClient from 'mongodb';
 
 app.use(cors());
 app.use(express.json());
@@ -35,6 +36,26 @@ function connectToDB() {
     console.log('Connexió a la base de dades correcta');
   });
 }
+
+async function connectionMongo() {
+  const url = process.env.MONGO_URI;
+  const dbName = process.env.MONGO_DB;
+
+  const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
+
+  try {
+      await client.connect();
+      const db = client.db(dbName);
+      const collection = db.collection('dades');
+      return collection;
+  } catch (error) {
+      console.error('Error inserint les dades a MongoDB:', error);
+  } finally {
+      await client.close();
+  }
+}
+
+mongodb = connectToDB();
 
 connectToDB();
 
@@ -250,6 +271,75 @@ app.post('/api/aules/:id/grafic', (req, res) => {
     res.json(results);
   });
 });
+
+app.get('/api/sensors', (req, res) => {
+  const query = 'SELECT * FROM sensor';
+  connexioBD.execute(query, (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+    res.status(200).send(results);
+  });
+});
+  
+app.get('/api/data/mongodb', async (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate) {
+    return res.status(400).json({ message: 'startDate i endDate són necessaris' });
+  }
+  try {
+    const results = await mongodb.find({
+      date: {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      }
+    }).toArray();
+
+    res.status(200).json(results);
+  } catch (error) {
+    console.error('Error obtenint les dades de MongoDB:', error);
+    res.status(500).json({ message: 'Error obtenint les dades de MongoDB' });
+  }
+});
+
+app.post('/api/data/mongodb', verifyAPI, async (req, res) => {
+  const { volume, temperature, id_sensor, date } = req.body;
+  try {
+      const result = await collection.insertOne({ volume, temperature, id_sensor, date });
+        console.log(`Dades inserides amb l'ID: ${result.insertedId}`);
+  }
+  catch (error) {
+      console.error('Error inserint les dades a MongoDB:', error);
+  }
+    res.status(201).send({ message: 'Sensor creat correctament', id: results.insertId });
+});
+
+
+
+async function verifyAPI(req, res, next) {
+  const apiKey = req.headers['x-api-key'];
+
+  if (!apiKey) {
+    return res.status(401).json({ message: 'API key es requerida' });
+  }
+
+  const query = 'SELECT * FROM sensor WHERE api_key = ?';
+  connexioBD.execute(query, [apiKey], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de datos:', err);
+      return res.status(500).json({ message: 'Error en la consulta a la base de datos' });
+    }
+
+    if (results.length === 0) {
+      return res.status(403).json({ message: 'API key no válida' });
+    }
+    
+    next();
+  });
+}
 
 server.listen(PORT, () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
