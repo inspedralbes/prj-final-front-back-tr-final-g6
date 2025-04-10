@@ -55,8 +55,8 @@
 
             <!-- Chart Container -->
             <div class="bg-slate-800 rounded-lg p-6 shadow-lg">
-                <div class="relative h-[400px]"> <!-- Usando clases de Tailwind -->
-                    <component :is="currentChart" :data="chartData" />
+                <div class="h-[400px]">
+                    <component :is="currentChart" />
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
@@ -90,17 +90,46 @@ import VolumeWeekChart from './charts/volume/VolumeWeekChart.vue';
 import VolumeMonthChart from './charts/volume/VolumeMonthChart.vue';
 import VolumeCourseChart from './charts/volume/VolumeCourseChart.vue';
 
-import { getAulaById, getDades } from '~/utils/communicationManager';
-
 const route = useRoute();
 const aulaId = route.params.id;
-const aula = ref(null);
-const chartData = ref([]);
+const aula = ref({
+    Classe: 'A1',
+    Etapa: 'ESO',
+    Planta: 'Primera',
+    Aula: '1',
+});
+
+const chartComponents = {
+    Temperatura: {
+        minuts: TemperatureMinuteChart,
+        hours: TemperatureHourChart,
+        daily: TemperatureDayChart,
+        weekly: TemperatureWeekChart,
+        monthly: TemperatureMonthChart,
+        course: TemperatureCourseChart,
+    },
+    Co2: {
+        minuts: Co2MinuteChart,
+        hours: Co2HourChart,
+        daily: Co2DayChart,
+        weekly: Co2WeekChart,
+        monthly: Co2MonthChart,
+        course: Co2CourseChart,
+    },
+    Volum: {
+        minuts: VolumeMinuteChart,
+        hours: VolumeHourChart,
+        daily: VolumeDayChart,
+        weekly: VolumeWeekChart,
+        monthly: VolumeMonthChart,
+        course: VolumeCourseChart,
+    },
+};
 
 const items = [
-    { label: 'Temperatura', icon: 'pi pi-thermometer', component: TemperatureMinuteChart },
-    { label: 'CO₂', icon: 'pi pi-chart-line', component: Co2MinuteChart },
-    { label: 'Volum', icon: 'pi pi-volume-up', component: VolumeMinuteChart },
+    { label: 'Temperatura', icon: 'pi pi-thermometer' },
+    { label: 'Co2', icon: 'pi pi-chart-line' },
+    { label: 'Volum', icon: 'pi pi-volume-up' },
 ];
 
 const ranges = [
@@ -115,33 +144,10 @@ const ranges = [
 const selectedChart = ref('Temperatura');
 const selectedRange = ref('minuts');
 
+// Computed para determinar el componente actual basado en el tipo de gráfico y el rango
 const currentChart = computed(() => {
-    const item = items.find((i) => i.label === selectedChart.value);
-    return item ? item.component : null;
-});
-
-onMounted(async () => {
-    try {
-        aula.value = await getAulaById(aulaId);
-        if (!aula.value) {
-            console.log('No es van trobar dades per a aquesta aula');
-        }
-
-        const dades = await getDades(selectedRange.value, selectedChart.toLowerCase(), aulaId, '2025-02-10T00:00:00', '2025-02-15T00:00:00');
-        chartData.value = dades || [];
-
-    } catch (error) {
-        console.error('Error en obtenir les dades:', error);
-    }
-});
-
-watch(selectedRange, async (newRange) => {
-    try {
-        const dades = await getDades(newRange, selectedChart.toLowerCase(), aulaId, '2025-02-10T00:00:00', '2025-02-15T00:00:00');
-        chartData.value = dades || [];
-    } catch (error) {
-        console.error('Error al obtener datos al cambiar el rango:', error);
-    }
+    const chartType = chartComponents[selectedChart.value];
+    return chartType ? chartType[selectedRange.value] : null;
 });
 </script>
 

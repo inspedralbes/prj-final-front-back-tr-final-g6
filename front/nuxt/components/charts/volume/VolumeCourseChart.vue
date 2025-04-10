@@ -1,103 +1,94 @@
 <template>
-    <Line :options="chartOptions" :data="formattedData" />
+    <div class="w-full h-full flex justify-center items-center">
+        <div class="w-full h-full relative">
+            <Line :options="chartOptions" :data="formattedData" />
+        </div>
+    </div>
 </template>
 
 <script setup>
-import { ref, watch, defineProps } from 'vue';
+import { ref } from 'vue';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale } from 'chart.js';
 
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale);
 
-const props = defineProps({
-    data: {
-        type: Array,
-        default: () => []
-    }
-});
-
 const formattedData = ref({
-    labels: [],
-    datasets: []
+    labels: ['2021 - 2022', '2022 - 2023', '2023 - 2024', '2024 - 2025'],
+    datasets: [
+        {
+            label: 'Volumen (dB)',
+            data: [5, 45, 23, 55],
+            fill: false,
+            borderColor: '#4CAF50',
+            backgroundColor: 'rgba(76, 175, 80, 0.2)',
+            pointBackgroundColor: '#4CAF50',
+            pointBorderColor: '#4CAF50',
+            tension: 0.1,
+        },
+    ],
 });
 
-watch(props.data, (newData) => {
-    if (newData && newData.length > 0) {
-        formattedData.value = {
-            labels: newData.map(item => item.course), // Asumiendo que cada item tiene una propiedad 'course' para el nombre del curso
-            datasets: [
-                {
-                    label: "Volumen (m³)",
-                    data: newData.map(item => item.value), // Asumimos que 'value' es el volumen
-                    borderColor: '#FF6347', // Tomate rojo
-                    backgroundColor: 'rgba(255, 99, 71, 0.1)',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#FF6347',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    fill: true,
-                    tension: 0.3
-                }
-            ]
-        };
-    }
-}, { immediate: true });
-
-const chartOptions = {
+const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
         legend: {
             labels: {
-                color: '#E5E7EB',
                 font: {
-                    size: 14
-                }
-            }
+                    size: 14,
+                },
+                color: 'white',
+            },
         },
-        tooltip: {
-            backgroundColor: '#1F2937',
-            titleColor: '#E5E7EB',
-            bodyColor: '#E5E7EB',
-            borderColor: '#374151',
-            borderWidth: 1,
-            padding: 12,
-            callbacks: {
-                label: function (context) {
-                    return ` ${context.dataset.label}: ${context.raw} m³`;
-                }
-            }
-        }
     },
     scales: {
         x: {
-            grid: {
-                color: '#374151'
-            },
-            ticks: {
-                color: '#9CA3AF'
-            },
             title: {
                 display: true,
-                text: 'Curso',
-                color: '#9CA3AF'
-            }
+                text: 'Minut',
+                font: {
+                    size: 14,
+                },
+                color: 'gray',
+            },
+            ticks: {
+                autoSkip: false,
+                maxTicksLimit: 13,
+                autoSkip: 5,
+                font: {
+                    size: 12,
+                },
+                color: 'gray',
+            },
         },
         y: {
-            grid: {
-                color: '#374151'
-            },
-            ticks: {
-                color: '#9CA3AF',
-                stepSize: 10
-            },
             title: {
                 display: true,
-                text: 'Volumen (m³)',
-                color: '#9CA3AF'
-            }
-        }
-    }
-};
+                text: 'Volumen (dB)',
+                font: {
+                    size: 14,
+                },
+                color: 'gray',
+            },
+            ticks: {
+                font: {
+                    size: 12,
+                },
+                color: 'gray',
+                min: 0,  // Asegúrate de que el mínimo es 0
+                max: 60, // El máximo es 60
+                stepSize: 10, // El tamaño del paso es 10
+            },
+        },
+    },
+});
 </script>
+
+<style scoped>
+div.w-full.h-full {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+</style>

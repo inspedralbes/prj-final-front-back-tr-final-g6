@@ -1,103 +1,95 @@
 <template>
-    <Line :options="chartOptions" :data="formattedData" />
+    <div class="w-full h-full flex justify-center items-center">
+        <div class="w-full h-full relative">
+            <Line :data="chartData" :options="chartOptions" />
+        </div>
+    </div>
 </template>
 
 <script setup>
-import { ref, watch, defineProps } from 'vue';
+import { ref } from 'vue';
 import { Line } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale } from 'chart.js';
+import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale } from 'chart.js';
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale);
+ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale);
 
-const props = defineProps({
-    data: {
-        type: Array,
-        default: () => []
-    }
+const chartData = ref({
+    labels: [
+        '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+        '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00', '00:00'
+    ],
+    datasets: [
+        {
+            label: 'Volumen (dB)',
+            data: [10, 12, 15, 18, 57, 22, 25, 30, 35, 40, 38, 36, 34, 32, 30, 28, 26, 24, 22, 20, 18, 15, 12, 5, 8],
+            fill: false,
+            borderColor: '#4CAF50',
+            backgroundColor: 'rgba(76, 175, 80, 0.2)',
+            pointBackgroundColor: '#4CAF50',
+            pointBorderColor: '#4CAF50',
+            tension: 0.1,
+        },
+    ],
 });
 
-const formattedData = ref({
-    labels: [],
-    datasets: []
-});
-
-watch(props.data, (newData) => {
-    if (newData && newData.length > 0) {
-        formattedData.value = {
-            labels: newData.map(item => new Date(item.timestamp).toLocaleTimeString()), // Usamos 'timestamp' para la hora
-            datasets: [
-                {
-                    label: "Volumen (m³)",
-                    data: newData.map(item => item.value), // Asumimos que 'value' es el volumen
-                    borderColor: '#FF6347', // Tomate rojo
-                    backgroundColor: 'rgba(255, 99, 71, 0.1)',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#FF6347',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    fill: true,
-                    tension: 0.3
-                }
-            ]
-        };
-    }
-}, { immediate: true });
-
-const chartOptions = {
+const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
         legend: {
             labels: {
-                color: '#E5E7EB',
                 font: {
-                    size: 14
-                }
-            }
+                    size: 14,
+                },
+                color: 'white',
+            },
         },
-        tooltip: {
-            backgroundColor: '#1F2937',
-            titleColor: '#E5E7EB',
-            bodyColor: '#E5E7EB',
-            borderColor: '#374151',
-            borderWidth: 1,
-            padding: 12,
-            callbacks: {
-                label: function (context) {
-                    return ` ${context.dataset.label}: ${context.raw} m³`;
-                }
-            }
-        }
     },
     scales: {
         x: {
-            grid: {
-                color: '#374151'
-            },
-            ticks: {
-                color: '#9CA3AF'
-            },
             title: {
                 display: true,
-                text: 'Hora',
-                color: '#9CA3AF'
-            }
+                text: 'Minut',
+                font: {
+                    size: 14,
+                },
+                color: 'gray',
+            },
+            ticks: {
+                autoSkip: false,
+                maxTicksLimit: 13,
+                autoSkip: 5,
+                font: {
+                    size: 12,
+                },
+                color: 'gray',
+            },
         },
         y: {
-            grid: {
-                color: '#374151'
-            },
-            ticks: {
-                color: '#9CA3AF',
-                stepSize: 10
-            },
             title: {
                 display: true,
-                text: 'Volumen (m³)',
-                color: '#9CA3AF'
-            }
-        }
-    }
-};
+                text: 'Volumen (dB)',
+                font: {
+                    size: 14,
+                },
+                color: 'gray',
+            },
+            ticks: {
+                font: {
+                    size: 12,
+                },
+                color: 'gray',
+                min: 0,  // Asegúrate de que el mínimo es 0
+                max: 60, // El máximo es 60
+                stepSize: 10, // El tamaño del paso es 10
+            },
+        },
+    },
+});
 </script>
+
+<style scoped>
+div.w-full.h-full {
+    position: relative;
+}
+</style>
