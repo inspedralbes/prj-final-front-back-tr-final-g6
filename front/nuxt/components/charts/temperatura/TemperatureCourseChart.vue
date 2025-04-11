@@ -1,110 +1,97 @@
 <template>
-    <Line :options="chartOptions" :data="formattedData" />
+    <div class="w-full h-full flex justify-center items-center">
+        <div class="w-full h-full relative">
+            <Line :options="chartOptions" :data="formattedData" />
+        </div>
+    </div>
 </template>
 
 <script setup>
-import { ref, watch, defineProps } from 'vue';
+import { ref } from 'vue';
 import { Line } from 'vue-chartjs';
-import {
-    Chart as ChartJS,
-    Title,
-    Tooltip,
-    Legend,
-    LineElement,
-    CategoryScale,
-    LinearScale,
-    PointElement
-} from 'chart.js';
+import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, Filler } from 'chart.js';
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale);
-
-const props = defineProps({
-    data: {
-        type: Array,
-        default: () => []
-    },
-    valueKey: {
-        type: String,
-        default: 'temperature'
-    },
-    label: {
-        type: String,
-        default: 'Temperatura (°C)'
-    },
-    unit: {
-        type: String,
-        default: '°C'
-    },
-    color: {
-        type: String,
-        default: 'rgba(16, 185, 129, 1)' // verde esmeralda
-    },
-    bgColor: {
-        type: String,
-        default: 'rgba(16, 185, 129, 0.2)' // fondo verde suave
-    }
-});
+// Registrar los componentes necesarios, incluyendo Filler para el área
+ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, Filler);
 
 const formattedData = ref({
-    labels: [],
-    datasets: []
+    labels: ['2021 - 2022', '2022 - 2023', '2023 - 2024', '2024 - 2025'],
+    datasets: [
+        {
+            label: 'Temperatura (°C)',
+            data: [5, 25, 15, 35],
+            fill: true, // Habilitar el relleno para el gráfico de áreas
+            borderColor: '#2196F3',
+            backgroundColor: 'rgba(33, 150, 243, 0.2)', // Color del área
+            pointBackgroundColor: '#2196F3',
+            pointBorderColor: '#2196F3',
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            tension: 0.1, // Suavizar la línea
+        },
+    ],
 });
 
-watch(() => props.data, (newData) => {
-    if (newData && newData.length > 0) {
-        formattedData.value = {
-            labels: newData.map((item, index) => {
-                // Etiqueta por trimestre, usando el índice
-                return `Trimestre ${index + 1}`; // Primer trimestre, Segundo trimestre, etc.
-            }),
-            datasets: [
-                {
-                    label: props.label,
-                    data: newData.map(item => item[props.valueKey]),
-                    borderColor: props.color,
-                    backgroundColor: props.bgColor,
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 3,
-                    pointHoverRadius: 5
-                }
-            ]
-        };
-    }
-}, { immediate: true });
-
-const chartOptions = {
+const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
         legend: {
             labels: {
-                color: '#E5E7EB'
-            }
-        }
+                font: {
+                    size: 14,
+                },
+                color: 'white',
+            },
+        },
     },
     scales: {
         x: {
-            grid: { display: false },
-            ticks: { color: '#9CA3AF' },
-            title: { 
-                display: true, 
-                text: 'Periodo', 
-                color: '#9CA3AF' 
-            }
-        },
-        y: {
-            ticks: { color: '#9CA3AF' },
             title: {
                 display: true,
-                text: props.label,
-                color: '#9CA3AF'
-            }
-        }
-    }
-};
+                text: 'Minut',
+                font: {
+                    size: 14,
+                },
+                color: 'gray',
+            },
+            ticks: {
+                autoSkip: false,
+                maxTicksLimit: 13,
+                autoSkip: 5,
+                font: {
+                    size: 12,
+                },
+                color: 'gray',
+            },
+        },
+        y: {
+            title: {
+                display: true,
+                text: 'Temperatura (°C)',
+                font: {
+                    size: 14,
+                },
+                color: 'gray',
+            },
+            ticks: {
+                font: {
+                    size: 12,
+                },
+                color: 'gray',
+                min: 0,  // Asegúrate de que el mínimo es 0
+                max: 40, // El máximo es 40
+                stepSize: 10, // El tamaño del paso es 10
+            },
+        },
+    },
+});
 </script>
 
 <style scoped>
+div.w-full.h-full {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
 </style>

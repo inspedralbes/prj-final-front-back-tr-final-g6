@@ -1,111 +1,95 @@
 <template>
-    <Line :options="chartOptions" :data="formattedData" />
+    <div class="w-full h-full flex justify-center items-center">
+        <div class="w-full h-full relative">
+            <Line :data="chartData" :options="chartOptions" />
+        </div>
+    </div>
 </template>
 
 <script setup>
-import { ref, watch, defineProps } from 'vue';
+import { ref } from 'vue';
 import { Line } from 'vue-chartjs';
-import {
-    Chart as ChartJS,
-    Title,
-    Tooltip,
-    Legend,
-    LineElement,
-    CategoryScale,
-    LinearScale,
-    PointElement
-} from 'chart.js';
+import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale } from 'chart.js';
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale);
+ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale);
 
-const props = defineProps({
-    data: {
-        type: Array,
-        default: () => []
-    },
-    valueKey: {
-        type: String,
-        default: 'temperature'
-    },
-    label: {
-        type: String,
-        default: 'Temperatura (°C)'
-    },
-    unit: {
-        type: String,
-        default: '°C'
-    },
-    color: {
-        type: String,
-        default: 'rgba(16, 185, 129, 1)' // verde esmeralda
-    },
-    bgColor: {
-        type: String,
-        default: 'rgba(16, 185, 129, 0.2)' // fondo verde suave
-    }
+const chartData = ref({
+    labels: [
+        '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+        '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
+    ],
+    datasets: [
+        {
+            label: 'Temperatura (°C)',
+            data: [2, 22, 23, 22.5, 23.2, 24, 24.5, 25, 26, 26.5, 27, 27.3, 27.5, 28, 28.3, 28.7, 29, 29.5, 30, 30.5, 30.8, 31, 31.3, 37.5], // Temperaturas para cada hora
+            fill: false,
+            borderColor: '#2196F3',
+            backgroundColor: 'rgba(33, 150, 243, 0.2)',
+            pointBackgroundColor: '#2196F3',
+            pointBorderColor: '#2196F3',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            tension: 0.1,
+        },
+    ],
 });
 
-const formattedData = ref({
-    labels: [],
-    datasets: []
-});
-
-watch(() => props.data, (newData) => {
-    if (newData && newData.length > 0) {
-        formattedData.value = {
-            labels: newData.map(item => {
-                // Usamos toLocaleString() para mostrar la fecha completa con hora
-                const date = new Date(item.timestamp);
-                return date.toLocaleString();  // Formato completo (fecha y hora)
-            }),
-            datasets: [
-                {
-                    label: props.label,
-                    data: newData.map(item => item[props.valueKey]),
-                    borderColor: props.color,
-                    backgroundColor: props.bgColor,
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 3,
-                    pointHoverRadius: 5
-                }
-            ]
-        };
-    }
-}, { immediate: true });
-
-const chartOptions = {
+const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
         legend: {
             labels: {
-                color: '#E5E7EB'
-            }
-        }
+                font: {
+                    size: 14,
+                },
+                color: 'white',
+            },
+        },
     },
     scales: {
         x: {
-            grid: { display: false },
-            ticks: { color: '#9CA3AF' },
-            title: { 
-                display: true, 
-                text: 'Hora', 
-                color: '#9CA3AF' 
-            }
-        },
-        y: {
-            ticks: { color: '#9CA3AF' },
             title: {
                 display: true,
-                text: props.label,
-                color: '#9CA3AF'
-            }
-        }
-    }
-};
+                text: 'Hores',
+                font: {
+                    size: 14,
+                },
+                color: 'gray',
+            },
+            ticks: {
+                autoSkip: false, // Desactiva el auto-skip
+                font: {
+                    size: 12,
+                },
+                color: 'gray',
+            },
+        },
+        y: {
+            title: {
+                display: true,
+                text: 'Temperatura (°C)',
+                font: {
+                    size: 14,
+                },
+                color: 'gray',
+            },
+            ticks: {
+                font: {
+                    size: 12,
+                },
+                color: 'gray',
+                min: 0,
+                max: 40, // Ajusta el rango de la temperatura según tus datos
+                stepSize: 5,
+            },
+        },
+    },
+});
 </script>
 
 <style scoped>
+div.w-full.h-full {
+    position: relative;
+}
 </style>
