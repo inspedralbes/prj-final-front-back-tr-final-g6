@@ -127,7 +127,7 @@ const chartComponents = {
 };
 
 const items = [
-    { label: 'Temperatura', icon: 'pi pi-thermometer' },
+    { label: 'Temperatura', icon: 'pi pi-sun' },
     { label: 'Co2', icon: 'pi pi-chart-line' },
     { label: 'Volum', icon: 'pi pi-volume-up' },
 ];
