@@ -1,83 +1,87 @@
 <template>
-    <Line :options="chartOptions" :data="formattedData" />
+    <div class="w-full h-full flex justify-center items-center">
+        <div class="w-full h-full relative">
+            <Bar :options="chartOptions" :data="formattedData" />
+        </div>
+    </div>
 </template>
 
 <script setup>
-import { ref, watch, defineProps } from 'vue';
-import { Line } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale } from 'chart.js';
+import { ref } from 'vue';
+import { Bar } from 'vue-chartjs';
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale);
-
-const props = defineProps({
-    data: {
-        type: Array,
-        default: () => []
-    }
-});
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
 const formattedData = ref({
-    labels: [],
-    datasets: []
+    labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+    datasets: [
+        {
+            label: 'CO2 (ppm)',
+            data: [500, 1000, 1500, 2000],
+            borderColor: '#FF5722',
+            backgroundColor: 'rgba(255, 87, 34, 0.6)',
+            borderWidth: 1,
+        },
+    ],
 });
 
-watch(props.data, (newData) => {
-    if (newData && newData.length > 0) {
-        formattedData.value = {
-            labels: newData.map(item => `Semana ${item.week}`), // Semana como etiqueta
-            datasets: [
-                {
-                    label: "Concentració CO₂ (ppm)",
-                    data: newData.map(item => item.co2),
-                    borderColor: '#10B981', // Teal
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 3,
-                    pointHoverRadius: 5
-                }
-            ]
-        };
-    }
-}, { immediate: true });
-
-const chartOptions = {
+const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
+    indexAxis: 'y', // Cambia el eje para barras horizontales
     plugins: {
         legend: {
             labels: {
-                color: '#E5E7EB'
-            }
+                font: {
+                    size: 14,
+                },
+                color: 'white',
+            },
         },
-        tooltip: {
-            backgroundColor: '#1F2937',
-            titleColor: '#E5E7EB',
-            bodyColor: '#E5E7EB',
-            borderColor: '#374151',
-            borderWidth: 1,
-            padding: 12,
-            callbacks: {
-                label: function (context) {
-                    return ` ${context.dataset.label}: ${context.raw} ppm`;
-                }
-            }
-        }
     },
     scales: {
         x: {
-            grid: { display: false },
-            ticks: { color: '#9CA3AF' },
-            title: { display: true, text: 'Setmana', color: '#9CA3AF' }
+            title: {
+                display: true,
+                text: 'CO2 (ppm)',
+                font: {
+                    size: 14,
+                },
+                color: 'gray',
+            },
+            ticks: {
+                font: {
+                    size: 12,
+                },
+                color: 'gray',
+                min: 0,  // Asegúrate de que el mínimo es 0
+                max: 2000, // El máximo es 2000
+                stepSize: 250, // El tamaño del paso es 500
+            },
         },
         y: {
-            ticks: { color: '#9CA3AF' },
-            title: { display: true, text: 'CO₂ (ppm)', color: '#9CA3AF' }
-        }
-    }
-};
+            title: {
+                display: true,
+                text: 'Semanas',
+                font: {
+                    size: 14,
+                },
+                color: 'gray',
+            },
+            ticks: {
+                font: {
+                    size: 12,
+                },
+                color: 'gray',
+            },
+        },
+    },
+});
 </script>
 
 <style scoped>
+div.w-full.h-full {
+    position: relative;
+}
 </style>
