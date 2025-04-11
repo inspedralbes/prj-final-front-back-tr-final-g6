@@ -9,9 +9,10 @@
 <script setup>
 import { ref } from 'vue';
 import { Line } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale } from 'chart.js';
+import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, Filler } from 'chart.js';
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale);
+// Registrar los componentes necesarios, incluyendo Filler para el área
+ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, Filler);
 
 const formattedData = ref({
     labels: ['2021 - 2022', '2022 - 2023', '2023 - 2024', '2024 - 2025'],
@@ -19,12 +20,14 @@ const formattedData = ref({
         {
             label: 'Volumen (dB)',
             data: [5, 45, 23, 55],
-            fill: false,
+            fill: true, // Habilitar el relleno para el gráfico de áreas
             borderColor: '#4CAF50',
-            backgroundColor: 'rgba(76, 175, 80, 0.2)',
+            backgroundColor: 'rgba(76, 175, 80, 0.2)', // Color del área
             pointBackgroundColor: '#4CAF50',
             pointBorderColor: '#4CAF50',
-            tension: 0.1,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            tension: 0.1, // Suavizar la línea
         },
     ],
 });

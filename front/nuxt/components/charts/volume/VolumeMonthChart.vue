@@ -24,6 +24,8 @@ const formattedData = ref({
             backgroundColor: 'rgba(76, 175, 80, 0.2)',
             pointBackgroundColor: '#4CAF50',
             pointBorderColor: '#4CAF50',
+            pointRadius: 6,
+            pointHoverRadius: 8,
             tension: 0.1,
         },
     ],

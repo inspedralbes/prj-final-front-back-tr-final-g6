@@ -27,6 +27,8 @@ const chartData = ref({
             backgroundColor: 'rgba(76, 175, 80, 0.2)',
             pointBackgroundColor: '#4CAF50',
             pointBorderColor: '#4CAF50',
+            pointRadius: 4,
+            pointHoverRadius: 6,
             tension: 0.1,
         },
     ],
@@ -49,16 +51,14 @@ const chartOptions = ref({
         x: {
             title: {
                 display: true,
-                text: 'Minut',
+                text: 'Hores',
                 font: {
                     size: 14,
                 },
                 color: 'gray',
             },
             ticks: {
-                autoSkip: false,
-                maxTicksLimit: 13,
-                autoSkip: 5,
+                autoSkip: false, // Desactiva el auto-skip
                 font: {
                     size: 12,
                 },
@@ -79,9 +79,9 @@ const chartOptions = ref({
                     size: 12,
                 },
                 color: 'gray',
-                min: 0,  // Asegúrate de que el mínimo es 0
-                max: 60, // El máximo es 60
-                stepSize: 10, // El tamaño del paso es 10
+                min: 0,
+                max: 60,
+                stepSize: 10,
             },
         },
     },
