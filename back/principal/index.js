@@ -7,7 +7,7 @@ import { createServer } from 'http';
 import mysql2 from 'mysql2';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import MongoClient from 'mongodb';
+import { MongoClient } from 'mongodb';
 
 app.use(cors());
 app.use(express.json());
@@ -37,25 +37,33 @@ function connectToDB() {
   });
 }
 
-async function connectionMongo() {
-  const url = process.env.MONGO_URI;
-  const dbName = process.env.MONGO_DB;
+const mongoClient = new MongoClient(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
-  const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
+let collection;
 
+async function connectToMongoDB() {
   try {
-      await client.connect();
-      const db = client.db(dbName);
-      const collection = db.collection('dades');
-      return collection;
-  } catch (error) {
-      console.error('Error inserint les dades a MongoDB:', error);
-  } finally {
-      await client.close();
+    await mongoClient.connect();
+    console.log('Connected to MongoDB successfully');
+    const db = mongoClient.db(process.env.MONGO_DATABASE);
+
+    const collections = await db.listCollections({ name: 'dades' }).toArray();
+    if (collections.length === 0) {
+      await db.createCollection('dades');
+      console.log('Colección "dades" creada correctamente');
+    } else {
+      console.log('La colección "dades" ya existe');
+    }
+
+    collection = db.collection('dades');
+    console.log('Colección "dades" inicializada correctamente');
+  } catch (err) {
+    console.error('Error connecting to MongoDB:', err);
+    process.exit(1);
   }
 }
 
-mongodb = connectToDB();
+await connectToMongoDB();
 
 connectToDB();
 
@@ -305,18 +313,19 @@ app.get('/api/data/mongodb', async (req, res) => {
   }
 });
 
-app.post('/api/data/mongodb', verifyAPI, async (req, res) => {
+app.post('/api/data/mongodb', async (req, res) => {
+  console.log('Rebent dades per a MongoDB');
   const { volume, temperature, id_sensor, date } = req.body;
-  try {
-      const result = await collection.insertOne({ volume, temperature, id_sensor, date });
-        console.log(`Dades inserides amb l'ID: ${result.insertedId}`);
-  }
-  catch (error) {
-      console.error('Error inserint les dades a MongoDB:', error);
-  }
-    res.status(201).send({ message: 'Sensor creat correctament', id: results.insertId });
-});
 
+  try {
+    const result = await collection.insertOne({ volume, temperature, id_sensor, date });
+    console.log(`Dades inserides amb l'ID: ${result.insertedId}`);
+    res.status(201).json({ message: 'Dades inserides correctament', id: result.insertedId });
+  } catch (error) {
+    console.error('Error inserint les dades a MongoDB:', error);
+    res.status(500).send({ message: 'Error inserint les dades a MongoDB' });
+  }
+});
 
 
 async function verifyAPI(req, res, next) {
@@ -341,6 +350,6 @@ async function verifyAPI(req, res, next) {
   });
 }
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
 });

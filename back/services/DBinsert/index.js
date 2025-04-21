@@ -28,20 +28,31 @@ async function receiveMessage() {
 
 
 async function insertDataToMongoDB(apt_key, volume, temperature, id_sensor, date) {
+  const url = process.env.BACK_URL + "/api/data/mongodb";
 
-    fetch(process.env.MONGO_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apt_key
-        },
-        body: JSON.stringify({
-            volume,
-            temperature,
-            id_sensor,
-            date
-        })
-    })
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apt_key
+      },
+      body: JSON.stringify({
+        volume,
+        temperature,
+        id_sensor,
+        date
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    console.log('Data successfully sent to MongoDB');
+  } catch (error) {
+    console.error('Error sending data to MongoDB:', error);
+  }
 }
 
 receiveMessage();
