@@ -298,14 +298,29 @@ app.get('/api/data/mongodb', async (req, res) => {
   if (!startDate || !endDate) {
     return res.status(400).json({ message: 'startDate i endDate són necessaris' });
   }
+
   try {
-    const results = await mongodb.find({
+    console.log('Dates rebudes: ', startDate, endDate);
+
+    // Converteix les dates a objectes Date
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    console.log('Dates convertides: ', start, end);
+
+    // Afegeix validació per assegurar-te que són dates vàlides
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return res.status(400).json({ message: 'El format de les dates no és vàlid' });
+    }
+
+    const results = await collection.find({
       date: {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate)
+        $gte: start.toISOString(), // Converteix a string ISO per comparar amb el camp string
+        $lt: end.toISOString()
       }
     }).toArray();
 
+    console.log('Dades rebudes de MongoDB: ', results);
     res.status(200).json(results);
   } catch (error) {
     console.error('Error obtenint les dades de MongoDB:', error);
