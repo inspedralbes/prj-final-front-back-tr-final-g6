@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-slate-900 flex flex-col">
+  <div class="min-h-screen flex flex-col animated-bg">
     <!-- Gradient Header Section -->
     <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6">
       <div class="max-w-7xl mx-auto flex flex-col items-center">
@@ -67,7 +67,7 @@
           width: 95vw;
           max-width: 1600px;
           position: relative;
-          left: -180px;
+          left: 0;
         "
         @click="handleMapClick"
       >
@@ -327,7 +327,21 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
+<style>
+.animated-bg {
+  position: relative;
+  min-height: 100vh;
+  /* Animated gradient background */
+  background: linear-gradient(270deg, #0f172a, #134e4a, #1e293b, #0e7490, #0f172a);
+  background-size: 400% 400%;
+  animation: gradientBG 18s ease infinite;
+}
+@keyframes gradientBG {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+
 .map-container {
   overflow: hidden;
   position: relative;
