@@ -24,7 +24,7 @@ services:
      build: 
        dockerfile: ./back/principal/develop.Dockerfile
        context: .
-     command: sh -c "/usr/bin/python3 -m venv venv && ./venv/bin/pip install -r requirements.txt && cp .env.DEV .env && npm install --no-bin-links && nodemon -L index.js"
+     command: sh -c "cp .env.DEV .env && npm install --no-bin-links && nodemon -L index.js"
      volumes:
        - ./back/principal:/usr/src/app
      working_dir: /usr/src/app
