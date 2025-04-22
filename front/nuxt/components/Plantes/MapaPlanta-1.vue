@@ -2,13 +2,13 @@
 import { onMounted, ref, defineProps, nextTick } from "vue";
 import Konva from "konva";
 import { getMapa } from "@/utils/communicationManager";
-import InfoCard from '../InfoCard.vue';
+import InfoCard from "../InfoCard.vue";
 
 const props = defineProps({
   imageUrl: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 const stageRef = ref(null);
@@ -20,22 +20,20 @@ const fetchDataText = ref(""); // Esta variable se usará para mostrar la inform
 const fetchData = async () => {
   try {
     const bodyRequest = {
-      "aules": [
-        8, 10, 12, 9, 11, 13,
-        42, 49, 43, 54, 44, 45,
-        46
-      ],
-      "data": "2025-02-10",
-      "tipus": "volum"
+      aules: [8, 10, 12, 9, 11, 13, 42, 49, 43, 54, 44, 45, 46],
+      data: "2025-02-10",
+      tipus: "volum",
     };
 
     const response = await getMapa(bodyRequest);
     aulaData.value = response;
 
     // Crear una cadena con la información para mostrar debajo del mapa
-    fetchDataText.value = response.map(aula => {
-      return `Aula: ${aula.Curs}, Volumen: ${aula.average}`;
-    }).join("\n");
+    fetchDataText.value = response
+      .map((aula) => {
+        return `Aula: ${aula.Curs}, Volumen: ${aula.average}`;
+      })
+      .join("\n");
 
     console.log("Datos recibidos:", aulaData.value);
   } catch (error) {
@@ -63,7 +61,7 @@ onMounted(async () => {
     return;
   }
 
-  const image = './PLANTA 1.png';
+  const image = "./PLANTA 1.png";
   const imageObj = new Image();
 
   imageObj.onload = function () {
@@ -97,37 +95,12 @@ onMounted(async () => {
 
     layer.add(konvaImage);
 
-    const points = [
-      { x: 179, y: 164, idAula: "8", popupX: 175, popupY: 350 },
-      { x: 268, y: 156, idAula: "10", popupX: 320, popupY: 350 },
-      { x: 494, y: 135, idAula: "12", popupX: 599, popupY: 350 },
-      { x: 189, y: 288, idAula: "9", popupX: 180, popupY: 550 },
-      { x: 279, y: 280, idAula: "11", popupX: 299, popupY: 540 },
-      { x: 458, y: 265, idAula: "13", popupX: 540, popupY: 530 },
-      { x: 735, y: 260, idAula: "42", popupX: 920, popupY: 490 },
-      { x: 824, y: 268, idAula: "49", popupX: 1100, popupY: 500 },
-      { x: 915, y: 274, idAula: "43", popupX: 1190, popupY: 490 },
-      { x: 1003, y: 283, idAula: "54", popupX: 1290, popupY: 490 },
-      { x: 1016, y: 160, idAula: "44", popupX: 1300, popupY: 350 },
-      { x: 1103, y: 168, idAula: "45", popupX: 1440, popupY: 360 },
-      { x: 1095, y: 294, idAula: "46", popupX: 1430, popupY: 530 },
-    ].map(point => {
-      const aula = aulaData.value.find(a => a.idAula == point.idAula);
-      const volumen = aula ? aula.average : 0;
-
-      return {
-        ...point,
-        enabled: true,
-        volumen: volumen,
-      };
-    });
-
     console.log("Puntos procesados:", points);
 
-    const minVolumen = Math.min(...points.map(p => p.volumen));
-    const maxVolumen = Math.max(...points.map(p => p.volumen));
+    const minVolumen = Math.min(...points.map((p) => p.volumen));
+    const maxVolumen = Math.max(...points.map((p) => p.volumen));
 
-    points.forEach(point => {
+    points.forEach((point) => {
       const color = point.enabled
         ? getInterpolatedColor(point.volumen, minVolumen, maxVolumen)
         : "gray";
@@ -142,15 +115,15 @@ onMounted(async () => {
         draggable: false,
       });
 
-      circle.on('click', () => {
+      circle.on("click", () => {
         if (!point.enabled) return;
 
         // Agregar nuevo popup a la lista
         popups.value.push({
           idAula: point.idAula,
-          Curs: aulaData.value.find(a => a.idAula == point.idAula)?.Curs || '',
+          Curs: aulaData.value.find((a) => a.idAula == point.idAula)?.Curs || "",
           volumen: point.volumen.toFixed(2),
-          position: { x: point.popupX, y: point.popupY }
+          position: { x: point.popupX, y: point.popupY },
         });
       });
 
@@ -167,14 +140,14 @@ onMounted(async () => {
 <template>
   <div ref="stageRef" class="canvas-container">
     <!-- Mostrar múltiples InfoCard dependiendo de la lista popups -->
-    <InfoCard 
-      v-for="(popup, index) in popups" 
-      :key="index" 
-      :info="`Aula: ${popup.Curs} - Volum: ${popup.volumen}`" 
-      :position="popup.position" 
-      @close="closePopup(index)" 
+    <InfoCard
+      v-for="(popup, index) in popups"
+      :key="index"
+      :info="`Aula: ${popup.Curs} - Volum: ${popup.volumen}`"
+      :position="popup.position"
+      @close="closePopup(index)"
     />
-    
+
     <!-- Mostrar la información de la base de datos debajo del mapa -->
     <div class="info-text">
       <h3>Información de Aulas</h3>
@@ -182,7 +155,6 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
 
 <style scoped>
 .canvas-container {

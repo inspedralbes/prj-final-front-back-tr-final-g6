@@ -1,33 +1,39 @@
 <template>
-  <div>
-    <Header />
+  <div class="min-h-screen bg-slate-900 flex flex-col">
+    <!-- Gradient Header Section -->
+    <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6">
+      <div class="max-w-7xl mx-auto flex flex-col items-center">
+        <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">
+          Mapes
+        </h1>
+        <p class="text-teal-200 font-medium">
+          Institut Pedralbes • Visualització de totes les plantes
+        </p>
+      </div>
+    </div>
 
-    <div
-      class="min-h-screen flex flex-col items-center p-8 animated-bg bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1]"
-    >
-      <h1 class="text-5xl font-bold text-white mb-10 animate__animated animate__fadeIn">
-        Mapes
-      </h1>
-      <div class="buttons mb-8 flex space-x-6">
+    <div class="w-full max-w-7xl mx-auto px-4 py-6 flex-grow">
+      <!-- Botones de plantas -->
+      <div class="flex flex-wrap gap-4 mb-8 justify-center">
         <button
           v-for="planta in plantas"
           :key="planta"
           @click="seleccionarPlanta(planta)"
-          class="px-8 py-4 text-lg font-semibold bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
+          class="px-6 py-3 text-lg font-semibold bg-slate-800 text-white rounded-lg shadow hover:bg-slate-700 transition-all duration-300 border border-slate-700 hover:border-teal-500"
         >
           {{ planta }}
         </button>
       </div>
 
       <!-- Botones para gestionar pop-ups -->
-      <div class="mb-4 flex space-x-4">
+      <div class="mb-6 flex flex-wrap gap-4 justify-center">
         <button
           @click="togglePopupMode"
           :class="[
-            'px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg',
+            'px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg border',
             isAddingPopup
-              ? 'bg-red-500 hover:bg-red-600 shadow-red-300'
-              : 'bg-blue-500 hover:bg-blue-600 shadow-blue-300',
+              ? 'bg-red-600 hover:bg-red-700 border-red-700 text-white'
+              : 'bg-teal-600 hover:bg-teal-700 border-teal-700 text-white',
           ]"
         >
           <div class="flex items-center space-x-2">
@@ -39,10 +45,10 @@
           v-if="customPopups.length > 0"
           @click="toggleDeleteMode"
           :class="[
-            'px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg',
+            'px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg border',
             isDeletingPopup
-              ? 'bg-red-500 hover:bg-red-600 shadow-red-300'
-              : 'bg-amber-500 hover:bg-amber-600 shadow-amber-300',
+              ? 'bg-emerald-600 hover:bg-emerald-700 border-emerald-700 text-white'
+              : 'bg-amber-600 hover:bg-amber-700 border-amber-700 text-white',
           ]"
         >
           <div class="flex items-center space-x-2">
@@ -52,9 +58,12 @@
         </button>
       </div>
 
+      <!-- Contenedor del mapa - AHORA MÁS GRANDE -->
       <div
-        class="map-container w-full max-w-full lg:max-w-full bg-white p-8 pt-4 rounded-xl shadow-2xl text-center flex justify-center items-center relative"
+        class="map-container bg-slate-800 p-2 rounded-2xl shadow-2xl border-2 border-slate-700 flex items-center justify-center mx-auto"
+        style="height: 80vh; min-height: 600px; width: 95vw; max-width: 1600px;"
         @click="handleMapClick"
+      
       >
         <Mapaplanta1 v-if="plantaSeleccionada === 'PLANTA 1'" :aulaData="aulaData" />
         <Mapaplanta2 v-if="plantaSeleccionada === 'PLANTA 2'" :aulaData="aulaData" />
@@ -73,70 +82,80 @@
           v-for="popup in filteredPopups"
           :key="popup.id"
           :style="{ left: popup.x + 'px', top: popup.y + 'px' }"
-          class="custom-popup"
-          @click.stop="handlePopupClick(popup)"
+          class="custom-popup absolute"
         >
           <!-- Punto indicador -->
-          <div class="marker-point"></div>
+          <div
+            class="marker-point w-6 h-6 bg-red-500 rounded-full absolute -top-3 -left-3 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200"
+            @click.stop="isDeletingPopup ? deletePopup(popup.id) : showingPopupId = popup.id"
+          >
+            <i class="fas fa-map-marker-alt"></i>
+          </div>
           <!-- Contenido del popup -->
-          <div class="popup-content">
-            <div class="popup-header">{{ popup.text }}</div>
-            <div class="popup-data">
-              <div class="data-item">
-                <span class="label">Humedad:</span>
-                <span class="value">{{ popup.humidity }}%</span>
+          <div v-if="showingPopupId === popup.id"
+            class="popup-content bg-slate-700 border-2 border-teal-500 rounded-2xl p-6 shadow-2xl min-w-[220px] relative animate-fadeIn"
+          >
+            <button @click="showingPopupId = null" class="delete-btn absolute -top-4 -right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-lg hover:bg-red-700 transition-all">
+              <i class="fas fa-times"></i>
+            </button>
+            <div class="popup-header font-bold text-white mb-2">{{ popup.text }}</div>
+            <div class="popup-data space-y-1">
+              <div class="data-item flex justify-between">
+                <span class="label text-slate-300">Humedad:</span>
+                <span class="value text-teal-400">{{ popup.humidity }}%</span>
               </div>
-              <div class="data-item">
-                <span class="label">Temperatura:</span>
-                <span class="value">{{ popup.temperature }}°C</span>
+              <div class="data-item flex justify-between">
+                <span class="label text-slate-300">Temperatura:</span>
+                <span class="value text-teal-400">{{ popup.temperature }}°C</span>
               </div>
-              <div class="data-item">
-                <span class="label">Volumen:</span>
-                <span class="value">{{ popup.volume }}</span>
+              <div class="data-item flex justify-between">
+                <span class="label text-slate-300">Volumen:</span>
+                <span class="value text-teal-400">{{ popup.volume }}</span>
               </div>
             </div>
             <button
               v-if="isDeletingPopup"
               @click.stop="deletePopup(popup.id)"
-              class="delete-btn"
+              class="delete-btn absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
             >
-              <i class="fas fa-times"></i>
+              <i class="fas fa-times text-xs"></i>
             </button>
           </div>
         </div>
       </div>
 
       <!-- Formulario para nuevo pop-up -->
-      <div v-if="showPopupForm" class="popup-form">
-        <div class="form-header">Nuevo Pop-up</div>
-        <input
-          v-model="newPopupText"
-          placeholder="Texto del pop-up"
-          class="popup-input"
-          @keyup.enter="confirmNewPopup"
-          @keyup.esc="cancelNewPopup"
-        />
-        <div class="flex space-x-2 mt-2">
-          <button
-            @click="confirmNewPopup"
-            class="bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded shadow-lg transition-all duration-300 hover:scale-105"
-          >
-            <i class="fas fa-check mr-2"></i>Confirmar
-          </button>
-          <button
-            @click="cancelNewPopup"
-            class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded shadow-lg transition-all duration-300 hover:scale-105"
-          >
-            <i class="fas fa-times mr-2"></i>Cancelar
-          </button>
+      <div
+        v-if="showPopupForm"
+        class="popup-form fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      >
+        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 max-w-md w-full">
+          <div class="form-header text-xl font-bold text-white mb-4">Nuevo Pop-up</div>
+          <input
+            v-model="newPopupText"
+            placeholder="Texto del pop-up"
+            class="popup-input w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all mb-4"
+            @keyup.enter="confirmNewPopup"
+            @keyup.esc="cancelNewPopup"
+          />
+          <div class="flex space-x-3 justify-end">
+            <button
+              @click="confirmNewPopup"
+              class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-emerald-700"
+            >
+              <i class="fas fa-check mr-2"></i>Confirmar
+            </button>
+            <button
+              @click="cancelNewPopup"
+              class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-red-700"
+            >
+              <i class="fas fa-times mr-2"></i>Cancelar
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Aquí mostramos los datos debajo del mapa -->
-      <div class="info-text">
-        <h3>Información de Aulas</h3>
-        <pre>{{ fetchDataText }}</pre>
-      </div>
+
     </div>
   </div>
 </template>
@@ -154,8 +173,8 @@ import MapaPlantaSubterranea from "~/components/Plantes/MapaPlantaSubterranea.vu
 
 const plantas = ["PLANTA BAJA", "PLANTA 1", "PLANTA 2", "PLANTA 3", "PLANTA SUBTERRANEA"];
 const plantaSeleccionada = ref("PLANTA 1");
-const aulaData = ref([]); // Variable que contiene los datos de las aulas
-const fetchDataText = ref(""); // Información a mostrar debajo del mapa
+const aulaData = ref([]);
+const fetchDataText = ref("");
 
 // Estado para los pop-ups personalizados
 const customPopups = ref([]);
@@ -170,6 +189,8 @@ onMounted(() => {
   const savedPopups = localStorage.getItem("customMapPopups");
   if (savedPopups) {
     customPopups.value = JSON.parse(savedPopups);
+  } else {
+    customPopups.value = [];
   }
 });
 
@@ -188,6 +209,8 @@ const filteredPopups = computed(() => {
 });
 
 // Funciones para gestionar pop-ups
+const showingPopupId = ref(null);
+
 const togglePopupMode = () => {
   isAddingPopup.value = !isAddingPopup.value;
   isDeletingPopup.value = false;
@@ -211,11 +234,10 @@ const handleMapClick = (event) => {
 
 const confirmNewPopup = () => {
   if (newPopupText.value.trim() && tempPopupPosition.value) {
-    // Generar datos aleatorios simulados
     const randomData = {
-      humidity: Math.floor(Math.random() * 30) + 40, // Entre 40% y 70%
-      temperature: Math.floor(Math.random() * 10) + 20, // Entre 20°C y 30°C
-      volume: Math.floor(Math.random() * 50) + 50, // Entre 50 y 100
+      humidity: Math.floor(Math.random() * 30) + 40,
+      temperature: Math.floor(Math.random() * 10) + 20,
+      volume: Math.floor(Math.random() * 50) + 50,
     };
 
     customPopups.value.push({
@@ -229,9 +251,7 @@ const confirmNewPopup = () => {
       volume: randomData.volume,
     });
 
-    // Limpiar el formulario
     cancelNewPopup();
-    // Desactivar modo de agregar
     isAddingPopup.value = false;
   }
 };
@@ -246,11 +266,19 @@ const deletePopup = (id) => {
   customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
 };
 
+// Ahora los popups solo se muestran al hacer clic en el marcador
+// y solo uno puede estar abierto a la vez
 const handlePopupClick = (popup) => {
   if (isDeletingPopup.value) {
     deletePopup(popup.id);
+  } else {
+    showingPopupId.value = popup.id;
   }
 };
+
+// Eliminar popups hardcodeados: asegurarse de que solo se usan los dinámicos
+// (No hay popups hardcodeados, solo los del array customPopups)
+
 
 // Obtener los datos de la base de datos
 const fetchData = async () => {
@@ -264,7 +292,6 @@ const fetchData = async () => {
     const response = await getMapa(bodyRequest);
     aulaData.value = response;
 
-    // Crear la cadena con la información para mostrar debajo del mapa
     fetchDataText.value = response
       .map((aula) => {
         return `Aula: ${aula.idAula}, Volumen: ${aula.average}`;
@@ -277,40 +304,96 @@ const fetchData = async () => {
   }
 };
 
-// Cambiar la planta seleccionada
 const seleccionarPlanta = (planta) => {
-  console.log(`Seleccionaste: ${planta}`);
   plantaSeleccionada.value = planta;
 };
 
 const router = useRouter();
-const isMenuVisible = ref(false);
 const userStore = useUserStore();
-
-const toggleMenu = () => {
-  isMenuVisible.value = !isMenuVisible.value;
-};
-
-const logout = () => {
-  userStore.logout();
-  router.push("/login");
-};
 
 const isAdmin = computed(() => userStore.user?.admin === 1);
 
-// Obtener los datos al montar el componente
 onMounted(async () => {
   await fetchData();
 });
 </script>
 
 <style scoped>
-.animated-bg {
-  background-size: 200% 200%;
-  animation: move-bg 6s ease infinite;
+.map-container {
+  overflow: hidden;
+  position: relative;
+  touch-action: none;
+  user-select: none;
+  background: linear-gradient(135deg, #0f172a 70%, #134e4a 100%);
+  box-shadow: 0 10px 40px 0 rgba(0,0,0,0.45);
 }
 
-@keyframes move-bg {
+/* Prevenir zoom con atajos en la página (solo para desktop) */
+html, body {
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  background: #0f172a;
+}
+
+.popup-content {
+  animation: fadeIn 0.3s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.marker-point {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.delete-btn {
+  transition: all 0.2s ease;
+  font-size: 1.5rem;
+}
+
+.delete-btn:hover {
+  transform: scale(1.1);
+}
+
+
+.custom-popup {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.custom-popup:hover {
+  transform: translateY(-3px);
+}
+
+.popup-content {
+  transition: all 0.3s ease;
+}
+
+.popup-content:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.marker-point {
+  z-index: 10;
+}
+
+.delete-btn {
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Animación para el fondo del header */
+.w-full.bg-gradient-to-r {
+  background-size: 200% 200%;
+  animation: gradient 6s ease infinite;
+}
+
+@keyframes gradient {
   0% {
     background-position: 0% 50%;
   }
@@ -322,69 +405,19 @@ onMounted(async () => {
   }
 }
 
+/* Animación de entrada para el título */
 h1 {
-  font-family: "Poppins", sans-serif;
-  color: #ffffff;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
-  animation: fadeInTitle 2s ease-in-out;
+  animation: fadeIn 1s ease-out;
 }
 
-@keyframes fadeInTitle {
-  0% {
+@keyframes fadeIn {
+  from {
     opacity: 0;
-    transform: translateY(-40px);
+    transform: translateY(-20px);
   }
-  100% {
+  to {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-button {
-  transition: all 0.3s ease-in-out;
-}
-
-button:hover {
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-  transform: scale(1.05);
-}
-
-button:active {
-  transform: scale(1);
-}
-
-button:focus {
-  outline: none;
-}
-
-button:focus-visible {
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
-}
-
-.map-container {
-  height: 500px;
-  overflow: hidden;
-}
-
-.map-container img {
-  width: 100%;
-  object-fit: cover;
-}
-
-.info-text {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 10px;
-  max-width: 100%;
-  white-space: pre-wrap; /* Esto asegura que el texto se ajuste correctamente */
-  z-index: 10;
-}
-
-h3 {
-  font-size: 20px;
-  margin-bottom: 10px;
 }
 </style>
