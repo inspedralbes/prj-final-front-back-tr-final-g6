@@ -9,6 +9,7 @@ import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, Ca
 
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale);
 
+// Props to receive the data
 const props = defineProps({
     data: {
         type: Array,
@@ -16,11 +17,13 @@ const props = defineProps({
     }
 });
 
+// Reactive variable for formatted data
 const formattedData = ref({
     labels: [],
     datasets: []
 });
 
+// Watch for changes in the input data and format it
 watch(props.data, (newData) => {
     if (newData && newData.length > 0) {
         formattedData.value = {
@@ -44,6 +47,7 @@ watch(props.data, (newData) => {
     }
 }, { immediate: true });
 
+// Chart configuration
 const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -97,8 +101,8 @@ const chartOptions = {
                 text: 'CO₂ (ppm)',
                 color: '#9CA3AF'
             },
-            min: 300,
-            max: 500
+            min: Math.min(...props.data.map(item => item.average)) - 50, // Dynamic adjustment for min
+            max: Math.max(...props.data.map(item => item.average)) + 50  // Dynamic adjustment for max
         }
     }
 };

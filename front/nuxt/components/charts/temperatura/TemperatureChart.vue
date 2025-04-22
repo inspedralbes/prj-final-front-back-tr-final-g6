@@ -24,20 +24,20 @@ const formattedData = ref({
 watch(props.data, (newData) => {
     if (newData && newData.length > 0) {
         formattedData.value = {
-            labels: newData.map(item => new Date(item.dataIni).toLocaleDateString()),
+            labels: newData.map(item => new Date(item.dataIni).toLocaleDateString('es-ES')), // Cambié a 'es-ES' para formato español
             datasets: [
                 {
-                    label: "Temperatura (°C)",
+                    label: "Nivell de CO₂ (ppm)",
                     data: newData.map(item => item.average),
-                    borderColor: '#3B82F6', // Blue-500
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: '#10B981', // Teal-500
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     borderWidth: 2,
                     pointBackgroundColor: '#fff',
-                    pointBorderColor: '#3B82F6',
+                    pointBorderColor: '#10B981',
                     pointRadius: 4,
                     pointHoverRadius: 6,
                     fill: true,
-                    tension: 0.2
+                    tension: 0.3
                 }
             ]
         };
@@ -65,7 +65,7 @@ const chartOptions = {
             padding: 12,
             callbacks: {
                 label: function (context) {
-                    return ` ${context.dataset.label}: ${context.raw}°C`;
+                    return ` ${context.dataset.label}: ${context.raw} ppm`;
                 }
             }
         }
@@ -90,15 +90,15 @@ const chartOptions = {
             },
             ticks: {
                 color: '#9CA3AF',
-                stepSize: 5
+                stepSize: 40
             },
             title: {
                 display: true,
-                text: 'Temperatura (°C)',
+                text: 'CO₂ (ppm)',
                 color: '#9CA3AF'
             },
-            min: 10,
-            max: 35
+            min: 300,
+            max: 500
         }
     }
 };

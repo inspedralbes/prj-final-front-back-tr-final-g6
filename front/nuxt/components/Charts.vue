@@ -56,7 +56,7 @@
             <!-- Chart Container -->
             <div class="bg-slate-800 rounded-lg p-6 shadow-lg">
                 <div class="h-[400px]">
-                    <component :is="currentChart" :data="chartData" />
+                    <component :is="currentChart" />
                 </div>
             </div>
         </div>
@@ -64,25 +64,72 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
 
-import TemperatureChart from './charts/TemperatureChart.vue';
-import Co2Chart from './charts/Co2Chart.vue';
-import VolumeChart from './charts/VolumeChart.vue';
-import { getAulaById, getDades } from '~/utils/communicationManager';
+import TemperatureMinuteChart from './charts/temperatura/TemperatureMinuteChart.vue';
+import TemperatureHourChart from './charts/temperatura/TemperatureHourChart.vue';
+import TemperatureDayChart from './charts/temperatura/TemperatureDayChart.vue';
+import TemperatureWeekChart from './charts/temperatura/TemperatureWeekChart.vue';
+import TemperatureMonthChart from './charts/temperatura/TemperatureMonthChart.vue';
+import TemperatureCourseChart from './charts/temperatura/TemperatureCourseChart.vue';
+
+import Co2MinuteChart from './charts/co2/Co2MinuteChart.vue';
+import Co2HourChart from './charts/co2/Co2HourChart.vue';
+import Co2DayChart from './charts/co2/Co2DayChart.vue';
+import Co2WeekChart from './charts/co2/Co2WeekChart.vue';
+import Co2MonthChart from './charts/co2/Co2MonthChart.vue';
+import Co2CourseChart from './charts/co2/Co2CourseChart.vue';
+
+import VolumeMinuteChart from './charts/volume/VolumeMinuteChart.vue';
+import VolumeHourChart from './charts/volume/VolumeHourChart.vue';
+import VolumeDayChart from './charts/volume/VolumeDayChart.vue';
+import VolumeWeekChart from './charts/volume/VolumeWeekChart.vue';
+import VolumeMonthChart from './charts/volume/VolumeMonthChart.vue';
+import VolumeCourseChart from './charts/volume/VolumeCourseChart.vue';
 
 const route = useRoute();
 const aulaId = route.params.id;
-const aula = ref(null);
-const chartData = ref([]);
+const aula = ref({
+    Classe: 'A1',
+    Etapa: 'ESO',
+    Planta: 'Primera',
+    Aula: '1',
+});
+
+const chartComponents = {
+    Temperatura: {
+        minuts: TemperatureMinuteChart,
+        hours: TemperatureHourChart,
+        daily: TemperatureDayChart,
+        weekly: TemperatureWeekChart,
+        monthly: TemperatureMonthChart,
+        course: TemperatureCourseChart,
+    },
+    Co2: {
+        minuts: Co2MinuteChart,
+        hours: Co2HourChart,
+        daily: Co2DayChart,
+        weekly: Co2WeekChart,
+        monthly: Co2MonthChart,
+        course: Co2CourseChart,
+    },
+    Volum: {
+        minuts: VolumeMinuteChart,
+        hours: VolumeHourChart,
+        daily: VolumeDayChart,
+        weekly: VolumeWeekChart,
+        monthly: VolumeMonthChart,
+        course: VolumeCourseChart,
+    },
+};
 
 const items = [
-    { label: 'Temperatura', icon: 'pi pi-thermometer', component: TemperatureChart },
-    { label: 'CO₂', icon: 'pi pi-chart-line', component: Co2Chart },
-    { label: 'Volum', icon: 'pi pi-volume-up', component: VolumeChart },
+    { label: 'Temperatura', icon: 'pi pi-sun' },
+    { label: 'Co2', icon: 'pi pi-chart-line' },
+    { label: 'Volum', icon: 'pi pi-volume-up' },
 ];
 
 const ranges = [
@@ -95,26 +142,12 @@ const ranges = [
 ];
 
 const selectedChart = ref('Temperatura');
-const selectedRange = ref('daily');
+const selectedRange = ref('minuts');
 
+// Computed para determinar el componente actual basado en el tipo de gráfico y el rango
 const currentChart = computed(() => {
-    const item = items.find((i) => i.label === selectedChart.value);
-    return item ? item.component : null;
-});
-
-onMounted(async () => {
-    try {
-        aula.value = await getAulaById(aulaId);
-        if (!aula.value) {
-            console.log('No es van trobar dades per a aquesta aula');
-        }
-
-        const dades = await getDades('dia', 'volum', aulaId, '2025-02-10T00:00:00', '2025-02-15T00:00:00');
-        chartData.value = dades || [];
-
-    } catch (error) {
-        console.error('Error en obtenir les dades:', error);
-    }
+    const chartType = chartComponents[selectedChart.value];
+    return chartType ? chartType[selectedRange.value] : null;
 });
 </script>
 
