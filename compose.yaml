@@ -68,7 +68,7 @@ services:
   prfg6-python:
     build:
       context: .
-      dockerfile: ./back/services/python/Dockerfile
+      dockerfile: ./back/services/python/develop.Dockerfile
     ports:
       - "5000:5000"
     volumes:
