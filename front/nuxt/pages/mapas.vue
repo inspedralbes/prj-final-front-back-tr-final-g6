@@ -60,10 +60,16 @@
 
       <!-- Contenedor del mapa - AHORA MÁS GRANDE -->
       <div
-        class="map-container bg-slate-800 p-2 rounded-2xl shadow-2xl border-2 border-slate-700 flex items-center justify-center mx-auto"
-        style="height: 80vh; min-height: 600px; width: 95vw; max-width: 1600px;"
+        class="bg-slate-800 p-2 rounded-2xl shadow-2xl border-2 border-slate-700 flex items-center justify-center"
+        style="
+          height: 80vh;
+          min-height: 600px;
+          width: 95vw;
+          max-width: 1600px;
+          position: relative;
+          left: -180px;
+        "
         @click="handleMapClick"
-      
       >
         <Mapaplanta1 v-if="plantaSeleccionada === 'PLANTA 1'" :aulaData="aulaData" />
         <Mapaplanta2 v-if="plantaSeleccionada === 'PLANTA 2'" :aulaData="aulaData" />
@@ -87,15 +93,21 @@
           <!-- Punto indicador -->
           <div
             class="marker-point w-6 h-6 bg-red-500 rounded-full absolute -top-3 -left-3 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200"
-            @click.stop="isDeletingPopup ? deletePopup(popup.id) : showingPopupId = popup.id"
+            @click.stop="
+              isDeletingPopup ? deletePopup(popup.id) : (showingPopupId = popup.id)
+            "
           >
             <i class="fas fa-map-marker-alt"></i>
           </div>
           <!-- Contenido del popup -->
-          <div v-if="showingPopupId === popup.id"
+          <div
+            v-if="showingPopupId === popup.id"
             class="popup-content bg-slate-700 border-2 border-teal-500 rounded-2xl p-6 shadow-2xl min-w-[220px] relative animate-fadeIn"
           >
-            <button @click="showingPopupId = null" class="delete-btn absolute -top-4 -right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-lg hover:bg-red-700 transition-all">
+            <button
+              @click="showingPopupId = null"
+              class="delete-btn absolute -top-4 -right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-lg hover:bg-red-700 transition-all"
+            >
               <i class="fas fa-times"></i>
             </button>
             <div class="popup-header font-bold text-white mb-2">{{ popup.text }}</div>
@@ -154,8 +166,6 @@
           </div>
         </div>
       </div>
-
-
     </div>
   </div>
 </template>
@@ -279,7 +289,6 @@ const handlePopupClick = (popup) => {
 // Eliminar popups hardcodeados: asegurarse de que solo se usan los dinámicos
 // (No hay popups hardcodeados, solo los del array customPopups)
 
-
 // Obtener los datos de la base de datos
 const fetchData = async () => {
   try {
@@ -325,11 +334,12 @@ onMounted(async () => {
   touch-action: none;
   user-select: none;
   background: linear-gradient(135deg, #0f172a 70%, #134e4a 100%);
-  box-shadow: 0 10px 40px 0 rgba(0,0,0,0.45);
+  box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.45);
 }
 
 /* Prevenir zoom con atajos en la página (solo para desktop) */
-html, body {
+html,
+body {
   overscroll-behavior: none;
   touch-action: none;
   user-select: none;
@@ -340,8 +350,14 @@ html, body {
   animation: fadeIn 0.3s;
 }
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .marker-point {
@@ -356,7 +372,6 @@ html, body {
 .delete-btn:hover {
   transform: scale(1.1);
 }
-
 
 .custom-popup {
   cursor: pointer;
