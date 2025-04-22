@@ -177,6 +177,7 @@ CREATE TABLE `usuari` (
 -- Crear tabla `sensor` (si aún no existe)
 CREATE TABLE `sensor` (
   `idSensor` INT(10) AUTO_INCREMENT PRIMARY KEY,
+  `api_key` VARCHAR(255),
   `nombre` VARCHAR(100) NOT NULL,  -- Ejemplo de columna adicional
   `ubicacion` VARCHAR(100) NOT NULL,  -- Ejemplo de columna adicional
   `x` INT NOT NULL,  -- Coordenada x del sensor
