@@ -24,10 +24,10 @@ def get_dades(start_date, end_date):
     })
     return response.json()
 
-def run_script(script_name, data):
+def run_script(script_name, data, timeSpan):
     script_path = os.path.join(os.path.dirname(__file__), 'scripts', script_name)
     data_str = json.dumps(data) 
-    command = ['python3', script_path, data_str]
+    command = ['python3', script_path, data_str, timeSpan]
     result = subprocess.run(command, capture_output=True, text=True)
     return result.stdout
 
@@ -38,19 +38,19 @@ def execute_scheduled_script(timeSpan):
     current_date = datetime.now()
 
     # Calculem start_date i end_date segons el timeSpan
-    if timeSpan == "minute":
+    if timeSpan == "minut":
         end_date = current_date.replace(second=0, microsecond=0)
         start_date = end_date - timedelta(minutes=1)
-    elif timeSpan == "hour":
+    elif timeSpan == "hora":
         end_date = current_date.replace(minute=0, second=0, microsecond=0)
         start_date = end_date - timedelta(hours=1)
-    elif timeSpan == "day":
+    elif timeSpan == "dia":
         end_date = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
         start_date = end_date - timedelta(days=1)
-    elif timeSpan == "week":
+    elif timeSpan == "setmana":
         end_date = current_date.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=current_date.weekday())
         start_date = end_date - timedelta(weeks=1)
-    elif timeSpan == "month":
+    elif timeSpan == "mes":
         end_date = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         start_date = (end_date - timedelta(days=1)).replace(day=1)
     else:
@@ -64,7 +64,7 @@ def execute_scheduled_script(timeSpan):
     app.logger.info("Dades obtingudes amb èxit: %s", data)
 
     # Executem el script d'agregació amb les dades obtingudes
-    output = run_script('agregation.py', data)
+    output = run_script('agregation.py', data, timeSpan)
     app.logger.info("Script d'agregació executat amb èxit: %s", output)
     send_agregated_data(output)
 
@@ -96,7 +96,7 @@ def run_scheduler_minute():
         now = datetime.now()
         seconds_to_next_minute = 60 - now.second
         time.sleep(seconds_to_next_minute)  
-        execute_scheduled_script("minute") 
+        execute_scheduled_script("minut") 
 
     ## Scheduler per executar el script cada hora en punt
 
@@ -105,7 +105,7 @@ def run_scheduler_hour():
         now = datetime.now()
         seconds_to_next_hour = (60 - now.second) + (60 * (60 - now.minute))
         time.sleep(seconds_to_next_hour)  
-        execute_scheduled_script("hour") 
+        execute_scheduled_script("hora") 
 
     ## Scheduler per executar el script cada dia a les 00:00
 
@@ -114,7 +114,7 @@ def run_scheduler_day():
         now = datetime.now()
         seconds_to_next_day = (60 - now.second) + (60 * (60 - now.minute)) + (24 * 60 * (24 - now.hour))
         time.sleep(seconds_to_next_day)  
-        execute_scheduled_script("day")
+        execute_scheduled_script("dia")
 
     ## Scheduler per executar el script cada setmana a les 00:00 del dilluns
 
@@ -124,7 +124,7 @@ def run_scheduler_week():
         days_to_next_week = (7 - now.weekday()) % 7
         seconds_to_next_week = (60 - now.second) + (60 * (60 - now.minute)) + (24 * 60 * (24 * days_to_next_week - now.hour))
         time.sleep(seconds_to_next_week)  
-        execute_scheduled_script("week")
+        execute_scheduled_script("setmana")
 
     ## Scheduler per executar el script cada mes el primer dia a les 00:00
 
@@ -134,7 +134,7 @@ def run_scheduler_month():
         days_to_next_month = (30 - now.day) % 30
         seconds_to_next_month = (60 - now.second) + (60 * (60 - now.minute)) + (24 * 60 * (24 * days_to_next_month - now.hour))
         time.sleep(seconds_to_next_month)  
-        execute_scheduled_script("month")
+        execute_scheduled_script("mes")
 
 # Routes
 

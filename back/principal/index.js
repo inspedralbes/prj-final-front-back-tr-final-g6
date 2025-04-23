@@ -410,27 +410,27 @@ app.post('/api/data/mongodb', async (req, res) => {
 });
 
 app.post('/api/data/mysql', (req, res) => {
-  const data = req.body;
+  const { timeSpan, sensors } = req.body;
 
-  if (typeof data !== 'object' || Object.keys(data).length === 0) {
-    return res.status(400).json({ message: 'Es requereix un objecte de dades no buit' });
+  if (!timeSpan || typeof sensors !== 'object' || Object.keys(sensors).length === 0) {
+    return res.status(400).json({ message: 'Es requereix un timeSpan i un objecte de sensors no buit' });
   }
 
   const query = `
-    INSERT INTO minut (idAula, idSensor, tipus, max, min, average, dataIni, dataFi)
+    INSERT INTO ?? (idAula, idSensor, tipus, max, min, average, dataIni, dataFi)
     VALUES ?
   `;
 
   const currentDate = new Date();
   const dataIni = currentDate.toISOString();
-  const dataFi = new Date(currentDate.getTime() + 60000).toISOString(); 
+  const dataFi = new Date(currentDate.getTime() + 60000).toISOString();
 
-  const values = Object.entries(data).flatMap(([idSensor, { volume, temperature }]) => [
+  const values = Object.entries(sensors).flatMap(([idSensor, { volume, temperature }]) => [
     [1, idSensor, 'volum', volume.max, volume.min, volume.avg, dataIni, dataFi],
     [1, idSensor, 'temperatura', temperature.max, temperature.min, temperature.avg, dataIni, dataFi]
   ]);
 
-  connexioBD.query(query, [values], (err, results) => {
+  connexioBD.query(query, [timeSpan, values], (err, results) => {
     if (err) {
       console.error('Error en la inserció a la base de dades: ' + err.stack);
       return res.status(500).json({ message: 'Error en la inserció a la base de dades' });
