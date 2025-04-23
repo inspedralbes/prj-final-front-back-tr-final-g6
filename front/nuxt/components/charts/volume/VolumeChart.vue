@@ -9,6 +9,7 @@ import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, Li
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
+// Props to receive the data
 const props = defineProps({
     data: {
         type: Array,
@@ -16,33 +17,39 @@ const props = defineProps({
     }
 });
 
+// Reactive variable for formatted data
 const formattedData = ref({
     labels: [],
     datasets: []
 });
 
+// Watch for changes in the input data and format it
 watch(props.data, (newData) => {
     if (newData && newData.length > 0) {
+        // Debug: Log the new data to check its structure
+        console.log("New Data:", newData);
+
+        // Ensure data is correctly formatted
         formattedData.value = {
             labels: newData.map(item => new Date(item.dataIni).toLocaleDateString()),
             datasets: [
                 {
                     label: "Mínim (dB)",
-                    data: newData.map(item => item.min),
+                    data: newData.map(item => item.min || 0), // Ensure no undefined values
                     backgroundColor: 'rgba(16, 185, 129, 0.7)', // Teal
                     borderColor: 'rgba(16, 185, 129, 1)',
                     borderWidth: 1
                 },
                 {
                     label: "Màxim (dB)",
-                    data: newData.map(item => item.max),
+                    data: newData.map(item => item.max || 0), // Ensure no undefined values
                     backgroundColor: 'rgba(239, 68, 68, 0.7)', // Red
                     borderColor: 'rgba(239, 68, 68, 1)',
                     borderWidth: 1
                 },
                 {
                     label: "Mitjana (dB)",
-                    data: newData.map(item => item.average),
+                    data: newData.map(item => item.average || 0), // Ensure no undefined values
                     backgroundColor: 'rgba(99, 102, 241, 0.7)', // Indigo
                     borderColor: 'rgba(99, 102, 241, 1)',
                     borderWidth: 1
@@ -52,6 +59,7 @@ watch(props.data, (newData) => {
     }
 }, { immediate: true });
 
+// Chart configuration
 const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -106,8 +114,8 @@ const chartOptions = {
                 text: 'Decibels (dB)',
                 color: '#9CA3AF'
             },
-            min: 0,
-            max: 100
+            min: Math.min(...props.data.map(item => item.min || 0)) - 10,  // Dynamic min
+            max: Math.max(...props.data.map(item => item.max || 0)) + 10   // Dynamic max
         }
     }
 };
