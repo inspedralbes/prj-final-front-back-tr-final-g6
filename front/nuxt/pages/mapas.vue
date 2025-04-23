@@ -62,12 +62,12 @@
       <div
         class="bg-slate-800 p-2 rounded-2xl shadow-2xl border-2 border-slate-700 flex items-center justify-center"
         style="
-          height: 80vh;
+          height: 55vh;
           min-height: 600px;
-          width: 95vw;
+          width: 80vw;
           max-width: 1600px;
           position: relative;
-          left: 0;
+          left: -150px;
         "
         @click="handleMapClick"
       >
@@ -337,9 +337,15 @@ onMounted(async () => {
   animation: gradientBG 18s ease infinite;
 }
 @keyframes gradientBG {
-  0% {background-position: 0% 50%;}
-  50% {background-position: 100% 50%;}
-  100% {background-position: 0% 50%;}
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .map-container {
