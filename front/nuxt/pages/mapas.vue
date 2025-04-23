@@ -2,6 +2,11 @@
   <div class="min-h-screen flex flex-col animated-bg">
     <!-- Gradient Header Section -->
     <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6 relative">
+      <!-- Logo Acoubox -->
+      <div class="absolute left-6 top-1/2 transform -translate-y-1/2 flex items-center space-x-3">
+        <img src="/logo.jpg" alt="Acoubox Logo" class="h-10 w-10" />
+        <span class="text-white text-xl font-semibold">Acoubox</span>
+      </div>
       <!-- Botón de retroceso -->
       <NuxtLink to="/aulas" class="absolute right-6 top-1/2 transform -translate-y-1/2">
         <button
@@ -62,14 +67,14 @@
         >
           <div class="flex items-center space-x-2">
             <i :class="isDeletingPopup ? 'fas fa-check' : 'fas fa-trash'"></i>
-            <span>{{ isDeletingPopup ? "Terminar Borrado" : "Borrar Pop-ups" }}</span>
+            <span>{{ isDeletingPopup ? "Terminar Borrado" : "Borrar Sensor" }}</span>
           </div>
         </button>
       </div>
 
-      <!-- Contenedor del mapa - AHORA MÁS GRANDE -->
+      <!-- Contenedor del mapa -->
       <div
-        class="bg-slate-800 p-2 rounded-2xl shadow-2xl border-2 border-slate-700 flex items-center justify-center"
+        class="bg-slate-800 p-2 rounded-2xl shadow-2xl border-2 border-slate-700 flex items-center justify-center map-container"
         style="
           height: 55vh;
           min-height: 600px;
@@ -77,6 +82,7 @@
           max-width: 1600px;
           margin: 0 auto;
           position: relative;
+          cursor: crosshair; /* Indicador de que se puede hacer clic */
         "
         @click="handleMapClick"
       >
@@ -209,7 +215,7 @@
           <div class="form-header text-xl font-bold text-white mb-4">Nuevo Sensor</div>
           <input
             v-model="newPopupText"
-            placeholder="Texto del pop-up"
+            placeholder="Texto del Sensor"
             class="popup-input w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all mb-4"
             @keyup.enter="confirmNewPopup"
             @keyup.esc="cancelNewPopup"
@@ -483,6 +489,33 @@ html,
 body {
   background: #0f172a;
   overflow-x: hidden;
+}
+
+/* Contenedor del mapa y área clickeable */
+.map-container {
+  cursor: crosshair;
+  /* El área clickeable solo será el contenedor del mapa */
+  pointer-events: all;
+}
+
+/* Asegurar que los pop-ups no interfieran con los clicks en el mapa */
+.custom-popup {
+  pointer-events: none; /* Por defecto, ignorar clicks */
+  z-index: 20;
+}
+
+/* Pero permitir clicks en los elementos interactivos dentro del pop-up */
+.custom-popup .marker-point,
+.custom-popup .popup-content,
+.custom-popup .delete-btn {
+  pointer-events: auto;
+}
+
+/* Ajustar el tamaño y posición del contenido del pop-up */
+.popup-content {
+  transform: translateY(1rem); /* Mover un poco hacia abajo para no tapar el marcador */
+  max-width: 300px; /* Limitar el ancho máximo */
+  z-index: 30;
 }
 
 .popup-content {
