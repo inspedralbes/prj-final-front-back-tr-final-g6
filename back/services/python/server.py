@@ -8,6 +8,7 @@ from threading import Thread
 from datetime import datetime, timedelta
 import logging
 import pytz
+import json 
 
 app = Flask(__name__)
 
@@ -25,7 +26,8 @@ def get_dades(start_date, end_date):
 
 def run_script(script_name, data):
     script_path = os.path.join(os.path.dirname(__file__), 'scripts', script_name)
-    command = ['python3', script_path, data]
+    data_str = json.dumps(data) 
+    command = ['python3', script_path, data_str]
     result = subprocess.run(command, capture_output=True, text=True)
     return result.stdout
 
@@ -62,9 +64,28 @@ def execute_scheduled_script(timeSpan):
     app.logger.info("Dades obtingudes amb èxit: %s", data)
 
     # Executem el script d'agregació amb les dades obtingudes
-    output = run_script('agregation.py', '{}')
+    output = run_script('agregation.py', data)
     app.logger.info("Script d'agregació executat amb èxit: %s", output)
-    return output
+    send_agregated_data(output)
+
+def send_agregated_data(data):
+    try:
+        # Assegura't que `data` sigui un JSON vàlid
+        if isinstance(data, str):
+            data = json.loads(data)  # Converteix de string a diccionari si cal
+
+        url = 'http://prfg6-back:3020/api/data/mysql'
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(url, data=json.dumps(data), headers=headers)
+        
+        if response.status_code == 200:
+            app.logger.info("Dades agregades enviades amb èxit.")
+        else:
+            app.logger.error("Error en enviar les dades agregades: %s", response.text)
+    except json.JSONDecodeError as e:
+        app.logger.error("Error en el format de JSON: %s", str(e))
+    except Exception as e:
+        app.logger.error("Error inesperat: %s", str(e))
 
 # Scheduler
 
