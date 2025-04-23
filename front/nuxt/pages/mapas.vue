@@ -3,7 +3,9 @@
     <!-- Gradient Header Section -->
     <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6 relative">
       <!-- Logo Acoubox -->
-      <div class="absolute left-6 top-1/2 transform -translate-y-1/2 flex items-center space-x-3">
+      <div
+        class="absolute left-6 top-1/2 transform -translate-y-1/2 flex items-center space-x-3"
+      >
         <img src="/logo.jpg" alt="Acoubox Logo" class="h-10 w-10" />
         <span class="text-white text-xl font-semibold">Acoubox</span>
       </div>
