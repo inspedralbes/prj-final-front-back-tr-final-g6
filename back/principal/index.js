@@ -397,16 +397,32 @@ app.get('/api/data/mongodb', async (req, res) => {
 
 app.post('/api/data/mongodb', async (req, res) => {
   console.log('Rebent dades per a MongoDB');
-  const { volume, temperature, id_sensor, date } = req.body;
-
-  try {
-    const result = await collection.insertOne({ volume, temperature, id_sensor, date });
-    console.log(`Dades inserides amb l'ID: ${result.insertedId}`);
-    res.status(201).json({ message: 'Dades inserides correctament', id: result.insertedId });
-  } catch (error) {
-    console.error('Error inserint les dades a MongoDB:', error);
-    res.status(500).send({ message: 'Error inserint les dades a MongoDB' });
+  const { volume, temperature, date, MAC, api_key } = req.body;
+  if(volume == null || temperature == null || date == null || MAC == null || api_key == null) {
+    return res.status(400).json({ message: 'Dades incompletes' });
   }
+
+  const query = 'SELECT * FROM sensor WHERE mac = ? AND api_key = ?';
+  connexioBD.execute(query, [MAC, api_key], async (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+    if (results.length === 0) {
+      return res.status(403).json({ message: 'API key no vàlida' });
+    }
+    console.log('API key vàlida, inserint dades a MongoDB');
+    const id_sensor = results[0].idSensor;
+    try {
+      const result = await collection.insertOne({ volume, temperature, id_sensor, date });
+      console.log(`Dades inserides amb l'ID: ${result.insertedId}`);
+      res.status(201).json({ message: 'Dades inserides correctament', id: result.insertedId });
+    } catch (error) {
+      console.error('Error inserint les dades a MongoDB:', error);
+      res.status(500).send({ message: 'Error inserint les dades a MongoDB' });
+    }
+  });
 });
 
 app.post('/api/data/mysql', (req, res) => {
@@ -439,29 +455,6 @@ app.post('/api/data/mysql', (req, res) => {
     res.status(201).json({ message: 'Dades inserides correctament', affectedRows: results.affectedRows });
   });
 });
-
-
-async function verifyAPI(req, res, next) {
-  const apiKey = req.headers['x-api-key'];
-
-  if (!apiKey) {
-    return res.status(401).json({ message: 'API key es requerida' });
-  }
-
-  const query = 'SELECT * FROM sensor WHERE api_key = ?';
-  connexioBD.execute(query, [apiKey], (err, results) => {
-    if (err) {
-      console.error('Error en la consulta a la base de datos:', err);
-      return res.status(500).json({ message: 'Error en la consulta a la base de datos' });
-    }
-
-    if (results.length === 0) {
-      return res.status(403).json({ message: 'API key no válida' });
-    }
-    
-    next();
-  });
-}
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
