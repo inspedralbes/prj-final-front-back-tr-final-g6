@@ -291,21 +291,103 @@ app.get('/api/sensors', (req, res) => {
     res.status(200).send(results);
   });
 });
-  
+
+app.put('/api/sensors', (req, res) => {
+  const { MAC, nombre, ubicacion, x, y } = req.body;
+  const query = 'UPDATE sensor SET nombre = ?, ubicacion = ?, x = ?, y = ? WHERE mac = ?';
+  connexioBD.execute(query, [nombre, ubicacion, x, y, MAC], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+    if (results.affectedRows > 0) {
+      res.status(200).send({ message: 'Sensor actualitzat correctament' });
+    } else {
+      res.status(404).send('Sensor no trobat');
+    }
+  });
+});
+
+app.get('/api/newsensors', (req, res) => {
+  const query = 'SELECT * FROM newsensor';
+  connexioBD.execute(query, (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+    res.status(200).send(results);
+  });
+});
+
+app.post('/api/newsensors', (req, res) => {
+  const { MAC } = req.body;
+  const query1 = `SELECT * FROM newsensor WHERE mac = ?`;
+  connexioBD.execute(query1, [MAC], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+    if (results.length === 0) {
+      const query3 = 'INSERT INTO newsensor (mac, accepted) VALUES (?, ?)';
+      connexioBD.execute(query3, [MAC, 0], (err, results) => {
+        if (err) {
+          console.error('Error en la inserció a la base de dades: ' + err.stack);
+          res.status(500).send('Error en la inserció a la base de dades');
+          return;
+        }
+        res.status(201).send({ message: 'Sensor creat correctament', id: results.insertId });
+      });
+    }
+    else if (results.length === 1 && results[0].accepted === 1) {
+      const apiKey = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const query2 = 'INSERT INTO sensor (mac, api_key, nombre, ubicacion, x, y) VALUES (?, ?, ?, ?, ?, ?)';
+      const nombre = 'Sensor ' + MAC;
+      connexioBD.execute(query2, [MAC, apiKey, nombre, 'Aula 1', 0, 0], (err, results) => {
+        if (err) {
+          console.error('Error en la inserció a la base de dades: ' + err.stack);
+          res.status(500).send('Error en la inserció a la base de dades');
+          return;
+        }
+        res.status(201).send({ message: 'Sensor creat correctament', id: results.insertId, apiKey });
+      });
+    } else if (results.length === 1 && results[0].accepted === 0) {
+      res.status(400).send({ message: 'El sensor no esta acceptat' });
+    }
+  });
+});
+
 app.get('/api/data/mongodb', async (req, res) => {
   const { startDate, endDate } = req.query;
 
   if (!startDate || !endDate) {
     return res.status(400).json({ message: 'startDate i endDate són necessaris' });
   }
+
   try {
-    const results = await mongodb.find({
+    console.log('Dates rebudes: ', startDate, endDate);
+
+    // Converteix les dates a objectes Date
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    console.log('Dates convertides: ', start, end);
+
+    // Afegeix validació per assegurar-te que són dates vàlides
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return res.status(400).json({ message: 'El format de les dates no és vàlid' });
+    }
+
+    const results = await collection.find({
       date: {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate)
+        $gte: start.toISOString(), // Converteix a string ISO per comparar amb el camp string
+        $lt: end.toISOString()
       }
     }).toArray();
 
+    console.log('Dades rebudes de MongoDB: ', results);
     res.status(200).json(results);
   } catch (error) {
     console.error('Error obtenint les dades de MongoDB:', error);
@@ -325,6 +407,37 @@ app.post('/api/data/mongodb', async (req, res) => {
     console.error('Error inserint les dades a MongoDB:', error);
     res.status(500).send({ message: 'Error inserint les dades a MongoDB' });
   }
+});
+
+app.post('/api/data/mysql', (req, res) => {
+  const data = req.body;
+
+  if (typeof data !== 'object' || Object.keys(data).length === 0) {
+    return res.status(400).json({ message: 'Es requereix un objecte de dades no buit' });
+  }
+
+  const query = `
+    INSERT INTO minut (idAula, idSensor, tipus, max, min, average, dataIni, dataFi)
+    VALUES ?
+  `;
+
+  const currentDate = new Date();
+  const dataIni = currentDate.toISOString();
+  const dataFi = new Date(currentDate.getTime() + 60000).toISOString(); 
+
+  const values = Object.entries(data).flatMap(([idSensor, { volume, temperature }]) => [
+    [1, idSensor, 'volum', volume.max, volume.min, volume.avg, dataIni, dataFi],
+    [1, idSensor, 'temperatura', temperature.max, temperature.min, temperature.avg, dataIni, dataFi]
+  ]);
+
+  connexioBD.query(query, [values], (err, results) => {
+    if (err) {
+      console.error('Error en la inserció a la base de dades: ' + err.stack);
+      return res.status(500).json({ message: 'Error en la inserció a la base de dades' });
+    }
+
+    res.status(201).json({ message: 'Dades inserides correctament', affectedRows: results.affectedRows });
+  });
 });
 
 
