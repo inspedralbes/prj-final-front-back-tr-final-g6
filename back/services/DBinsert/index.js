@@ -15,9 +15,9 @@ async function receiveMessage() {
   
       channel.consume(queue, (msg) => {
         const data = JSON.parse(msg.content.toString());
-        const { apt_key, volume, temperature, id_sensor, date } = data;
-        console.log(`🔵 Mensaje recibido - APIKEY:${apt_key} Volum: ${volume} dB, Temperatura: ${temperature}°C, Aula: ${id_sensor}, Data: ${date}`);
-        insertDataToMongoDB(apt_key, volume, temperature, id_sensor, date);
+        const { api_key, volume, temperature, MAC, date } = data;
+        console.log(`🔵 Mensaje recibido - Volum: ${volume} dB, Temperatura: ${temperature}°C, Data: ${date}`);
+        insertDataToMongoDB(volume, temperature, date, MAC, api_key);
       }, {
         noAck: true
       });
@@ -27,21 +27,23 @@ async function receiveMessage() {
   }
 
 
-async function insertDataToMongoDB(apt_key, volume, temperature, id_sensor, date) {
+async function insertDataToMongoDB(volume, temperature, date, MAC, api_key) {
+  console.log('🔵 Enviando datos a MongoDB...')
+  console.log(`🔵 Volum: ${volume} dB, Temperatura: ${temperature}°C, Api_key: ${api_key}, MAC:${MAC} Data: ${date}`);
   const url = process.env.BACK_URL + "/api/data/mongodb";
 
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apt_key
+        'Content-Type': 'application/json' // Asegura que el servidor interprete el cuerpo como JSON
       },
       body: JSON.stringify({
         volume,
         temperature,
-        id_sensor,
-        date
+        date,
+        MAC,
+        api_key
       })
     });
 

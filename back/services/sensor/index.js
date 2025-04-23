@@ -1,5 +1,6 @@
 const dotenv = require('dotenv');
 const amqp = require('amqplib');
+const { DateTime } = require("luxon");
 dotenv.config();
 
 // Funció per simular la lectura del volum en decibels en una aula de secundària
@@ -17,9 +18,12 @@ function getRandomAulaId() {
     return Math.floor(Math.random() * 3) + 1; // Genera un id entre 1 i 3
 }
 
-async function sendMessage(apt_key, volume, temperature, id_sensor, date) {
+const MAC = "MAMAMAM";
+const api_key = "c8nlsy4955ju75tq5w3f";
+
+async function sendMessage(api_key, volume, temperature, date, MAC) {
     const queue = 'SensorData';
-    const msg = { apt_key, volume, temperature, id_sensor, date};
+    const msg = { api_key, volume, temperature, date, MAC };
   
     try {
       const connection = await amqp.connect(process.env.RABBITMQ_URL);
@@ -27,7 +31,7 @@ async function sendMessage(apt_key, volume, temperature, id_sensor, date) {
   
       await channel.assertQueue(queue, { durable: false });
       channel.sendToQueue(queue, Buffer.from(JSON.stringify(msg)));
-      console.log(`🟢 Mensaje enviado: ${msg}`);
+      console.log(`🟢 Mensaje enviado`);
   
       setTimeout(() => {
         connection.close();
@@ -40,13 +44,11 @@ async function sendMessage(apt_key, volume, temperature, id_sensor, date) {
   async function logData() {
     const volume = getVolumeInDecibels();
     const temperature = getTemperatureInCelsius();
-    const id_sensor = getRandomAulaId();
-    const apt_key = "Jupiter1";
-    const date = new Date().toISOString();
+    const date = DateTime.now().setZone("Europe/Madrid").toISO();
 
-    console.log(`Volum: ${volume} dB, Temperatura: ${temperature}°C, Aula: ${id_sensor}`);
+    console.log(`Volum: ${volume} dB, Temperatura: ${temperature}°C, Data: ${date}`);
 
-    sendMessage(apt_key, volume, temperature, id_sensor, date)
+    sendMessage(api_key, volume, temperature, date, MAC);
 }
 
 // Configurar l'interval per executar la funció cada 10 segons
