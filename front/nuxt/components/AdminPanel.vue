@@ -53,7 +53,7 @@
                             class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd"
-                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a 1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                                     clip-rule="evenodd" />
                             </svg>
                         </div>
@@ -104,8 +104,12 @@
                         </div>
                         <div>
                             <label for="turn" class="block text-sm font-medium text-slate-300 mb-2">Torn:</label>
-                            <input v-model="newAula.turn" type="text" placeholder="Torn"
-                                class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all" />
+                            <select v-model="newAula.turn"
+                                class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all">
+                                <option value="mati">Mati</option>
+                                <option value="tarda">Tarda</option>
+                                <option value="mati i tarda">Mati i tarda</option>
+                            </select>
                         </div>
                     </div>
                     <div class="flex justify-end pt-4">
@@ -128,20 +132,6 @@
                                     }}</h2>
                                 <p class="text-sm text-teal-400">Etapa: {{ aula.Etapa || 'Sense etapa' }}</p>
                             </div>
-                            <div class="flex items-center space-x-4">
-                                <label :for="'toggle-' + aula.id" class="flex items-center cursor-pointer">
-                                    <div class="relative">
-                                        <input type="checkbox" :id="'toggle-' + aula.id" :checked="aula.activa === 1"
-                                            @change="toggleActive(aula)" class="sr-only">
-                                        <div class="block bg-slate-600 w-14 h-8 rounded-full"></div>
-                                        <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition transform"
-                                            :class="{ 'translate-x-6 bg-teal-500': aula.activa === 1 }"></div>
-                                    </div>
-                                    <div class="ml-3 text-sm font-medium text-slate-300">
-                                        {{ aula.activa === 1 ? 'Activa' : 'Inactiva' }}
-                                    </div>
-                                </label>
-                            </div>
                         </div>
 
                         <div v-if="aula.showDetails" class="mt-6 space-y-4" @click.stop>
@@ -150,6 +140,10 @@
                                     <div>
                                         <p class="text-sm text-slate-400">Classe:</p>
                                         <p class="text-lg text-white">{{ aula.Classe || 'Sense classe' }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-slate-400">Etapa:</p>
+                                        <p class="text-lg text-white">{{ aula.Etapa || 'Sense etapa' }}</p>
                                     </div>
                                     <div>
                                         <p class="text-sm text-slate-400">Planta:</p>
@@ -190,47 +184,61 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label class="block text-sm font-medium text-slate-300 mb-2">Curs:</label>
-                                        <input v-model="aula.Curs" type="text" placeholder="Curs"
+                                        <input v-model="editData.Curs" type="text" placeholder="Curs"
                                             class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-slate-300 mb-2">Classe:</label>
-                                        <input v-model="aula.Classe" type="text" placeholder="Classe"
-                                            class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all" />
+                                        <select v-model="editData.Classe"
+                                            class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all">
+                                            <option value="">Seleccionar Classe</option>
+                                            <option v-for="classe in uniqueClasses" :key="classe" :value="classe">
+                                                {{ classe }}
+                                            </option>
+                                            <option value="_new">+ Afegir nova classe</option>
+                                        </select>
+                                        <input v-if="editData.Classe === '_new'" v-model="editData.newClasse"
+                                            type="text" placeholder="Escriu el nom de la nova classe"
+                                            class="w-full mt-2 p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all"
+                                            @keydown.enter.prevent="addNewClasse(aula)" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-300 mb-2">Etapa:</label>
+                                        <select v-model="editData.Etapa"
+                                            class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all">
+                                            <option value="" disabled>Seleccionar Etapa</option>
+                                            <option v-for="etapa in etapas" :key="etapa.value" :value="etapa.value">
+                                                {{ etapa.label }}
+                                            </option>
+                                        </select>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-slate-300 mb-2">Planta:</label>
-                                        <input v-model="aula.Planta" type="number" placeholder="Planta"
+                                        <input v-model="editData.Planta" type="number" placeholder="Planta"
                                             class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-slate-300 mb-2">Aula:</label>
-                                        <input v-model="aula.Aula" type="number" placeholder="Aula"
+                                        <input v-model="editData.Aula" type="number" placeholder="Aula"
                                             class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-slate-300 mb-2">Torn:</label>
-                                        <input v-model="aula.turn" type="text" placeholder="Torn"
-                                            class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all" />
+                                        <select v-model="editData.turn"
+                                            class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all">
+                                            <option value="mati">Mati</option>
+                                            <option value="tarda">Tarda</option>
+                                            <option value="mati i tarda">Mati i tarda</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="flex flex-wrap gap-3 pt-4">
                                     <button type="submit"
                                         class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-all flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 13l4 4L19 7" />
-                                        </svg>
                                         Guardar
                                     </button>
-                                    <button @click.stop="cancelEdit(aula)"
+                                    <button type="button" @click.stop="cancelEdit(aula)"
                                         class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
                                         Cancel·lar
                                     </button>
                                 </div>
@@ -246,7 +254,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { getTotesAulas, createAula, deleteAula } from '~/utils/communicationManager';
+import { getTotesAulas, createAula, deleteAula, updateAula, habilitarAula } from '~/utils/communicationManager';
 
 const router = useRouter();
 const aulas = ref([]);
@@ -258,9 +266,9 @@ const newAula = ref({
     Classe: '',
     Etapa: '',
     Planta: 0,
-    Aula: '',
-    activa: 0,
-    turn: ''
+    Aula: 0,
+    turn: 'mati',
+    activa: 1
 });
 
 const etapas = [
@@ -272,23 +280,36 @@ const etapas = [
     { label: 'ALTRES', value: 'ALTRES' }
 ];
 
+// Get unique classes from aulas data
+const uniqueClasses = computed(() => {
+  const classes = new Set();
+  aulas.value.forEach(aula => {
+    if (aula.Classe && aula.Classe.trim() !== '') {
+      classes.add(aula.Classe);
+    }
+  });
+  return Array.from(classes).sort();
+});
+
 onMounted(async () => {
     try {
-        aulas.value = await getTotesAulas();
-        aulas.value = aulas.value.map(aula => ({
+        const data = await getTotesAulas();
+        aulas.value = data.map(aula => ({
             ...aula,
             showDetails: false,
-            editing: false
+            editing: false,
+            newClasse: ''
         }));
     } catch (error) {
         console.error('Error al cargar las aulas:', error.message);
+        alert('Error al cargar las aulas: ' + error.message);
     }
 });
 
 const filteredAulas = computed(() => {
     return aulas.value.filter(aula => {
-        const matchesSearch = aula.Curs.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            aula.Aula.toLowerCase().includes(searchQuery.value.toLowerCase());
+        const matchesSearch = aula.Curs?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+            aula.Aula?.toString().includes(searchQuery.value.toLowerCase());
         const matchesEtapa = !selectedEtapa.value || aula.Etapa === selectedEtapa.value;
         return matchesSearch && matchesEtapa;
     });
@@ -300,17 +321,63 @@ const clearFilters = () => {
 };
 
 const toggleDetails = (aula) => aula.showDetails = !aula.showDetails;
-const startEditing = (aula) => aula.editing = true;
-const cancelEdit = (aula) => aula.editing = false;
+const editData = ref({});
+
+const startEditing = (aula) => {
+    aula.editing = true;
+    editData.value = {
+        ...aula,
+        newClasse: ''
+    };
+};
+
+const cancelEdit = (aula) => {
+    aula.editing = false;
+    editData.value = {};
+};
+
+const addNewClasse = (aula) => {
+    if (editData.value.newClasse && editData.value.newClasse.trim() !== '') {
+        editData.value.Classe = editData.value.newClasse;
+        editData.value.newClasse = '';
+    }
+};
 
 const saveEdit = async (aula) => {
     try {
-        await updateAula(aula.id, aula);
+        // Handle new class if selected
+        if (editData.value.Classe === '_new' && editData.value.newClasse) {
+            editData.value.Classe = editData.value.newClasse;
+        }
+
+        // Update the aula object
+        Object.assign(aula, {
+            Curs: editData.value.Curs,
+            Classe: editData.value.Classe,
+            Etapa: editData.value.Etapa,
+            Planta: editData.value.Planta,
+            Aula: editData.value.Aula,
+            turn: editData.value.turn,
+            activa: editData.value.activa
+        });
+
+        // Send update to server
+        await updateAula(aula.id, {
+            Curs: editData.value.Curs,
+            Classe: editData.value.Classe,
+            Etapa: editData.value.Etapa,
+            Planta: editData.value.Planta,
+            Aula: editData.value.Aula,
+            turn: editData.value.turn,
+            activa: editData.value.activa
+        });
+
         aula.editing = false;
+        editData.value = {};
         alert('Aula actualitzada correctament');
     } catch (error) {
         console.error('Error en actualitzar l\'aula:', error.message);
-        alert('Ha ocurrido un error al actualizar el aula.');
+        alert('Error al actualizar el aula: ' + error.message);
     }
 };
 
@@ -327,34 +394,52 @@ const handleDeleteAula = async (id) => {
     }
 };
 
-const toggleActive = async (aula) => {
-    try {
-        const updatedAula = {
-            id: aula.id,
-            activa: aula.activa ? 0 : 1
-        };
-        await habilitarAula(updatedAula);
-        aula.activa = !aula.activa;
-    } catch (error) {
-        console.error('Error al cambiar el estado del aula:', error.message);
-        aula.activa = !aula.activa;
-    }
-};
-
 const navigateToMapas = () => {
     router.push('/mapas');
 };
 
 const handleCreateAula = async () => {
     try {
-        await createAula(newAula.value.Curs, newAula.value.Classe, newAula.value.Etapa);
-        alert('Aula creada correctament!');
-        newAula.value = { Curs: '', Classe: '', Etapa: '', Planta: 0, Aula: '', activa: 0, turn: '' };
+        // Validate required fields
+        if (!newAula.value.Curs || !newAula.value.Etapa) {
+            throw new Error('Els camps Curs i Etapa són obligatoris');
+        }
+
+        // Create the new aula
+        const createdAula = await createAula({
+            Curs: newAula.value.Curs,
+            Classe: newAula.value.Classe,
+            Etapa: newAula.value.Etapa,
+            Planta: newAula.value.Planta,
+            Aula: newAula.value.Aula,
+            turn: newAula.value.turn,
+            activa: newAula.value.activa
+        });
+
+        // Add to local state
+        aulas.value.push({
+            ...createdAula,
+            showDetails: false,
+            editing: false,
+            newClasse: ''
+        });
+
+        // Reset form
+        newAula.value = {
+            Curs: '',
+            Classe: '',
+            Etapa: '',
+            Planta: 0,
+            Aula: 0,
+            turn: 'mati',
+            activa: 1
+        };
         showCreateAulaForm.value = false;
-        aulas.value = await getTotesAulas();
+        
+        alert('Aula creada correctament!');
     } catch (error) {
         console.error("Error al crear el aula:", error.message);
-        alert('Ha ocurrido un error al crear el aula.');
+        alert('Error al crear el aula: ' + error.message);
     }
 };
 </script>
@@ -369,10 +454,5 @@ const handleCreateAula = async () => {
 
 .custom-select:focus {
     box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2);
-}
-
-/* Toggle switch styling */
-.dot {
-    transition: all 0.3s ease-in-out;
 }
 </style>
