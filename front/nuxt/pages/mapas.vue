@@ -1,7 +1,16 @@
 <template>
   <div class="min-h-screen flex flex-col animated-bg">
     <!-- Gradient Header Section -->
-    <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6">
+    <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6 relative">
+      <!-- Botón de retroceso -->
+      <NuxtLink to="/aulas" class="absolute right-6 top-1/2 transform -translate-y-1/2">
+        <button
+          class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg shadow-lg transition-all duration-300 flex items-center space-x-2 border border-slate-600"
+        >
+          <i class="fas fa-arrow-left"></i>
+          <span>Volver a Aulas</span>
+        </button>
+      </NuxtLink>
       <div class="max-w-7xl mx-auto flex flex-col items-center">
         <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">
           Mapes
@@ -37,8 +46,8 @@
           ]"
         >
           <div class="flex items-center space-x-2">
-            <i :class="isAddingPopup ? 'fas fa-times' : 'fas fa-plus'"></i>
-            <span>{{ isAddingPopup ? "Cancelar" : "Agregar Pop-up" }}</span>
+            <i :class="isAddingPopup ? 'fas fa-times' : 'fas fa-microchip'"></i>
+            <span>{{ isAddingPopup ? "Cancelar" : "Agregar Sensor" }}</span>
           </div>
         </button>
         <button
@@ -64,10 +73,10 @@
         style="
           height: 55vh;
           min-height: 600px;
-          width: 80vw;
+          width: 100%;
           max-width: 1600px;
+          margin: 0 auto;
           position: relative;
-          left: -150px;
         "
         @click="handleMapClick"
       >
@@ -92,17 +101,20 @@
         >
           <!-- Punto indicador -->
           <div
-            class="marker-point w-6 h-6 bg-red-500 rounded-full absolute -top-3 -left-3 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200"
+            :class="[
+              'marker-point w-6 h-6 rounded-full absolute -top-3 -left-3 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200',
+              getMarkerColor(popup),
+            ]"
             @click.stop="
               isDeletingPopup ? deletePopup(popup.id) : (showingPopupId = popup.id)
             "
           >
-            <i class="fas fa-map-marker-alt"></i>
+            <i class="fas fa-map-marker-alt text-white"></i>
           </div>
           <!-- Contenido del popup -->
           <div
             v-if="showingPopupId === popup.id"
-            class="popup-content bg-slate-700 border-2 border-teal-500 rounded-2xl p-6 shadow-2xl min-w-[220px] relative animate-fadeIn"
+            class="popup-content bg-slate-700 border-2 border-teal-500 rounded-2xl p-6 shadow-2xl min-w-[300px] relative animate-fadeIn"
           >
             <button
               @click="showingPopupId = null"
@@ -110,19 +122,71 @@
             >
               <i class="fas fa-times"></i>
             </button>
-            <div class="popup-header font-bold text-white mb-2">{{ popup.text }}</div>
-            <div class="popup-data space-y-1">
-              <div class="data-item flex justify-between">
-                <span class="label text-slate-300">Humedad:</span>
-                <span class="value text-teal-400">{{ popup.humidity }}%</span>
+            <div
+              class="text-white text-lg font-semibold mb-2 flex items-center justify-between"
+            >
+              <span>{{ popup.text }}</span>
+              <span class="text-sm text-gray-400">ID: {{ popup.id }}</span>
+            </div>
+            <div class="text-gray-300 space-y-3">
+              <!-- Temperatura -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <div
+                    :class="[
+                      'w-3 h-3 rounded-full',
+                      getSensorStatusColor(popup.temperature, 15, 30),
+                    ]"
+                  ></div>
+                  <span>Temperatura:</span>
+                </div>
+                <span
+                  :class="[
+                    getSensorStatusColor(popup.temperature, 15, 30).replace(
+                      'bg-',
+                      'text-'
+                    ),
+                  ]"
+                  >{{ popup.temperature }}°C</span
+                >
               </div>
-              <div class="data-item flex justify-between">
-                <span class="label text-slate-300">Temperatura:</span>
-                <span class="value text-teal-400">{{ popup.temperature }}°C</span>
+
+              <!-- CO2 -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <div
+                    :class="[
+                      'w-3 h-3 rounded-full',
+                      getSensorStatusColor(popup.co2, 400, 2000),
+                    ]"
+                  ></div>
+                  <span>CO2:</span>
+                </div>
+                <span
+                  :class="[
+                    getSensorStatusColor(popup.co2, 400, 2000).replace('bg-', 'text-'),
+                  ]"
+                  >{{ popup.co2 }}ppm</span
+                >
               </div>
-              <div class="data-item flex justify-between">
-                <span class="label text-slate-300">Volumen:</span>
-                <span class="value text-teal-400">{{ popup.volume }}</span>
+
+              <!-- Volumen -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <div
+                    :class="[
+                      'w-3 h-3 rounded-full',
+                      getSensorStatusColor(popup.volume, 35, 85),
+                    ]"
+                  ></div>
+                  <span>Volumen:</span>
+                </div>
+                <span
+                  :class="[
+                    getSensorStatusColor(popup.volume, 35, 85).replace('bg-', 'text-'),
+                  ]"
+                  >{{ popup.volume }}dB</span
+                >
               </div>
             </div>
             <button
@@ -142,7 +206,7 @@
         class="popup-form fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
       >
         <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 max-w-md w-full">
-          <div class="form-header text-xl font-bold text-white mb-4">Nuevo Pop-up</div>
+          <div class="form-header text-xl font-bold text-white mb-4">Nuevo Sensor</div>
           <input
             v-model="newPopupText"
             placeholder="Texto del pop-up"
@@ -256,9 +320,9 @@ const confirmNewPopup = () => {
       x: tempPopupPosition.value.x,
       y: tempPopupPosition.value.y,
       planta: plantaSeleccionada.value,
-      humidity: randomData.humidity,
-      temperature: randomData.temperature,
-      volume: randomData.volume,
+      temperature: Math.floor(Math.random() * 15) + 15, // 15-30°C
+      co2: Math.floor(Math.random() * 1600) + 400, // 400-2000 ppm
+      volume: Math.floor(Math.random() * 50) + 35, // 35-85 dB
     });
 
     cancelNewPopup();
@@ -278,6 +342,63 @@ const deletePopup = (id) => {
 
 // Ahora los popups solo se muestran al hacer clic en el marcador
 // y solo uno puede estar abierto a la vez
+const getMarkerColor = (popup) => {
+  // Normalizar cada valor en una escala de 0 a 1
+  const tempNorm = (popup.temperature - 15) / (30 - 15);
+  const co2Norm = (popup.co2 - 400) / (2000 - 400);
+  const volumeNorm = (popup.volume - 35) / (85 - 35);
+
+  // Obtener el valor normalizado más alto
+  const maxNorm = Math.max(tempNorm, co2Norm, volumeNorm);
+
+  // Usar la misma escala de colores que getSensorStatusColor
+  const colors = [
+    "bg-blue-400", // 0-10%
+    "bg-blue-300", // 10-20%
+    "bg-cyan-400", // 20-30%
+    "bg-teal-400", // 30-40%
+    "bg-green-400", // 40-50%
+    "bg-yellow-400", // 50-60%
+    "bg-orange-400", // 60-70%
+    "bg-orange-500", // 70-80%
+    "bg-red-400", // 80-90%
+    "bg-red-500", // 90-100%
+  ];
+
+  const colorIndex = Math.min(Math.floor(maxNorm * 10), 9);
+  return colors[Math.max(0, colorIndex)];
+};
+
+const getAlertLevel = (value, normal, warning, critical) => {
+  if (value >= critical) return 3; // Crítico
+  if (value >= warning) return 2; // Alto
+  if (value >= normal) return 1; // Moderado
+  return 0; // Normal
+};
+
+const getSensorStatusColor = (value, min, max) => {
+  // Crear una escala de colores desde azul (frío/bajo) hasta rojo (caliente/alto)
+  const colors = [
+    "bg-blue-400", // 0-10%
+    "bg-blue-300", // 10-20%
+    "bg-cyan-400", // 20-30%
+    "bg-teal-400", // 30-40%
+    "bg-green-400", // 40-50%
+    "bg-yellow-400", // 50-60%
+    "bg-orange-400", // 60-70%
+    "bg-orange-500", // 70-80%
+    "bg-red-400", // 80-90%
+    "bg-red-500", // 90-100%
+  ];
+
+  // Normalizar el valor entre 0 y 1
+  const normalized = (value - min) / (max - min);
+  // Obtener el índice del color (0-9)
+  const colorIndex = Math.min(Math.floor(normalized * 10), 9);
+  // Retornar el color correspondiente
+  return colors[Math.max(0, colorIndex)];
+};
+
 const handlePopupClick = (popup) => {
   if (isDeletingPopup.value) {
     deletePopup(popup.id);
@@ -360,10 +481,8 @@ onMounted(async () => {
 /* Prevenir zoom con atajos en la página (solo para desktop) */
 html,
 body {
-  overscroll-behavior: none;
-  touch-action: none;
-  user-select: none;
   background: #0f172a;
+  overflow-x: hidden;
 }
 
 .popup-content {
@@ -393,25 +512,37 @@ body {
   transform: scale(1.1);
 }
 
+/* Contenedor de los pop-ups */
 .custom-popup {
   cursor: pointer;
   transition: transform 0.2s;
+  z-index: 20; /* Aseguramos que los pop-ups estén por encima de otros elementos */
 }
 
 .custom-popup:hover {
   transform: translateY(-3px);
 }
 
+/* Cambiar el estilo para los pop-ups */
 .popup-content {
-  transition: all 0.3s ease;
+  animation: fadeIn 0.3s;
+  z-index: 30; /* Aseguramos que el contenido del popup esté encima de otros elementos */
+  display: block; /* Asegura que los pop-ups sean visibles */
+  position: relative; /* Cambiar a relative si es necesario */
 }
 
+/* Evitar que los pop-ups invisibles interrumpan las interacciones */
+.custom-popup {
+  pointer-events: auto; /* Asegura que los pop-ups sean interactivos */
+}
+
+/* Añadir reglas para el fondo animado */
 .popup-content:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .marker-point {
-  z-index: 10;
+  z-index: 5;
 }
 
 .delete-btn {
