@@ -1,5 +1,6 @@
 services:
   prfg6-front:
+    container_name: prfg6-front
     build:
       context: ./front/nuxt
       dockerfile: prod.Dockerfile
@@ -7,10 +8,10 @@ services:
       - "3000:3000"
 
   prfg6-back:
+    container_name: prfg6-back
     build:
       context: ./back/principal
       dockerfile: prod.Dockerfile
-    container_name: back
     working_dir: /usr/src/app
     ports:
       - "3020:3020"
@@ -20,6 +21,7 @@ services:
       - prfg6-mongodb
 
   prfg6-mongodb:
+    container_name: prfg6-mongodb
     image: mongo:6.0
     restart: always
     ports:
@@ -30,6 +32,7 @@ services:
       - mongo-bd:/data/db
 
   prfg6-mysql:
+    container_name: prfg6-mysql
     image: mysql:8.0
     restart: always
     ports:
@@ -41,8 +44,8 @@ services:
       - ./bd/mysql/acubox.sql:/docker-entrypoint-initdb.d/acubox.sql
 
   rabbitmq:
+    container_name: prfg6-rabbitmq
     image: rabbitmq:3-management
-    container_name: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -52,10 +55,10 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
 
   prfg6-sensor:
+    container_name: prfg6-sensor
     build:
       context: ./back/services
       dockerfile: prod.Dockerfile
-    container_name: sensor-back
     working_dir: /usr/src/app
     volumes:
       - ./back/services/sensor:/usr/src/app
@@ -64,10 +67,10 @@ services:
       - rabbitmq
 
   prfg6-dbinsert:
+    container_name: prfg6-dbinsert
     build:
       context: ./back/services
       dockerfile: prod.Dockerfile
-    container_name: dbinsert-back
     working_dir: /usr/src/app
     volumes:
       - ./back/services/dbinsert:/usr/src/app
@@ -77,13 +80,13 @@ services:
       - prfg6-sensor
 
   prfg6-python:
+    container_name: prfg6-python
     build:
       context: ./back/services/python
       dockerfile: prod.Dockerfile
     ports:
       - "5000:5000"
     working_dir: /usr/src/app
-    container_name: prfg6-python
     depends_on:
       - prfg6-back
 
@@ -96,6 +99,7 @@ services:
       - prfg6-mysql
 
   mongo-express:
+    container_name: mongo-express
     image: mongo-express
     restart: always
     ports:
@@ -106,8 +110,8 @@ services:
       - prfg6-mongodb
   
   portainer:
-    image: portainer/portainer-ce
     container_name: portainer
+    image: portainer/portainer-ce
     restart: always
     ports:
       - "9000:9000"
