@@ -1,67 +1,87 @@
-version: '3.8'
-
 services:
-  nuxt:
+  prfg6-front:
     build:
       context: ./front/nuxt
       dockerfile: prod.Dockerfile
-    volumes:
-      - ./front/nuxt:/home/node/app
     ports:
       - "3000:3000"
-  prfg6-mysql:
-    image: mysql
+    restart: unless-stopped
+
+  prfg6-back:
+    build:
+      context: ./back/principal
+      dockerfile: prod.Dockerfile
+    container_name: back
+    working_dir: /usr/src/app
+    ports:
+      - "3020:3020"
+    command: "node index.js"
+    depends_on:
+      - prfg6-mysql
+      - prfg6-mongodb
+    restart: unless-stopped
+
+  prfg6-mongodb:
+    image: mongo:6.0
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: prf-g6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-bd:/data/db
+
+  prfg6-mysql:
+    image: mysql:8.0
+    restart: always
     volumes:
       - mysql-bd:/var/lib/mysql:rw
       - ./bd/mysql/acubox.sql:/docker-entrypoint-initdb.d/acubox.sql
     ports:
-      - 3306:3306
+      - "3306:3306"
 
-  prfg6-back:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+  prfg6-sensor:
     build:
-      context: .
-      dockerfile: ./back/principal/prod.Dockerfile
-    container_name: back
+      context: ./back/services
+      dockerfile: prod.Dockerfile
+    container_name: sensor-back
     working_dir: /usr/src/app
-    ports:
-      - 3020:3020
     command: "node index.js"
-    environment:
-      - NODE_ENV=production
     depends_on:
-      - prfg6-mysql
+      - rabbitmq
+    restart: unless-stopped
+
+  prfg6-dbinsert:
+    build:
+      context: ./back/services
+      dockerfile: prod.Dockerfile
+    container_name: dbinsert-back
+    working_dir: /usr/src/app
+    command: "node index.js"
+    depends_on:
       - prfg6-mongodb
+      - prfg6-sensor
+    restart: unless-stopped
 
-  prfg6-mongodb:
-    image: mongo
-    restart: always
+  prfg6-python:
+    build:
+      context: ./back/services/python
+      dockerfile: prod.Dockerfile
     ports:
-      - 27017:27017
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-    volumes:
-      - mongo-bd:/data/db
-
-
-  portainer:
-    image: portainer/portainer-ce:latest
-    container_name: portainer
-    restart: always
-    security_opt:
-      - no-new-privileges:true
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - portainer_data:/data
-    ports:
-      - 9000:9000
+      - "5000:5000"
+    working_dir: /usr/src/app
+    container_name: prfg6-python
+    restart: unless-stopped
 
 volumes:
   mysql-bd:
   mongo-bd:
-  portainer_data:
+  rabbitmq_data:
