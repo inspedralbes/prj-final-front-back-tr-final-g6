@@ -17,8 +17,7 @@ jobs:
           SSH_USER: ${{ secrets.PROD_USER_SERVER }}
           SSH_PASSWORD: ${{ secrets.PROD_PASSWORD_SERVER }}
         run: |
-            ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
-            echo "Connected to server"
+            sshpass -p "${SSH_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'           echo "Connected to server"
             EOF
       - name: Update git
         run: |
