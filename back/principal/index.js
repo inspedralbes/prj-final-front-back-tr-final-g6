@@ -428,8 +428,8 @@ app.post('/api/data/mongodb', async (req, res) => {
 app.post('/api/data/mysql', (req, res) => {
   const { timeSpan, sensors } = req.body;
 
-  if (!timeSpan || typeof sensors !== 'object' || Object.keys(sensors).length === 0) {
-    return res.status(400).json({ message: 'Es requereix un timeSpan i un objecte de sensors no buit' });
+  if (!timeSpan || typeof sensors !== 'object') {
+    return res.status(400).json({ message: 'Es requereix un timeSpan' });
   }
 
   const query = `

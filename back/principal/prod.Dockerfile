@@ -4,13 +4,13 @@ FROM node:23-bookworm-slim
 WORKDIR /usr/src/app
 
 # Copia tots els fitxers de l'aplicació
-COPY back/ .
+COPY . .
 
 # Instal·la les dependències de Node.js
 RUN npm install --no-bin-links
 
 # Copia el fitxer .env
-COPY back/.env.PROD .env
+COPY .env.PROD .env
 
 
 

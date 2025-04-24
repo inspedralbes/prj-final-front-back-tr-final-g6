@@ -29,7 +29,7 @@ async function receiveMessage() {
 
 async function insertDataToMongoDB(volume, temperature, date, MAC, api_key) {
   console.log('🔵 Enviando datos a MongoDB...')
-  console.log(`🔵 Volum: ${volume} dB, Temperatura: ${temperature}°C, Api_key: ${api_key}, MAC:${MAC} Data: ${date}`);
+  console.log(`🔵 Volum: ${volume} dB, Temperatura: ${temperature}°C, Data: ${date}`);
   const url = process.env.BACK_URL + "/api/data/mongodb";
 
   try {
