@@ -23,4 +23,9 @@ jobs:
             git switch create-githubactions
             git pull
             echo "Git pull completed"
+            echo "Start DOCKER"
+            docker compose -f docker-compose.prod.yml up -d --build
+            echo "Docker compose up completed"
+            echo "List of running containers"
+            docker ps -a
             EOF
