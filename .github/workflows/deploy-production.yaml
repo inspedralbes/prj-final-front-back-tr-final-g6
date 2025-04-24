@@ -18,9 +18,7 @@ jobs:
           SSH_PASSWORD: ${{ secrets.PROD_PASSWORD_SERVER }}
         run: |
             sshpass -p "${SSH_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'           echo "Connected to server"
-            EOF
-      - name: Update git
-        run: |
             cd /root/PROD/prj-final-front-back-tr-final-g6
             git switch create-githubactions
             git pull
+            EOF
