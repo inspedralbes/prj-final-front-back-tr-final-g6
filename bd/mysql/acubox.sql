@@ -308,6 +308,13 @@ INSERT INTO `sensor` (`idSensor`, `mac`, `nombre`, `ubicacion`, `x`, `y`, `idAul
 (4, 'MAC4', 'sensor4', 'aula1', 4, 4, 1, 'API_KEY4'),
 (5, 'MAC5', 'sensor5', 'aula1', 5, 5, 1, 'API_KEY5'),
 (6, 'MAMAMAM', 'sensor6', 'aula1', 6, 6, 1, 'c8nlsy4955ju75tq5w3f');
+INSERT INTO `sensor` (`idSensor`, `mac`, `nombre`, `ubicacion`, `x`, `y`, `idAula`, `api_key`) VALUES
+(1, 'MAC1', 'sensor1', 'aula1', 1, 1, 1, NULL),
+(2, 'MAC2', 'sensor2', 'aula1', 2, 2, 1, NULL),
+(3, 'MAC3', 'sensor3', 'aula1', 3, 3, 1, 'API_KEY3'),
+(4, 'MAC4', 'sensor4', 'aula1', 4, 4, 1, 'API_KEY4'),
+(5, 'MAC5', 'sensor5', 'aula1', 5, 5, 1, 'API_KEY5'),
+(6, 'MAMAMAM', 'sensor6', 'aula1', 6, 6, 1, 'c8nlsy4955ju75tq5w3f');
 
 INSERT INTO `newsensor` (`idSensor`, `mac`, `ip_sensor`, `accepted`, `banned`) VALUES
 (1, 'MAC1', '192.168.1.1', 0, 0),
