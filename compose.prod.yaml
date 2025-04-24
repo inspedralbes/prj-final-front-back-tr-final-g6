@@ -5,7 +5,6 @@ services:
       dockerfile: prod.Dockerfile
     ports:
       - "3000:3000"
-    restart: unless-stopped
 
   prfg6-back:
     build:
@@ -15,17 +14,19 @@ services:
     working_dir: /usr/src/app
     ports:
       - "3020:3020"
-    command: "node index.js"
+    command: "sh -c 'sleep 5 && node index.js'"
     depends_on:
       - prfg6-mysql
       - prfg6-mongodb
-    restart: unless-stopped
 
   prfg6-mongodb:
     image: mongo:6.0
     restart: always
     ports:
       - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
       - mongo-bd:/data/db
 
@@ -35,6 +36,9 @@ services:
     volumes:
       - mysql-bd:/var/lib/mysql:rw
       - ./bd/mysql/acubox.sql:/docker-entrypoint-initdb.d/acubox.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: root 
+      MYSQL_DATABASE: prf-g6
     ports:
       - "3306:3306"
 
@@ -46,7 +50,6 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-    restart: unless-stopped
 
   prfg6-sensor:
     build:
@@ -54,10 +57,11 @@ services:
       dockerfile: prod.Dockerfile
     container_name: sensor-back
     working_dir: /usr/src/app
-    command: "node index.js"
+    volumes:
+      - ./back/services/sensor:/usr/src/app
+    command: "sh -c 'npm install && node index.js'"
     depends_on:
       - rabbitmq
-    restart: unless-stopped
 
   prfg6-dbinsert:
     build:
@@ -65,11 +69,12 @@ services:
       dockerfile: prod.Dockerfile
     container_name: dbinsert-back
     working_dir: /usr/src/app
-    command: "node index.js"
+    volumes:
+      - ./back/services/dbinsert:/usr/src/app
+    command: "sh -c 'npm install && node index.js'"
     depends_on:
       - prfg6-mongodb
       - prfg6-sensor
-    restart: unless-stopped
 
   prfg6-python:
     build:
@@ -79,7 +84,29 @@ services:
       - "5000:5000"
     working_dir: /usr/src/app
     container_name: prfg6-python
-    restart: unless-stopped
+    depends_on:
+      - prfg6-back
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - prfg6-mysql
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@prfg6-mongodb:27017/
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - prfg6-mongodb
 
 volumes:
   mysql-bd:
