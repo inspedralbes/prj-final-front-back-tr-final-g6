@@ -16,6 +16,11 @@ jobs:
           SSH_HOST: ${{ secrets.PROD_URL_SERVER }}
           SSH_USER: ${{ secrets.PROD_USER_SERVER }}
           SSH_PASSWORD: ${{ secrets.PROD_PASSWORD_SERVER }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          MONGO_USER: ${{ secrets.MONGO_USER }}
+          MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
         run: |
             set -x
             sshpass -p "${SSH_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
@@ -25,6 +30,19 @@ jobs:
             cd /root/PROD/prj-final-front-back-tr-final-g6
             git switch create-githubactions
             git pull
+            echo "Copying .env.PROD to .env in necessary directories"
+            cp ./back/principal/.env.PROD ./back/principal/.env
+            echo "MYSQL_USER=${MYSQL_USER}" >> ./back/principal/.env
+            echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> ./back/principal/.env
+            echo "MONGO_URI=${MONGO_URI}" >> ./back/principal/.env
+            cp ./back/services/dbinsert/.env.PROD ./back/services/dbinsert/.env
+            cp ./back/services/sensor/.env.PROD ./back/services/sensor/.env
+            echo "MYSQL_USER=${MYSQL_USER}" >> ./.env.PROD.DOCKER
+            echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> ./.env.PROD.DOCKER
+            echo "MONGO_URI=${MONGO_URI}" >> ./.env.PROD.DOCKER
+            echo "MONGO_USER=${MONGO_USER}" >> ./.env.PROD.DOCKER
+            echo "MONGO_PASSWORD=${MONGO_PASSWORD}" >> ./.env.PROD.DOCKER
+            echo ".env files copied successfully"
             echo "Git pull completed"
             echo "Start DOCKER"
             systemclt start Docker
