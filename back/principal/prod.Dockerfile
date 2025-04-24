@@ -9,9 +9,6 @@ COPY . .
 # Instal·la les dependències de Node.js
 RUN npm install --no-bin-links
 
-# Copia el fitxer .env
-COPY .env.PROD .env
-
 
 
 
