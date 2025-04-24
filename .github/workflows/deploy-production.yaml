@@ -1,4 +1,4 @@
-name: Deploy to Production
+name: Desplegament a Producció
 
 on:
   push:
@@ -10,40 +10,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: Deploy to Production via SSH
+      - name: Desplegar a producció via SSH
         env:
           SSH_HOST: ${{ secrets.PROD_URL_SERVER }}
           SSH_USER: ${{ secrets.PROD_USER_SERVER }}
           SSH_PASSWORD: ${{ secrets.PROD_PASSWORD_SERVER }}
         run: |
-            set -x
-            sshpass -p "${SSH_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
-            set -x
-            echo "Connected to server"
-            echo "Pulling latest changes from GitHub"
-            cd /root/PROD/prj-final-front-back-tr-final-g6
-            git switch create-githubactions
-            git pull
-            echo "Copying .env.PROD to .env in necessary directories"
-            cp ./back/principal/.env.PROD ./back/principal/.env
-            echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> ./back/principal/.env
-            echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> ./back/principal/.env
-            echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> ./back/principal/.env
-            cp ./back/services/dbinsert/.env.PROD ./back/services/dbinsert/.env
-            cp ./back/services/sensor/.env.PROD ./back/services/sensor/.env
-            echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> ./.env.PROD.DOCKER
-            echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> ./.env.PROD.DOCKER
-            echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> ./.env.PROD.DOCKER
-            echo "MONGO_USER=${{ secrets.MONGO_USER }}" >> ./.env.PROD.DOCKER
-            echo "MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}" >> ./.env.PROD.DOCKER
-            echo ".env files copied successfully"
-            echo "Git pull completed"
-            echo "Start DOCKER"
-            systemclt start Docker
-            echo "Docker started"
-            docker compose -f compose.prod.yaml up -d --build
-            echo "Docker compose up completed"
-            echo "List of running containers"
-            docker ps -a
-            EOF
+          set -x
+          
+          # Connexió al servidor
+          sshpass -p "${SSH_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
+          
+          set -x
+          echo "Connexió amb el servidor establerta"
+
+          # Actualitzar el codi des de GitHub
+          cd /root/PROD/prj-final-front-back-tr-final-g6
+          git switch create-githubactions
+          git pull
+
+          # Copiar i configurar arxius .env
+          echo "Copiant arxius .env.PROD a .env"
+          cp ./back/principal/.env.PROD ./back/principal/.env
+          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> ./back/principal/.env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> ./back/principal/.env
+          echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> ./back/principal/.env
+
+          cp ./back/services/dbinsert/.env.PROD ./back/services/dbinsert/.env
+          cp ./back/services/sensor/.env.PROD ./back/services/sensor/.env
+
+          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> ./.env.PROD.DOCKER
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> ./.env.PROD.DOCKER
+          echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> ./.env.PROD.DOCKER
+          echo "MONGO_USER=${{ secrets.MONGO_USER }}" >> ./.env.PROD.DOCKER
+          echo "MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}" >> ./.env.PROD.DOCKER
+
+          echo "Arxius .env copiats i configurats correctament"
+
+          # Iniciar Docker
+          echo "Iniciant Docker"
+          systemctl start docker
+          echo "Docker iniciat"
+
+          # Executar Docker Compose
+          docker compose -f compose.prod.yaml up -d --build
+          echo "Docker Compose executat correctament"
+
+          # Llistar contenidors actius
+          docker ps -a
+          
+          EOF
