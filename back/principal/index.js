@@ -283,12 +283,13 @@ app.post('/api/aules/:id/grafic', (req, res) => {
 app.get('/api/sensors', (req, res) => {
   const query = 'SELECT * FROM sensor';
   connexioBD.execute(query, (err, results) => {
-    if (err) {
-      console.error('Error en la consulta a la base de dades: ' + err.stack);
-      res.status(500).send('Error en la consulta a la base de dades');
-      return;
-    }
-    res.status(200).send(results);
+      if (err) {
+          console.error('Error en la consulta a la base de dades: ' + err.stack);
+          res.status(500).send('Error en la consulta a la base de dades');
+          return;
+      }
+      console.log('Resultados obtenidos:', results); // Log para depuración
+      res.status(200).send(results);
   });
 });
 
@@ -315,6 +316,30 @@ app.get('/api/newsensors', (req, res) => {
     if (err) {
       console.error('Error en la consulta a la base de dades: ' + err.stack);
       res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+    res.status(200).send(results);
+  });
+});
+
+app.put('/api/sensors/:id/accept', (req, res) => {
+  const { id } = req.params;
+  const query = 'UPDATE newsensor SET accepted = 1 WHERE id = ?';
+  connexioBD.execute(query, [id], (err, results) => {
+      if (err) {
+          console.error('Error en la consulta a la base de dades:', err);
+          return res.status(500).send('Error en la consulta a la base de dades');
+      }
+      res.status(200).send({ message: 'Sensor acceptat correctament' });
+  });
+});
+
+app.get('/api/sensors/banned', (req, res) => {
+  const query = 'SELECT * FROM newsensor WHERE banned = 1';
+  connexioBD.execute(query, (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
       return;
     }
     res.status(200).send(results);
