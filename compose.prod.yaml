@@ -104,8 +104,19 @@ services:
       - .env.PROD.DOCKER
     depends_on:
       - prfg6-mongodb
+  
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    restart: always
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
 
 volumes:
   mysql-bd:
   mongo-bd:
   rabbitmq_data:
+  portainer_data:
