@@ -300,6 +300,28 @@ export async function acceptSensor(idSensor) {
     }
 }
 
+export async function banSensor(idSensor, banned) {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/sensors/${idSensor}/ban`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ banned }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al banear/desbanear el sensor');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al banear/desbanear el sensor:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
 // Rechazar (eliminar) un sensor nuevo
 export async function deletePendingSensor(idSensor) {
     try {

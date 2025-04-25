@@ -311,7 +311,7 @@ app.put('/api/sensors', (req, res) => {
 });
 
 app.get('/api/newsensors', (req, res) => {
-  const query = 'SELECT * FROM newsensor';
+  const query = 'SELECT * FROM newsensor WHERE accepted = 0 AND banned = 0'; // Updated query
   connexioBD.execute(query, (err, results) => {
     if (err) {
       console.error('Error en la consulta a la base de dades: ' + err.stack);
