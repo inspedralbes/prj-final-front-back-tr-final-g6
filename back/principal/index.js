@@ -443,8 +443,7 @@ app.post('/api/data/mysql', (req, res) => {
     [1, idSensor, 'temperatura', temperature.max, temperature.min, temperature.avg, dataIni, dataFi]
   ]);
 
-  connexioBD.query(query, [timeSpan, values], (err, results) => {
-
+  connexioBD.query(query, [values], (err, results) => {
     console.log('Query completa: ', query);
 
     if (err) {
