@@ -34,8 +34,8 @@ def run_script(script_name, data, timeSpan):
 def execute_scheduled_script(timeSpan):
     app.logger.info(f"Executant script programat per {timeSpan}...")
 
-    # Obtenim la data actual
-    current_date = datetime.now()
+    # Obtenim la data actual amb la zona horària de Barcelona
+    current_date = datetime.now(BARCELONA_TZ)
 
     # Calculem start_date i end_date segons el timeSpan
     if timeSpan == "minut":
@@ -87,53 +87,42 @@ def send_agregated_data(data):
     except Exception as e:
         app.logger.error("Error inesperat: %s", str(e))
 
-# Scheduler
-
-    ## Scheduler per executar el script cada minut en punt
-
+# Scheduler functions
 def run_scheduler_minute():
     while True:
-        now = datetime.now()
+        now = datetime.now(BARCELONA_TZ)
         seconds_to_next_minute = 60 - now.second
-        time.sleep(seconds_to_next_minute)  
-        execute_scheduled_script("minut") 
-
-    ## Scheduler per executar el script cada hora en punt
+        time.sleep(seconds_to_next_minute)
+        execute_scheduled_script("minut")
 
 def run_scheduler_hour():
     while True:
-        now = datetime.now()
+        now = datetime.now(BARCELONA_TZ)
         seconds_to_next_hour = (60 - now.second) + (60 * (60 - now.minute))
-        time.sleep(seconds_to_next_hour)  
-        execute_scheduled_script("hora") 
-
-    ## Scheduler per executar el script cada dia a les 00:00
+        time.sleep(seconds_to_next_hour)
+        execute_scheduled_script("hora")
 
 def run_scheduler_day():
     while True:
-        now = datetime.now()
+        now = datetime.now(BARCELONA_TZ)
         seconds_to_next_day = (60 - now.second) + (60 * (60 - now.minute)) + (24 * 60 * (24 - now.hour))
-        time.sleep(seconds_to_next_day)  
+        time.sleep(seconds_to_next_day)
         execute_scheduled_script("dia")
-
-    ## Scheduler per executar el script cada setmana a les 00:00 del dilluns
 
 def run_scheduler_week():
     while True:
-        now = datetime.now()
+        now = datetime.now(BARCELONA_TZ)
         days_to_next_week = (7 - now.weekday()) % 7
         seconds_to_next_week = (60 - now.second) + (60 * (60 - now.minute)) + (24 * 60 * (24 * days_to_next_week - now.hour))
-        time.sleep(seconds_to_next_week)  
+        time.sleep(seconds_to_next_week)
         execute_scheduled_script("setmana")
-
-    ## Scheduler per executar el script cada mes el primer dia a les 00:00
 
 def run_scheduler_month():
     while True:
-        now = datetime.now()
+        now = datetime.now(BARCELONA_TZ)
         days_to_next_month = (30 - now.day) % 30
         seconds_to_next_month = (60 - now.second) + (60 * (60 - now.minute)) + (24 * 60 * (24 * days_to_next_month - now.hour))
-        time.sleep(seconds_to_next_month)  
+        time.sleep(seconds_to_next_month)
         execute_scheduled_script("mes")
 
 # Routes
