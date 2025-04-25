@@ -310,6 +310,40 @@ app.put('/api/sensors', (req, res) => {
   });
 });
 
+app.delete('/api/sensors/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'DELETE FROM sensor WHERE idSensor = ?';
+  connexioBD.execute(query, [id], (err, results) => {
+    if (err) {
+      console.error('Error en la eliminación del sensor:', err.stack);
+      return res.status(500).send({ message: 'Error en la eliminación del sensor' });
+    }
+    if (results.affectedRows > 0) {
+      res.status(200).send({ message: 'Sensor eliminado correctamente' });
+    } else {
+      res.status(404).send({ message: 'Sensor no encontrado' });
+    }
+  });
+});
+
+// Actualizar un sensor
+app.put('/api/sensors/:id', (req, res) => {
+  const { id } = req.params;
+  const { nombre, ubicacion, x, y } = req.body;
+  const query = 'UPDATE sensor SET nombre = ?, ubicacion = ?, x = ?, y = ? WHERE idSensor = ?';
+  connexioBD.execute(query, [nombre, ubicacion, x, y, id], (err, results) => {
+    if (err) {
+      console.error('Error en la actualización del sensor:', err.stack);
+      return res.status(500).send({ message: 'Error en la actualización del sensor' });
+    }
+    if (results.affectedRows > 0) {
+      res.status(200).send({ message: 'Sensor actualizado correctamente' });
+    } else {
+      res.status(404).send({ message: 'Sensor no encontrado' });
+    }
+  });
+});
+
 app.get('/api/newsensors', (req, res) => {
   const query = 'SELECT * FROM newsensor WHERE accepted = 0 AND banned = 0'; // Updated query
   connexioBD.execute(query, (err, results) => {

@@ -400,3 +400,44 @@ export async function getBannedSensors() {
         throw error;
     }
 }
+
+export async function deleteSensor(idSensor) {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/sensors/${idSensor}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al eliminar el sensor');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al eliminar el sensor:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
+// Actualizar un sensor
+export async function updateSensorById(idSensor, sensorData) {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/sensors/${idSensor}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(sensorData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al actualizar el sensor');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al actualizar el sensor:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}

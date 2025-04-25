@@ -8,6 +8,65 @@
             Carregant...
         </div>
 
+        <!-- Edit Sensor Modal -->
+        <div v-if="showEditModal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-md border border-slate-700">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold text-white mb-6">Editar Sensor</h2>
+
+                    <form @submit.prevent="submitEditForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-1">Nom</label>
+                            <input v-model="editForm.nombre" type="text"
+                                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-1">Ubicació</label>
+                            <input v-model="editForm.ubicacion" type="text"
+                                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Coordenada X</label>
+                                <input v-model.number="editForm.x" type="number"
+                                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Coordenada Y</label>
+                                <input v-model.number="editForm.y" type="number"
+                                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-1">Aula</label>
+                            <select v-model="editForm.idAula"
+                                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                                <option :value="null">No assignada</option>
+                                <option v-for="aula in aulas" :key="aula.id" :value="aula.id">
+                                    {{ aula.id }} - {{ aula.Curs }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4">
+                            <button type="button" @click="showEditModal = false"
+                                class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all">
+                                Cancel·lar
+                            </button>
+                            <button type="submit"
+                                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all">
+                                Guardar Canvis
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <div class="flex-grow w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
             <!-- Tabs for Sensor Types -->
             <div class="flex border-b border-slate-600">
@@ -62,7 +121,7 @@
                                 </h2>
                                 <div class="flex items-center mt-1">
                                     <span class="text-sm text-teal-400">{{ sensor.ubicacion || 'Ubicació no definida'
-                                        }}</span>
+                                    }}</span>
                                     <span v-if="sensor.idAula" class="mx-2 text-slate-400">•</span>
                                     <span v-if="sensor.idAula" class="text-sm text-slate-300">{{
                                         getAulaName(sensor.idAula) }}</span>
@@ -110,10 +169,21 @@
                                     <p class="text-lg text-white">{{ getAulaName(sensor.idAula) }}</p>
                                 </div>
                             </div>
+                            <div class="flex flex-wrap gap-3 pt-4">
+                                <button @click.stop="handleEditSensor(sensor)"
+                                    class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all flex items-center">
+                                    Editar
+                                </button>
+                                <button @click.stop="handleDeleteSensor(sensor)"
+                                    class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all flex items-center">
+                                    Eliminar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
             <!-- Pending Sensors List -->
             <div v-if="activeTab === 'pending'" class="space-y-6">
                 <div v-for="sensor in filteredPendingSensors" :key="sensor.idSensor"
@@ -182,10 +252,6 @@
                                     class="px-5 py-2.5 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-all flex items-center">
                                     Bannejar
                                 </button>
-                                <button @click.stop="handleDeletePendingSensor(sensor.idSensor)"
-                                    class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all flex items-center">
-                                    Eliminar
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -203,7 +269,7 @@
                                 </h2>
                                 <div class="flex items-center mt-1">
                                     <span class="text-sm text-teal-400">{{ sensor.ubicacion || 'Ubicació no definida'
-                                        }}</span>
+                                    }}</span>
                                 </div>
                             </div>
                             <div class="flex items-center">
@@ -265,7 +331,9 @@ import {
     banPendingSensor,
     getBannedSensors,
     getAllSensors,
-    banSensor
+    banSensor,
+    deleteSensor,
+    updateSensorById
 } from '~/utils/communicationManager';
 import { getTotesAulas } from '~/utils/communicationManager';
 
@@ -277,46 +345,92 @@ const aulas = ref([]);
 const activeTab = ref('active');
 const loading = ref(false);
 
+// Edit modal state
+const showEditModal = ref(false);
+const editForm = ref({
+    idSensor: null,
+    nombre: '',
+    ubicacion: '',
+    x: 0,
+    y: 0,
+    idAula: null
+});
+const currentEditingSensor = ref(null);
+
+const handleEditSensor = (sensor) => {
+    currentEditingSensor.value = sensor;
+    editForm.value = {
+        idSensor: sensor.idSensor,
+        nombre: sensor.nombre || '',
+        ubicacion: sensor.ubicacion || '',
+        x: sensor.x || 0,
+        y: sensor.y || 0,
+        idAula: sensor.idAula || null
+    };
+    showEditModal.value = true;
+};
+
+const submitEditForm = async () => {
+    try {
+        await updateSensorById(editForm.value.idSensor, {
+            nombre: editForm.value.nombre,
+            ubicacion: editForm.value.ubicacion,
+            x: editForm.value.x,
+            y: editForm.value.y,
+            idAula: editForm.value.idAula
+        });
+
+        // Actualizar el sensor en la lista correspondiente
+        const updateSensorInList = (list) => {
+            const index = list.value.findIndex(s => s.idSensor === editForm.value.idSensor);
+            if (index !== -1) {
+                list.value[index] = { ...list.value[index], ...editForm.value };
+            }
+        };
+
+        updateSensorInList(activeSensors);
+        updateSensorInList(pendingSensors);
+        updateSensorInList(bannedSensors);
+
+        showEditModal.value = false;
+        alert('Sensor actualitzat correctament');
+    } catch (error) {
+        console.error('Error al actualizar el sensor:', error);
+        alert('Error al actualizar el sensor: ' + error.message);
+    }
+};
+
 onMounted(async () => {
     loading.value = true;
     try {
         const [sensorsData, aulasData, bannedData, pendingData, newsensorsData] = await Promise.all([
-            getAllSensors(), // Llama a la API de sensores
+            getAllSensors(),
             getTotesAulas(),
             getBannedSensors(),
-            getNewsensors(), // Llama a la API de sensores pendientes
-            getNewsensors() // Reutiliza la función para obtener ip_sensor data
+            getNewsensors(),
+            getNewsensors()
         ]);
-
-        console.log('Sensors Data:', sensorsData); // Verificar datos originales
 
         activeSensors.value = sensorsData.map(sensor => {
             const newsensor = newsensorsData.find(n => n.idSensor === sensor.idSensor);
-            const enrichedActiveSensor = {
+            return {
                 ...sensor,
-                ip: newsensor?.ip_sensor || sensor.ip || 'No disponible', // Prioriza ip_sensor y luego ip
+                ip: newsensor?.ip_sensor || sensor.ip || 'No disponible',
                 showDetails: false,
                 banned: false
             };
-            return enrichedActiveSensor;
         });
-        console.log('Active Sensors:', activeSensors.value); // Verificar datos enriquecidos
 
-        // Process pending sensors (from newsensor table)
         pendingSensors.value = pendingData.map(sensor => {
             const sensorDetails = sensorsData.find(s => s.idSensor === sensor.idSensor) || {};
-            const enrichedPendingSensor = {
-                ...sensorDetails, // Enrich with additional details if available
+            return {
+                ...sensorDetails,
                 ...sensor,
-                ip: sensor.ip_sensor || sensorDetails.ip || 'No disponible', // Prioritize ip_sensor for pending
+                ip: sensor.ip_sensor || sensorDetails.ip || 'No disponible',
                 showDetails: false
             };
-            return enrichedPendingSensor;
         });
 
-        console.log('Pending Sensors:', pendingSensors.value); // Verificar datos enriquecidos
-
-        // Process banned sensors (combine with sensor details)
         bannedSensors.value = bannedData.map(banned => {
             const sensorDetails = sensorsData.find(s => s.idSensor === banned.idSensor);
             return {
@@ -341,7 +455,6 @@ const filteredActiveSensors = computed(() => {
 });
 
 const filteredPendingSensors = computed(() => {
-    console.log('Filtered Pending Sensors:', pendingSensors.value);
     return pendingSensors.value;
 });
 
@@ -358,12 +471,24 @@ const toggleDetails = (sensor) => {
     sensor.showDetails = !sensor.showDetails;
 };
 
+const handleDeleteSensor = async (sensor) => {
+    if (confirm(`¿Estás seguro de que deseas eliminar el sensor "${sensor.nombre || `Sensor ${sensor.mac}`}"?`)) {
+        try {
+            await deleteSensor(sensor.idSensor);
+            activeSensors.value = activeSensors.value.filter(s => s.idSensor !== sensor.idSensor);
+            alert('Sensor eliminado correctamente');
+        } catch (error) {
+            console.error('Error al eliminar el sensor:', error);
+            alert('Error al eliminar el sensor: ' + error.message);
+        }
+    }
+};
+
 const handleBanSensor = async (sensor) => {
     try {
         await banSensor(sensor.idSensor, !sensor.banned);
         sensor.banned = !sensor.banned;
 
-        // Move sensor between active and banned lists
         if (sensor.banned) {
             activeSensors.value = activeSensors.value.filter(s => s.idSensor !== sensor.idSensor);
             bannedSensors.value.push(sensor);
@@ -385,7 +510,6 @@ const acceptPendingSensor = async (sensor) => {
         pendingSensors.value = pendingSensors.value.filter(s => s.idSensor !== sensor.idSensor);
         alert('Sensor acceptat correctament');
 
-        // Refresh active sensors list
         const sensorsData = await getAllSensors();
         activeSensors.value = sensorsData
             .filter(s => !bannedSensors.value.some(banned => banned.idSensor === s.idSensor))
