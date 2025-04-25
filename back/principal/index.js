@@ -8,6 +8,7 @@ import mysql2 from 'mysql2';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { MongoClient } from 'mongodb';
+import moment from 'moment-timezone';
 
 app.use(cors());
 app.use(express.json());
@@ -370,8 +371,8 @@ app.get('/api/data/mongodb', async (req, res) => {
     console.log('Dates rebudes: ', startDate, endDate);
 
     // Converteix les dates a objectes Date
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = moment.tz(startDate, 'Europe/Madrid').toDate();
+    const end = moment.tz(endDate, 'Europe/Madrid').toDate();
 
     console.log('Dates convertides: ', start, end);
 
