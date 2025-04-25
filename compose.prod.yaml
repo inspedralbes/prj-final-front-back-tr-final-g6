@@ -73,7 +73,7 @@ services:
       dockerfile: prod.Dockerfile
     working_dir: /usr/src/app
     volumes:
-      - ./back/services/dbinsert:/usr/src/app
+      - ./back/services/DBinsert:/usr/src/app
     command: "sh -c 'npm install && node index.js'"
     depends_on:
       - prfg6-mongodb
