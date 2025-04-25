@@ -31,13 +31,13 @@ jobs:
 
           # Copiar i configurar arxius .env
           echo "Copiant arxius .env.PROD a .env"
-          cp ./back/principal/.env.PROD ./back/principal/.env
+          cp -f ./back/principal/.env.PROD ./back/principal/.env
           echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> ./back/principal/.env
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> ./back/principal/.env
           echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> ./back/principal/.env
 
-          cp ./back/services/dbinsert/.env.PROD ./back/services/dbinsert/.env
-          cp ./back/services/sensor/.env.PROD ./back/services/sensor/.env
+          cp -f ./back/services/dbinsert/.env.PROD ./back/services/dbinsert/.env
+          cp -f ./back/services/sensor/.env.PROD ./back/services/sensor/.env
 
           echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> ./.env.PROD.DOCKER
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> ./.env.PROD.DOCKER
