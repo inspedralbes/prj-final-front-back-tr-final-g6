@@ -370,11 +370,11 @@ app.get('/api/data/mongodb', async (req, res) => {
   try {
     console.log('Dates rebudes: ', startDate, endDate);
 
-    // Converteix les dates a objectes Date
-    const start = moment.tz(startDate, 'Europe/Madrid').toDate();
-    const end = moment.tz(endDate, 'Europe/Madrid').toDate();
+    // Converteix les dates a objectes Date i ajusta l'hora a l'hora local de Barcelona
+    const start = moment.tz(startDate, 'Europe/Madrid').add(2, 'hours').toDate();
+    const end = moment.tz(endDate, 'Europe/Madrid').add(2, 'hours').toDate();
 
-    console.log('Dates convertides: ', start, end);
+    console.log('Dates convertides i ajustades: ', start, end);
 
     // Afegeix validació per assegurar-te que són dates vàlides
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
