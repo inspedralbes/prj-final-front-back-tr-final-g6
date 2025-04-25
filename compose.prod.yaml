@@ -27,7 +27,7 @@ services:
     ports:
       - "27017:27017"
     env_file:
-      - .env.PROD.DOCKER
+      - .env.PROD.DOCKER 
     volumes:
       - mongo-bd:/data/db
 
