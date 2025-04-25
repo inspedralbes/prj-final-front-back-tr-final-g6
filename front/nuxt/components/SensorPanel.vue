@@ -322,35 +322,36 @@ const activeSensors = ref([]);
 const pendingSensors = ref([]);
 const aulas = ref([]);
 const activeTab = ref('active');
+const bannedSensors = ref([]); // Add this line to declare bannedSensors
 
 onMounted(async () => {
     try {
         // Cargar datos en paralelo
-        const [newsensorsData, aulasData, bannedSensorsData] = await Promise.all([
+        const [newsensorsData, aulasData, bannedSensorsData, allSensorsData] = await Promise.all([
             getNewsensors(),
             getTotesAulas(),
             getBannedSensors(),
             getAllSensors()
         ]);
 
-        // Filtrar y formatear sensores activos
-        activeSensors.value = formatSensors(
-            newsensorsData.filter(sensor => !sensor.banned) // Excluir sensores baneados
-        );
-
-        // Formatear y asignar sensores pendientes
-        pendingSensors.value = formatSensors(newsensorsData);
+        // Filtrar y asignar sensores activos
+        activeSensors.value = formatSensors(allSensorsData.filter(sensor => sensor.accepted === 0 && sensor.banned === 0));
 
         // Asignar aulas
         aulas.value = aulasData;
 
-        // Formatear y asignar sensores baneados
-        activeSensors.value = activeSensors.value.concat(
-            bannedSensorsData.map(sensor => ({
-                ...sensor,
+        // Filtrar y asignar sensores pendientes
+        pendingSensors.value = formatSensors(newsensorsData.filter(sensor => sensor.accepted === 0 && sensor.banned === 0));
+
+        // Formatear y asignar sensores baneados con información adicional
+        bannedSensors.value = bannedSensorsData.map(bannedSensor => {
+            const sensorDetails = allSensorsData.find(sensor => sensor.idSensor === bannedSensor.idSensor);
+            return {
+                ...bannedSensor,
+                ...sensorDetails,
                 showDetailsBanned: false
-            }))
-        );
+            };
+        }).filter(sensor => sensor.banned); // Asegurarse de que solo se incluyan los sensores baneados
     } catch (error) {
         console.error('Error al cargar datos:', error);
         alert('Error al cargar datos: ' + error.message);
@@ -366,7 +367,7 @@ const formatSensors = (sensors) => {
 };
 
 const filteredActiveSensors = computed(() => {
-    return activeSensors.value.filter(sensor => sensor.accepted === 0 && sensor.banned === 0);
+    return activeSensors.value; // Mostrar directamente los sensores activos ya filtrados
 });
 
 const filteredPendingSensors = computed(() => {
@@ -374,7 +375,7 @@ const filteredPendingSensors = computed(() => {
 });
 
 const filteredBannedSensors = computed(() => {
-    return activeSensors.value.filter(sensor => sensor.banned); // Only show banned sensors
+    return bannedSensors.value; // Usar directamente los sensores baneados ya procesados
 });
 const getAulaName = (aulaId) => {
     const aula = aulas.value.find(a => a.id === aulaId);
