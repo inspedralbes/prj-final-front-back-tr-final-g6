@@ -458,4 +458,4 @@ app.post('/api/data/mysql', (req, res) => {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
-});
+}); 
