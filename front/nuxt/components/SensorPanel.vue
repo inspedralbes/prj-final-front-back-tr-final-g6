@@ -74,7 +74,7 @@
                             </div>
                         </div>
 
-                        <!-- Sensor Details (same as banned sensors) -->
+                        <!-- Sensor Details -->
                         <div v-if="sensor.showDetails" class="mt-6 space-y-4" @click.stop>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -84,6 +84,10 @@
                                 <div>
                                     <p class="text-sm text-slate-400">MAC:</p>
                                     <p class="text-lg text-white">{{ sensor.mac }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-slate-400">IP:</p>
+                                    <p class="text-lg text-white">{{ sensor.ip || 'No disponible' }}</p>
                                 </div>
                                 <div>
                                     <p class="text-sm text-slate-400">Nom:</p>
@@ -106,17 +110,10 @@
                                     <p class="text-lg text-white">{{ getAulaName(sensor.idAula) }}</p>
                                 </div>
                             </div>
-                            <div class="flex flex-wrap gap-3 pt-4">
-                                <button @click.stop="handleBanSensor(sensor)"
-                                    class="px-6 py-3 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                                    Bannejar
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
             <!-- Pending Sensors List -->
             <div v-if="activeTab === 'pending'" class="space-y-6">
                 <div v-for="sensor in filteredPendingSensors" :key="sensor.idSensor"
@@ -135,8 +132,8 @@
                                 </div>
                             </div>
                             <div class="flex items-center">
-                                <div class="h-3 w-3 rounded-full mr-2 bg-green-500"></div>
-                                <span class="text-green-400 text-sm">Actiu</span>
+                                <div class="h-3 w-3 rounded-full mr-2 bg-yellow-500"></div>
+                                <span class="text-yellow-400 text-sm">Pendent</span>
                             </div>
                         </div>
 
@@ -152,6 +149,10 @@
                                     <p class="text-lg text-white">{{ sensor.mac }}</p>
                                 </div>
                                 <div>
+                                    <p class="text-sm text-slate-400">IP:</p>
+                                    <p class="text-lg text-white">{{ sensor.ip || 'No disponible' }}</p>
+                                </div>
+                                <div>
                                     <p class="text-sm text-slate-400">Nom:</p>
                                     <p class="text-lg text-white">{{ sensor.nombre || 'No disponible' }}</p>
                                 </div>
@@ -161,11 +162,11 @@
                                 </div>
                                 <div>
                                     <p class="text-sm text-slate-400">Coordenada X:</p>
-                                    <p class="text-lg text-white">{{ sensor.x }}</p>
+                                    <p class="text-lg text-white">{{ sensor.x || 'No disponible' }}</p>
                                 </div>
                                 <div>
                                     <p class="text-sm text-slate-400">Coordenada Y:</p>
-                                    <p class="text-lg text-white">{{ sensor.y }}</p>
+                                    <p class="text-lg text-white">{{ sensor.y || 'No disponible' }}</p>
                                 </div>
                                 <div v-if="sensor.idAula">
                                     <p class="text-sm text-slate-400">Aula assignada:</p>
@@ -279,27 +280,41 @@ const loading = ref(false);
 onMounted(async () => {
     loading.value = true;
     try {
-        const [sensorsData, aulasData, bannedData] = await Promise.all([
-            getAllSensors(),
+        const [sensorsData, aulasData, bannedData, pendingData, newsensorsData] = await Promise.all([
+            getAllSensors(), // Llama a la API de sensores
             getTotesAulas(),
-            getBannedSensors()
+            getBannedSensors(),
+            getNewsensors(), // Llama a la API de sensores pendientes
+            getNewsensors() // Reutiliza la función para obtener ip_sensor data
         ]);
 
-        // Process active sensors (non-banned)
-        activeSensors.value = sensorsData
-            .filter(sensor => !bannedData.some(banned => banned.idSensor === sensor.idSensor))
-            .map(sensor => ({
+        console.log('Sensors Data:', sensorsData); // Verificar datos originales
+
+        activeSensors.value = sensorsData.map(sensor => {
+            const newsensor = newsensorsData.find(n => n.idSensor === sensor.idSensor);
+            const enrichedActiveSensor = {
                 ...sensor,
+                ip: newsensor?.ip_sensor || sensor.ip || 'No disponible', // Prioriza ip_sensor y luego ip
                 showDetails: false,
                 banned: false
-            }));
+            };
+            return enrichedActiveSensor;
+        });
+        console.log('Active Sensors:', activeSensors.value); // Verificar datos enriquecidos
 
         // Process pending sensors (from newsensor table)
-        const pendingData = await getNewsensors(); // Already filtered by backend
-        pendingSensors.value = pendingData.map(sensor => ({
-            ...sensor,
-            showDetails: false
-        }));
+        pendingSensors.value = pendingData.map(sensor => {
+            const sensorDetails = sensorsData.find(s => s.idSensor === sensor.idSensor) || {};
+            const enrichedPendingSensor = {
+                ...sensorDetails, // Enrich with additional details if available
+                ...sensor,
+                ip: sensor.ip_sensor || sensorDetails.ip || 'No disponible', // Prioritize ip_sensor for pending
+                showDetails: false
+            };
+            return enrichedPendingSensor;
+        });
+
+        console.log('Pending Sensors:', pendingSensors.value); // Verificar datos enriquecidos
 
         // Process banned sensors (combine with sensor details)
         bannedSensors.value = bannedData.map(banned => {
@@ -326,6 +341,7 @@ const filteredActiveSensors = computed(() => {
 });
 
 const filteredPendingSensors = computed(() => {
+    console.log('Filtered Pending Sensors:', pendingSensors.value);
     return pendingSensors.value;
 });
 
