@@ -40,7 +40,6 @@ jobs:
           cp -f ./back/services/sensor/.env.PROD ./back/services/sensor/.
           
           echo "ME_CONFIG_BASICAUTH=false" > ./.env.PROD.DOCKER
-          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> ./.env.PROD.DOCKER
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> ./.env.PROD.DOCKER
           echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> ./.env.PROD.DOCKER
           echo "MONGO_USER=${{ secrets.MONGO_USER }}" >> ./.env.PROD.DOCKER
