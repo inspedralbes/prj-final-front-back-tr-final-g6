@@ -447,6 +447,9 @@ app.post('/api/data/mysql', (req, res) => {
   ]);
 
   connexioBD.query(query, [timeSpan, values], (err, results) => {
+
+    console.log('Query completa: ', query);
+
     if (err) {
       console.error('Error en la inserció a la base de dades: ' + err.stack);
       return res.status(500).json({ message: 'Error en la inserció a la base de dades' });
