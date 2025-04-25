@@ -432,10 +432,7 @@ app.post('/api/data/mysql', (req, res) => {
     return res.status(400).json({ message: 'Es requereix un timeSpan' });
   }
 
-  const query = `
-    INSERT INTO ?? (idAula, idSensor, tipus, max, min, average, dataIni, dataFi)
-    VALUES ?
-  `;
+  const query = `INSERT INTO ${mysql2.escapeId(timeSpan)} (idAula, idSensor, tipus, max, min, average, dataIni, dataFi) VALUES ?`;
 
   const currentDate = new Date();
   const dataIni = currentDate.toISOString();
