@@ -37,8 +37,9 @@ jobs:
           echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> ./back/principal/.env
 
           cp -f ./back/services/dbinsert/.env.PROD ./back/services/dbinsert/.env
-          cp -f ./back/services/sensor/.env.PROD ./back/services/sensor/.env
-
+          cp -f ./back/services/sensor/.env.PROD ./back/services/sensor/.
+          
+          echo "ME_CONFIG_BASICAUTH=false" > ./.env.PROD.DOCKER
           echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> ./.env.PROD.DOCKER
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> ./.env.PROD.DOCKER
           echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> ./.env.PROD.DOCKER
