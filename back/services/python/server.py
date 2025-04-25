@@ -22,6 +22,7 @@ def get_dades(start_date, end_date):
         'startDate': start_date,
         'endDate': end_date
     })
+    app.logger.info("Dades obtingudes de l'API: %s", response.json())
     return response.json()
 
 def run_script(script_name, data, timeSpan):
