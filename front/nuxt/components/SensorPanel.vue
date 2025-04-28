@@ -3,6 +3,26 @@
         <!-- Custom Header Component -->
         <Header />
 
+        <!-- Confirmation Popup -->
+        <div v-if="showConfirmationPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-md border border-slate-700">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold text-white mb-4">Confirmació</h2>
+                    <p class="text-slate-400 mb-6">{{ confirmationMessage }}</p>
+                    <div class="flex justify-end gap-3">
+                        <button @click="closeConfirmationPopup"
+                            class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all">
+                            Tancar
+                        </button>
+                        <button @click="executeConfirmationAction"
+                            class="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-all">
+                            Confirmar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Main Content -->
         <div v-if="loading" class="text-center text-white py-4">
             Carregant...
@@ -332,7 +352,7 @@
                                 </div>
                             </div>
                             <div class="flex flex-wrap gap-3 pt-4">
-                                <button @click.stop="handleBanSensor(sensor)"
+                                <button @click.stop="handleUnbanSensor(sensor)"
                                     class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                                     Desbannejar
                                 </button>
@@ -359,7 +379,8 @@ import {
     banSensor,
     deleteSensor,
     updateSensorById,
-    updateSensorStatus
+    updateSensorStatus,
+    unbanSensor
 } from '~/utils/communicationManager';
 import { getTotesAulas } from '~/utils/communicationManager';
 
@@ -516,56 +537,77 @@ const toggleDetails = (sensor) => {
     sensor.showDetails = !sensor.showDetails;
 };
 
-const handleBanSensor = async (sensor) => {
-    try {
-        await banSensor(sensor.idSensor, !sensor.banned);
-        sensor.banned = !sensor.banned;
+// Popup state
+const showConfirmationPopup = ref(false);
+const confirmationMessage = ref('');
+let confirmationAction = null;
 
-        if (sensor.banned) {
+const openConfirmationPopup = (message, action) => {
+    confirmationMessage.value = message;
+    confirmationAction = action;
+    showConfirmationPopup.value = true;
+};
+
+const closeConfirmationPopup = () => {
+    showConfirmationPopup.value = false;
+    confirmationMessage.value = '';
+    confirmationAction = null;
+};
+
+const executeConfirmationAction = () => {
+    if (confirmationAction) {
+        confirmationAction();
+    }
+    closeConfirmationPopup();
+};
+
+// Updated action handlers
+const handleBanSensor = (sensor) => {
+    openConfirmationPopup('Estàs segur que vols bannejar aquest sensor?', async () => {
+        try {
+            await banSensor(sensor.idSensor, true);
             activeSensors.value = activeSensors.value.filter(s => s.idSensor !== sensor.idSensor);
-            bannedSensors.value.push(sensor);
-        } else {
-            bannedSensors.value = bannedSensors.value.filter(s => s.idSensor !== sensor.idSensor);
-            activeSensors.value.push(sensor);
+            bannedSensors.value.push({ ...sensor, banned: true, showDetails: false });
+        } catch (error) {
+            console.error('Error banning sensor:', error);
         }
-
-        alert(sensor.banned ? 'Sensor bannejat' : 'Sensor desbannejat');
-    } catch (error) {
-        console.error('Error banning sensor:', error);
-        alert('Error al bannejar el sensor: ' + error.message);
-    }
+    });
 };
 
-const acceptPendingSensor = async (sensor) => {
-    try {
-        await updateSensorStatus(sensor.idSensor, 'accept');
-        pendingSensors.value = pendingSensors.value.filter(s => s.idSensor !== sensor.idSensor);
-        activeSensors.value.push({
-            ...sensor,
-            banned: false,
-            showDetails: false
-        });
-        alert('Sensor acceptat correctament');
-    } catch (error) {
-        console.error('Error accepting sensor:', error);
-        alert('Error al acceptar el sensor: ' + error.message);
-    }
+const handleUnbanSensor = (sensor) => {
+    openConfirmationPopup('Estàs segur que vols desbannejar aquest sensor?', async () => {
+        try {
+            await unbanSensor(sensor.idSensor);
+            bannedSensors.value = bannedSensors.value.filter(s => s.idSensor !== sensor.idSensor);
+            pendingSensors.value.push({ ...sensor, banned: false, showDetails: false });
+        } catch (error) {
+            console.error('Error unbanning sensor:', error);
+        }
+    });
 };
 
-const handleRejectPendingSensor = async (sensor) => {
-    try {
-        await updateSensorStatus(sensor.idSensor, 'reject');
-        pendingSensors.value = pendingSensors.value.filter(s => s.idSensor !== sensor.idSensor);
-        bannedSensors.value.push({
-            ...sensor,
-            banned: true,
-            showDetails: false
-        });
-        alert('Sensor rebutjat correctament');
-    } catch (error) {
-        console.error('Error rejecting sensor:', error);
-        alert('Error al rebutjar el sensor: ' + error.message);
-    }
+const acceptPendingSensor = (sensor) => {
+    openConfirmationPopup('Estàs segur que vols acceptar aquest sensor?', async () => {
+        try {
+            await updateSensorStatus(sensor.idSensor, 'accept');
+            pendingSensors.value = pendingSensors.value.filter(s => s.idSensor !== sensor.idSensor);
+            activeSensors.value.push({ ...sensor, banned: false, showDetails: false });
+        } catch (error) {
+            console.error('Error accepting sensor:', error);
+        }
+    });
+};
+
+const handleRejectPendingSensor = (sensor) => {
+    openConfirmationPopup('Estàs segur que vols rebutjar aquest sensor?', async () => {
+        try {
+            await updateSensorStatus(sensor.idSensor, 'reject');
+            pendingSensors.value = pendingSensors.value.filter(s => s.idSensor !== sensor.idSensor);
+            bannedSensors.value.push({ ...sensor, banned: true, showDetails: false });
+        } catch (error) {
+            console.error('Error rejecting sensor:', error);
+        }
+    });
 };
 
 const handleBanPendingSensor = async (sensor) => {

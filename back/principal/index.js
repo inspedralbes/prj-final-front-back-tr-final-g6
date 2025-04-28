@@ -413,6 +413,27 @@ app.put('/api/newsensors/:id/status', (req, res) => {
   });
 });
 
+app.put('/api/newsensors/:id/unban', (req, res) => {
+  const { id } = req.params;
+
+  const query = 'UPDATE newsensor SET banned = 0 WHERE idSensor = ?';
+
+  console.log('Executing query:', query, 'with idSensor:', id); // Debugging log
+
+  connexioBD.execute(query, [id], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err); // Log the error
+      return res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
+    }
+
+    if (results.affectedRows > 0) {
+      res.status(200).send({ message: 'Sensor desbannejat correctament' });
+    } else {
+      res.status(404).send({ message: 'Sensor no trobat' });
+    }
+  });
+});
+
 app.get('/api/newsensors/banned', (req, res) => {
   const query = 'SELECT * FROM newsensor WHERE banned = 1';
   connexioBD.execute(query, (err, results) => {

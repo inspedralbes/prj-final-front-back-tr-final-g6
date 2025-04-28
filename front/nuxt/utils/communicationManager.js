@@ -467,3 +467,24 @@ export async function updateSensorStatus(id, status) {
         throw new Error(error.message || 'Hubo un error en la solicitud');
     }
 }
+
+export async function unbanSensor(idSensor) {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/newsensors/${idSensor}/unban`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al desbanear el sensor');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al desbanear el sensor:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
