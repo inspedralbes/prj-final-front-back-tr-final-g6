@@ -305,12 +305,13 @@ app.post('/api/aules/:id/grafic', (req, res) => {
 app.get('/api/sensors', (req, res) => {
   const query = 'SELECT * FROM sensor';
   connexioBD.execute(query, (err, results) => {
-    if (err) {
-      console.error('Error en la consulta a la base de dades: ' + err.stack);
-      res.status(500).send('Error en la consulta a la base de dades');
-      return;
-    }
-    res.status(200).send(results);
+      if (err) {
+          console.error('Error en la consulta a la base de dades: ' + err.stack);
+          res.status(500).send('Error en la consulta a la base de dades');
+          return;
+      }
+      console.log('Resultados obtenidos:', results); // Log para depuración
+      res.status(200).send(results);
   });
 });
 
@@ -331,12 +332,136 @@ app.put('/api/sensors', (req, res) => {
   });
 });
 
+app.delete('/api/sensors/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'DELETE FROM sensor WHERE idSensor = ?';
+  connexioBD.execute(query, [id], (err, results) => {
+    if (err) {
+      console.error('Error en la eliminación del sensor:', err.stack);
+      return res.status(500).send({ message: 'Error en la eliminación del sensor' });
+    }
+    if (results.affectedRows > 0) {
+      res.status(200).send({ message: 'Sensor eliminado correctamente' });
+    } else {
+      res.status(404).send({ message: 'Sensor no encontrado' });
+    }
+  });
+});
+
+// Actualizar un sensor
+app.put('/api/sensors/:id', (req, res) => {
+  const { id } = req.params;
+  const { nombre, ubicacion, x, y } = req.body;
+  const query = 'UPDATE sensor SET nombre = ?, ubicacion = ?, x = ?, y = ? WHERE idSensor = ?';
+  connexioBD.execute(query, [nombre, ubicacion, x, y, id], (err, results) => {
+    if (err) {
+      console.error('Error en la actualización del sensor:', err.stack);
+      return res.status(500).send({ message: 'Error en la actualización del sensor' });
+    }
+    if (results.affectedRows > 0) {
+      res.status(200).send({ message: 'Sensor actualizado correctamente' });
+    } else {
+      res.status(404).send({ message: 'Sensor no encontrado' });
+    }
+  });
+});
+
 app.get('/api/newsensors', (req, res) => {
-  const query = 'SELECT * FROM newsensor';
+  const query = 'SELECT * FROM newsensor WHERE accepted = 0 AND banned = 0'; // Updated query
   connexioBD.execute(query, (err, results) => {
     if (err) {
       console.error('Error en la consulta a la base de dades: ' + err.stack);
       res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+    res.status(200).send(results);
+  });
+});
+
+app.put('/api/newsensors/:id/accept', (req, res) => {
+  const { id } = req.params;
+  const query = 'UPDATE newsensor SET accepted = 1 WHERE id = ?';
+  connexioBD.execute(query, [id], (err, results) => {
+      if (err) {
+          console.error('Error en la consulta a la base de dades:', err);
+          return res.status(500).send('Error en la consulta a la base de dades');
+      }
+      res.status(200).send({ message: 'Sensor acceptat correctament' });
+  });
+});
+
+app.put('/api/newsensors/:id/reject', (req, res) => {
+  const { id } = req.params;
+  const query = 'UPDATE newsensor SET accepted = 0, banned = 1 WHERE id = ?';
+  connexioBD.execute(query, [id], (err, results) => {
+      if (err) {
+          console.error('Error en la consulta a la base de dades:', err);
+          return res.status(500).send('Error en la consulta a la base de dades');
+      }
+      res.status(200).send({ message: 'Sensor rebutjat correctament' });
+  });
+});
+
+app.put('/api/newsensors/:id/status', (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body; // status should be 'accept' or 'reject'
+
+  if (!['accept', 'reject'].includes(status)) {
+    return res.status(400).send({ message: 'El estado debe ser "accept" o "reject"' });
+  }
+
+  const query =
+    status === 'accept'
+      ? 'UPDATE newsensor SET accepted = 1, banned = 0 WHERE idSensor = ?'
+      : 'UPDATE newsensor SET accepted = 0, banned = 1 WHERE idSensor = ?';
+
+  console.log('Executing query:', query, 'with idSensor:', id); // Debugging log
+
+  connexioBD.execute(query, [id], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err); // Log the error
+      return res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
+    }
+
+    if (results.affectedRows > 0) {
+      const message =
+        status === 'accept'
+          ? 'Sensor acceptat correctament'
+          : 'Sensor rebutjat correctament';
+      res.status(200).send({ message });
+    } else {
+      res.status(404).send({ message: 'Sensor no trobat' });
+    }
+  });
+});
+
+app.put('/api/newsensors/:id/unban', (req, res) => {
+  const { id } = req.params;
+
+  const query = 'UPDATE newsensor SET banned = 0 WHERE idSensor = ?';
+
+  console.log('Executing query:', query, 'with idSensor:', id); // Debugging log
+
+  connexioBD.execute(query, [id], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err); // Log the error
+      return res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
+    }
+
+    if (results.affectedRows > 0) {
+      res.status(200).send({ message: 'Sensor desbannejat correctament' });
+    } else {
+      res.status(404).send({ message: 'Sensor no trobat' });
+    }
+  });
+});
+
+app.get('/api/newsensors/banned', (req, res) => {
+  const query = 'SELECT * FROM newsensor WHERE banned = 1';
+  connexioBD.execute(query, (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
       return;
     }
     res.status(200).send(results);
@@ -480,6 +605,40 @@ app.post('/api/data/mysql', (req, res) => {
 
     console.log('Dades inserides correctament a MySQL: ', results);
     res.status(201).json({ message: 'Dades inserides correctament', affectedRows: results.affectedRows });
+  });
+});
+
+
+async function verifyAPI(req, res, next) {
+  const apiKey = req.headers['x-api-key'];
+
+  if (!apiKey) {
+    return res.status(401).json({ message: 'API key es requerida' });
+  }
+
+  const query = 'SELECT * FROM sensor WHERE api_key = ?';
+  connexioBD.execute(query, [apiKey], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de datos:', err);
+      return res.status(500).json({ message: 'Error en la consulta a la base de datos' });
+    }
+
+    if (results.length === 0) {
+      return res.status(403).json({ message: 'API key no válida' });
+    }
+    
+    next();
+  });
+}
+
+app.get('/api/sensors/banned', (req, res) => {
+  const query = 'SELECT * FROM sensor WHERE banned = 1'; // Ensure the correct table and column names
+  connexioBD.execute(query, (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err.stack);
+      return res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
+    }
+    res.status(200).send(results);
   });
 });
 
