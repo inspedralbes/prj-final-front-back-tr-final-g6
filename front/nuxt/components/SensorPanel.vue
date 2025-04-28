@@ -67,6 +67,31 @@
             </div>
         </div>
 
+        <!-- Delete Confirmation Modal -->
+        <div v-if="showDeleteModal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-md border border-slate-700">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold text-white mb-6">Confirmar Eliminació</h2>
+                    <p class="text-slate-400 mb-6">
+                        Estàs segur que vols eliminar el sensor
+                        <span class="text-white font-bold">{{ sensorToDelete?.nombre || `Sensor ${sensorToDelete?.mac}`
+                            }}</span>?
+                    </p>
+                    <div class="flex justify-end gap-3">
+                        <button @click="showDeleteModal = false"
+                            class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all">
+                            Cancel·lar
+                        </button>
+                        <button @click="confirmDeleteSensor"
+                            class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="flex-grow w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
             <!-- Tabs for Sensor Types -->
             <div class="flex border-b border-slate-600">
@@ -121,7 +146,7 @@
                                 </h2>
                                 <div class="flex items-center mt-1">
                                     <span class="text-sm text-teal-400">{{ sensor.ubicacion || 'Ubicació no definida'
-                                    }}</span>
+                                        }}</span>
                                     <span v-if="sensor.idAula" class="mx-2 text-slate-400">•</span>
                                     <span v-if="sensor.idAula" class="text-sm text-slate-300">{{
                                         getAulaName(sensor.idAula) }}</span>
@@ -195,7 +220,7 @@
                                 </h2>
                                 <div class="flex items-center mt-1">
                                     <span class="text-sm text-teal-400">{{ sensor.ubicacion || 'Ubicació no definida'
-                                        }}</span>
+                                    }}</span>
                                     <span v-if="sensor.idAula" class="mx-2 text-slate-400">•</span>
                                     <span v-if="sensor.idAula" class="text-sm text-slate-300">{{
                                         getAulaName(sensor.idAula) }}</span>
@@ -248,9 +273,9 @@
                                     class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all flex items-center">
                                     Acceptar
                                 </button>
-                                <button @click.stop="handleBanPendingSensor(sensor)"
-                                    class="px-5 py-2.5 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-all flex items-center">
-                                    Bannejar
+                                <button @click.stop="handleRejectPendingSensor(sensor)"
+                                    class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all flex items-center">
+                                    Rebutjar
                                 </button>
                             </div>
                         </div>
@@ -269,7 +294,7 @@
                                 </h2>
                                 <div class="flex items-center mt-1">
                                     <span class="text-sm text-teal-400">{{ sensor.ubicacion || 'Ubicació no definida'
-                                    }}</span>
+                                        }}</span>
                                 </div>
                             </div>
                             <div class="flex items-center">
@@ -333,7 +358,8 @@ import {
     getAllSensors,
     banSensor,
     deleteSensor,
-    updateSensorById
+    updateSensorById,
+    updateSensorStatus
 } from '~/utils/communicationManager';
 import { getTotesAulas } from '~/utils/communicationManager';
 
@@ -397,6 +423,25 @@ const submitEditForm = async () => {
     } catch (error) {
         console.error('Error al actualizar el sensor:', error);
         alert('Error al actualizar el sensor: ' + error.message);
+    }
+};
+
+const showDeleteModal = ref(false);
+const sensorToDelete = ref(null);
+
+const handleDeleteSensor = (sensor) => {
+    sensorToDelete.value = sensor;
+    showDeleteModal.value = true;
+};
+
+const confirmDeleteSensor = async () => {
+    try {
+        await deleteSensor(sensorToDelete.value.idSensor);
+        activeSensors.value = activeSensors.value.filter(s => s.idSensor !== sensorToDelete.value.idSensor);
+        showDeleteModal.value = false;
+    } catch (error) {
+        console.error('Error al eliminar el sensor:', error);
+        alert('Error al eliminar el sensor: ' + error.message);
     }
 };
 
@@ -471,19 +516,6 @@ const toggleDetails = (sensor) => {
     sensor.showDetails = !sensor.showDetails;
 };
 
-const handleDeleteSensor = async (sensor) => {
-    if (confirm(`¿Estás seguro de que deseas eliminar el sensor "${sensor.nombre || `Sensor ${sensor.mac}`}"?`)) {
-        try {
-            await deleteSensor(sensor.idSensor);
-            activeSensors.value = activeSensors.value.filter(s => s.idSensor !== sensor.idSensor);
-            alert('Sensor eliminado correctamente');
-        } catch (error) {
-            console.error('Error al eliminar el sensor:', error);
-            alert('Error al eliminar el sensor: ' + error.message);
-        }
-    }
-};
-
 const handleBanSensor = async (sensor) => {
     try {
         await banSensor(sensor.idSensor, !sensor.banned);
@@ -506,21 +538,33 @@ const handleBanSensor = async (sensor) => {
 
 const acceptPendingSensor = async (sensor) => {
     try {
-        await acceptSensor(sensor.idSensor);
+        await updateSensorStatus(sensor.idSensor, 'accept');
         pendingSensors.value = pendingSensors.value.filter(s => s.idSensor !== sensor.idSensor);
+        activeSensors.value.push({
+            ...sensor,
+            banned: false,
+            showDetails: false
+        });
         alert('Sensor acceptat correctament');
-
-        const sensorsData = await getAllSensors();
-        activeSensors.value = sensorsData
-            .filter(s => !bannedSensors.value.some(banned => banned.idSensor === s.idSensor))
-            .map(s => ({
-                ...s,
-                showDetails: false,
-                banned: false
-            }));
     } catch (error) {
         console.error('Error accepting sensor:', error);
         alert('Error al acceptar el sensor: ' + error.message);
+    }
+};
+
+const handleRejectPendingSensor = async (sensor) => {
+    try {
+        await updateSensorStatus(sensor.idSensor, 'reject');
+        pendingSensors.value = pendingSensors.value.filter(s => s.idSensor !== sensor.idSensor);
+        bannedSensors.value.push({
+            ...sensor,
+            banned: true,
+            showDetails: false
+        });
+        alert('Sensor rebutjat correctament');
+    } catch (error) {
+        console.error('Error rejecting sensor:', error);
+        alert('Error al rebutjar el sensor: ' + error.message);
     }
 };
 

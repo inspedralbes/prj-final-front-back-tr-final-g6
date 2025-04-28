@@ -281,7 +281,7 @@ export async function getNewsensors() {
 // Aceptar un sensor nuevo
 export async function acceptSensor(idSensor) {
     try {
-        const response = await fetch(`${getBaseUrl()}/api/sensors/${idSensor}/accept`, { // Endpoint correcto
+        const response = await fetch(`${getBaseUrl()}/api/newsensors/${idSensor}/accept`, { // Endpoint correcto
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -302,7 +302,7 @@ export async function acceptSensor(idSensor) {
 
 export async function banSensor(idSensor, banned) {
     try {
-        const response = await fetch(`${getBaseUrl()}/api/sensors/${idSensor}/ban`, {
+        const response = await fetch(`${getBaseUrl()}/api/newsensors/${idSensor}/ban`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -388,7 +388,7 @@ export async function banPendingSensor(idSensor, banned) {
 
 export async function getBannedSensors() {
     try {
-        const response = await fetch(`${getBaseUrl()}/api/sensors/banned`);
+        const response = await fetch(`${getBaseUrl()}/api/newsensors/banned`);
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Error al obtener los sensores baneados');
@@ -397,7 +397,7 @@ export async function getBannedSensors() {
         return data;
     } catch (error) {
         console.error('Error al obtener los sensores baneados:', error);
-        throw error;
+        throw new Error('Error al obtener los sensores baneados: ' + error.message);
     }
 }
 
@@ -438,6 +438,32 @@ export async function updateSensorById(idSensor, sensorData) {
         return await response.json();
     } catch (error) {
         console.error('Error al actualizar el sensor:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
+export async function updateSensorStatus(id, status) {
+    if (!['accept', 'reject'].includes(status)) {
+        throw new Error('El estado debe ser "accept" o "reject"');
+    }
+
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/newsensors/${id}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al actualizar el estado del sensor');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al actualizar el estado del sensor:', error);
         throw new Error(error.message || 'Hubo un error en la solicitud');
     }
 }

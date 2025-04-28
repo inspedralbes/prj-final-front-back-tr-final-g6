@@ -356,7 +356,7 @@ app.get('/api/newsensors', (req, res) => {
   });
 });
 
-app.put('/api/sensors/:id/accept', (req, res) => {
+app.put('/api/newsensors/:id/accept', (req, res) => {
   const { id } = req.params;
   const query = 'UPDATE newsensor SET accepted = 1 WHERE id = ?';
   connexioBD.execute(query, [id], (err, results) => {
@@ -368,7 +368,52 @@ app.put('/api/sensors/:id/accept', (req, res) => {
   });
 });
 
-app.get('/api/sensors/banned', (req, res) => {
+app.put('/api/newsensors/:id/reject', (req, res) => {
+  const { id } = req.params;
+  const query = 'UPDATE newsensor SET accepted = 0, banned = 1 WHERE id = ?';
+  connexioBD.execute(query, [id], (err, results) => {
+      if (err) {
+          console.error('Error en la consulta a la base de dades:', err);
+          return res.status(500).send('Error en la consulta a la base de dades');
+      }
+      res.status(200).send({ message: 'Sensor rebutjat correctament' });
+  });
+});
+
+app.put('/api/newsensors/:id/status', (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body; // status should be 'accept' or 'reject'
+
+  if (!['accept', 'reject'].includes(status)) {
+    return res.status(400).send({ message: 'El estado debe ser "accept" o "reject"' });
+  }
+
+  const query =
+    status === 'accept'
+      ? 'UPDATE newsensor SET accepted = 1, banned = 0 WHERE idSensor = ?'
+      : 'UPDATE newsensor SET accepted = 0, banned = 1 WHERE idSensor = ?';
+
+  console.log('Executing query:', query, 'with idSensor:', id); // Debugging log
+
+  connexioBD.execute(query, [id], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err); // Log the error
+      return res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
+    }
+
+    if (results.affectedRows > 0) {
+      const message =
+        status === 'accept'
+          ? 'Sensor acceptat correctament'
+          : 'Sensor rebutjat correctament';
+      res.status(200).send({ message });
+    } else {
+      res.status(404).send({ message: 'Sensor no trobat' });
+    }
+  });
+});
+
+app.get('/api/newsensors/banned', (req, res) => {
   const query = 'SELECT * FROM newsensor WHERE banned = 1';
   connexioBD.execute(query, (err, results) => {
     if (err) {
@@ -521,6 +566,17 @@ async function verifyAPI(req, res, next) {
     next();
   });
 }
+
+app.get('/api/sensors/banned', (req, res) => {
+  const query = 'SELECT * FROM sensor WHERE banned = 1'; // Ensure the correct table and column names
+  connexioBD.execute(query, (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err.stack);
+      return res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
+    }
+    res.status(200).send(results);
+  });
+});
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
