@@ -435,7 +435,7 @@ app.post('/api/data/mysql', (req, res) => {
 
   const query = `INSERT INTO ${mysql2.escapeId(timeSpan)} (idAula, idSensor, tipus, max, min, average, dataIni, dataFi) VALUES ?`;
 
-  const currentDate = new Date();
+  const currentDate = new Date(); 
   const dataIni = currentDate.toISOString();
   const dataFi = new Date(currentDate.getTime() + 60000).toISOString();
 
