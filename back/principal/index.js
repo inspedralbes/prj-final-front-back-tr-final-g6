@@ -1,4 +1,5 @@
 import express from 'express';
+import { Server } from 'socket.io';
 
 const app = express();
 const PORT = process.env.PORT || 3020;
@@ -67,6 +68,26 @@ async function connectToMongoDB() {
 await connectToMongoDB();
 
 connectToDB();
+
+// Socket.IO setup
+
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  }
+});
+
+// Socket.IO events
+
+io.on('connection', (socket) => {
+  console.log('New client connected:', socket.id);
+
+  // Handle client disconnection
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
 
 //ENDPOINTS API
 
@@ -418,6 +439,9 @@ app.post('/api/data/mongodb', async (req, res) => {
     try {
       const result = await collection.insertOne({ volume, temperature, id_sensor, date });
       console.log(`Dades inserides amb l'ID: ${result.insertedId}`);
+
+      io.emit('newRawData', { volume, temperature, id_sensor, date });
+
       res.status(201).json({ message: 'Dades inserides correctament', id: result.insertedId });
     } catch (error) {
       console.error('Error inserint les dades a MongoDB:', error);
@@ -452,6 +476,9 @@ app.post('/api/data/mysql', (req, res) => {
       return res.status(500).json({ message: 'Error en la inserció a la base de dades' });
     }
 
+    io.emit('newAggregatedData', { timeSpan, sensors });
+
+    console.log('Dades inserides correctament a MySQL: ', results);
     res.status(201).json({ message: 'Dades inserides correctament', affectedRows: results.affectedRows });
   });
 });
