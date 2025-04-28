@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, defineProps } from "vue";
+import { onMounted, ref, defineProps, nextTick } from "vue";
 import Konva from "konva";
 import { getMapa } from "@/utils/communicationManager";
 
@@ -26,7 +26,9 @@ const getInterpolatedColor = (value, min, max) => {
   return `rgb(${red}, 0, ${blue})`;
 };
 
-onMounted(() => {
+onMounted(async () => {
+  await nextTick();
+
   const image = "./SUBTERRANEO.png";
   const imageObj = new Image();
 
@@ -36,11 +38,11 @@ onMounted(() => {
 
     const canvasWidth = stageRef.value.offsetWidth;
     const canvasHeight = stageRef.value.offsetHeight;
-    const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight) * 1.3;
+    const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight);
     const scaledWidth = imgWidth * scaleFactor;
     const scaledHeight = imgHeight * scaleFactor;
     const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 9;
+    const y = (canvasHeight - scaledHeight) / 2;
 
     const stage = new Konva.Stage({
       container: stageRef.value,

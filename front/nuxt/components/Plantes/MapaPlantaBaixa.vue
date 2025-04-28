@@ -1,9 +1,8 @@
 <script setup>
-import { onMounted, ref, defineProps } from "vue";
+import { onMounted, ref, defineProps, nextTick } from "vue";
 import Konva from "konva";
 import { getMapa } from "@/utils/communicationManager";
 
-// Recibe la URL de la imagen como prop
 const props = defineProps({
   imageUrl: {
     type: String,
@@ -15,9 +14,6 @@ const stageRef = ref(null);
 const showPopup = ref(false);
 const popupInfo = ref("");
 const popupPosition = ref({ x: 0, y: 0 });
-const scale = ref(1);
-const stage = ref(null);
-const layer = ref(null);
 
 const closePopup = () => {
   showPopup.value = false;
@@ -30,32 +26,10 @@ const getInterpolatedColor = (value, min, max) => {
   return `rgb(${red}, 0, ${blue})`;
 };
 
-const handleWheel = (e) => {
-  e.evt.preventDefault();
+onMounted(async () => {
+  await nextTick();
 
-  const scaleBy = 1.1;
-  const oldScale = stage.value.scaleX();
-
-  const pointer = stage.value.getPointerPosition();
-  const mousePointTo = {
-    x: (pointer.x - stage.value.x()) / oldScale,
-    y: (pointer.y - stage.value.y()) / oldScale,
-  };
-
-  const newScale = e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy;
-
-  stage.value.scale({ x: newScale, y: newScale });
-
-  const newPos = {
-    x: pointer.x - mousePointTo.x * newScale,
-    y: pointer.y - mousePointTo.y * newScale,
-  };
-  stage.value.position(newPos);
-  stage.value.batchDraw();
-};
-
-onMounted(() => {
-  const image = "./PB.png";
+  const image = "./SUBTERRANEO.png";
   const imageObj = new Image();
 
   imageObj.onload = function () {
@@ -64,21 +38,23 @@ onMounted(() => {
 
     const canvasWidth = stageRef.value.offsetWidth;
     const canvasHeight = stageRef.value.offsetHeight;
-    const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight) * 0.9;
+
+    // Reducir el zoom (factor 1.0)
+    const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight) * 1.0;
     const scaledWidth = imgWidth * scaleFactor;
     const scaledHeight = imgHeight * scaleFactor;
-    const x = (canvasWidth - scaledWidth) / 2.5;
-    const y = (canvasHeight - scaledHeight) / 1.7;
 
-    stage.value = new Konva.Stage({
+    const x = (canvasWidth - scaledWidth) / 2;
+    const y = (canvasHeight - scaledHeight) / 2 + -20; // Subir un poco más la imagen (ajuste de +30)
+
+    const stage = new Konva.Stage({
       container: stageRef.value,
       width: canvasWidth,
       height: canvasHeight,
     });
 
-    layer.value = new Konva.Layer();
-    stage.value.add(layer.value);
-    stage.value.on('wheel', handleWheel);
+    const layer = new Konva.Layer();
+    stage.add(layer);
 
     const konvaImage = new Konva.Image({
       x: x,
@@ -88,28 +64,7 @@ onMounted(() => {
       height: scaledHeight,
     });
 
-    layer.value.add(konvaImage);
-
-    // Hacer la imagen draggable
-    konvaImage.draggable(true);
-    
-    // Añadir límites al arrastre
-    konvaImage.on('dragmove', () => {
-      const pos = konvaImage.position();
-      const stage = konvaImage.getStage();
-      const scale = konvaImage.scaleX();
-      
-      // Ajustar los límites según el tamaño escalado
-      const minX = -konvaImage.width() * scale;
-      const maxX = stage.width();
-      const minY = -konvaImage.height() * scale;
-      const maxY = stage.height();
-      
-      konvaImage.position({
-        x: Math.min(Math.max(pos.x, minX), maxX),
-        y: Math.min(Math.max(pos.y, minY), maxY)
-      });
-    });
+    layer.add(konvaImage);
 
     const minVolumen = Math.min(...points.map((p) => p.volumen));
     const maxVolumen = Math.max(...points.map((p) => p.volumen));
@@ -136,10 +91,10 @@ onMounted(() => {
         popupPosition.value = { x: point.popupX, y: point.popupY };
       });
 
-      layer.value.add(circle);
+      layer.add(circle);
     });
 
-    layer.value.batchDraw();
+    layer.batchDraw();
   };
 
   imageObj.src = image;
