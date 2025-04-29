@@ -57,7 +57,7 @@ services:
         context: .     
       command: sh -c "cp .env.DEV .env && npm install && nodemon -L index.js"
       volumes:
-        - ./back/services/dbinsert:/usr/src/app
+        - ./back/services/DBinsert:/usr/src/app
       working_dir: /usr/src/app
       depends_on:
         - prfg6-mongodb
