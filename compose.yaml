@@ -81,6 +81,7 @@ services:
 
   prfg6-mongodb:
     image: mongo:6.0
+    container_name: mongo
     restart: always
     ports:
       - 27017:27017
@@ -94,18 +95,18 @@ services:
 
   mongo-express:
     image: mongo-express
-    restart: always
     ports:
       - 8081:8081
     environment:
-      MONGO_USER: root
-      MONGO_PASSWORD: example
-      MONGO_URI: mongodb://root:example@prfg6-mongodb:27017/
-      ME_CONFIG_BASICAUTH: false
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_BASICAUTH: "false"
     depends_on:
       - prfg6-mongodb
     networks:
       - general
+
 
   prfg6-mysql:
     image: mysql

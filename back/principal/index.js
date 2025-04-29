@@ -1,5 +1,6 @@
 import express from 'express';
 import { Server } from 'socket.io';
+import axios from 'axios';
 
 const app = express();
 const PORT = process.env.PORT || 3020;
@@ -504,6 +505,36 @@ app.post('/api/newsensors', (req, res) => {
       res.status(400).send({ message: 'El sensor no esta acceptat' });
     }
   });
+});
+
+app.get('/api/data/mongodb/map', async (req, res) => {
+  const { id_sensor } = req.query;
+  if (!id_sensor) {
+    return res.status(400).json({ message: 'id_sensor és necessari' });
+  }
+  try {
+    // Obtenim les dades de MongoDB
+    const results = await collection.find({ id_sensor: parseInt(id_sensor) }).toArray();
+    console.log('Dades rebudes de MongoDB: ', results);
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No s\'han trobat dades per aquest sensor' });
+    }
+
+    // Crida a l'endpoint de Flask
+    try {
+      const flaskResponse = await axios.post('http://prfg6-python:5000/executeMapAverage', results);
+      console.log('Resposta de Flask:', flaskResponse.data);
+
+      // Retornem la resposta de Flask
+      return res.status(200).json(flaskResponse.data);
+    } catch (flaskError) {
+      console.error('Error en la crida a Flask:', flaskError.message);
+      return res.status(500).json({ message: 'Error en la crida a Flask', error: flaskError.message });
+    }
+  } catch (error) {
+    console.error('Error obtenint les dades de MongoDB:', error);
+    res.status(500).json({ message: 'Error obtenint les dades de MongoDB' });
+  }
 });
 
 app.get('/api/data/mongodb', async (req, res) => {

@@ -88,7 +88,15 @@ def send_agregated_data(data):
     except Exception as e:
         app.logger.error("Error inesperat: %s", str(e))
 
+def execute_script(script_name, data):
+    script_path = os.path.join(os.path.dirname(__file__), 'scripts', script_name)
+    data_str = json.dumps(data) 
+    command = ['python3', script_path, data_str]
+    result = subprocess.run(command, capture_output=True, text=True)
+    return result.stdout
+
 # Scheduler functions
+
 def run_scheduler_minute():
     while True:
         now = datetime.now(BARCELONA_TZ)
@@ -132,6 +140,14 @@ def run_scheduler_month():
 def status():
     app.logger.info("Comprovant l'estat del servidor...")
     return jsonify({'status': 'Servidor operant'})
+
+@app.route('/executeMapAverage', methods=['POST'])
+def execute_map_average():
+    app.logger.info("Rebent petició per executar el script de dades del mapa...")
+    data = request.get_json()
+    execute_script('mapAverage.py', data)
+    app.logger.info("Script de dades del mapa executat amb èxit.")
+    return jsonify({'status': 'Script executat amb èxit'}), 200
 
 if __name__ == '__main__':
     os.makedirs(os.path.join(os.path.dirname(__file__), 'scripts'), exist_ok=True)
