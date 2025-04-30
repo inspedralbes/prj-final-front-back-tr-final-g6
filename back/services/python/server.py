@@ -140,9 +140,17 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     app.logger.setLevel(logging.INFO)
     
-    # Inicia el scheduler en un fil separat
-    scheduler_thread = Thread(target=run_scheduler_minute, daemon=True)
-    scheduler_thread.start()
+    # Inicia els schedulers en fils separats
+    scheduler_threads = [
+        Thread(target=run_scheduler_minute, daemon=True),
+        Thread(target=run_scheduler_hour, daemon=True),
+        Thread(target=run_scheduler_day, daemon=True),
+        Thread(target=run_scheduler_week, daemon=True),
+        Thread(target=run_scheduler_month, daemon=True)
+    ]
+    
+    for thread in scheduler_threads:
+        thread.start()
     
     # Inicia el servidor Flask
     app.run(host='0.0.0.0', port=5000)

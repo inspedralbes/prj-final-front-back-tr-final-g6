@@ -237,7 +237,7 @@ app.put('/api/aules/:id/activa', (req, res) => {
 });
 
 // Get mitjanes de dades
-app.post('/api/mapa', async (req, res) => {
+app.get('/api/mapa', async (req, res) => {
   const { aules, tipus, data } = req.body;
 
   if (!aules || !tipus || !data) {
