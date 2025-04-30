@@ -52,4 +52,4 @@ async function sendMessage(api_key, volume, temperature, date, MAC) {
 }
 
 // Configurar l'interval per executar la funció cada 10 segons
-setInterval(logData, 10000);
+setInterval(logData, 1000);
