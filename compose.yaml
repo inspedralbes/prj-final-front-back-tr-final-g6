@@ -24,7 +24,7 @@ services:
      build: 
        dockerfile: ./back/principal/develop.Dockerfile
        context: .
-     command: sh -c "/usr/bin/python3 -m venv venv && ./venv/bin/pip install -r requirements.txt && cp .env.DEV .env && npm install --no-bin-links && nodemon -L index.js"
+     command: sh -c "cp .env.DEV .env && npm install --no-bin-links && nodemon -L index.js"
      volumes:
        - ./back/principal:/usr/src/app
      working_dir: /usr/src/app
@@ -41,7 +41,7 @@ services:
      build: 
        dockerfile: ./back/services/develop.Dockerfile
        context: .     
-     command: sh -c "cp .env.DEV .env && nodemon -L index.js"
+     command: sh -c "cp .env.DEV .env && npm install && nodemon -L index.js"
      volumes:
        - ./back/services/sensor:/usr/src/app
      working_dir: /usr/src/app
@@ -55,19 +55,32 @@ services:
       build: 
         dockerfile: ./back/services/develop.Dockerfile
         context: .     
-      command: sh -c "cp .env.DEV .env && nodemon -L index.js"
+      command: sh -c "cp .env.DEV .env && npm install && nodemon -L index.js"
       volumes:
-        - ./back/services/dbinsert:/usr/src/app
+        - ./back/services/DBinsert:/usr/src/app
       working_dir: /usr/src/app
       depends_on:
         - prfg6-mongodb
         - prfg6-sensor
       networks:
         - general
-          
+
+  prfg6-python:
+    build:
+      context: .
+      dockerfile: ./back/services/python/develop.Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./back/services/python:/usr/src/app
+    working_dir: /usr/src/app
+    restart: unless-stopped
+    container_name: prfg6-python
+    networks:
+      - general
 
   prfg6-mongodb:
-    image: mongo
+    image: mongo:6.0
     restart: always
     ports:
       - 27017:27017
@@ -85,9 +98,9 @@ services:
     ports:
       - 8081:8081
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: example
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@prfg6-mongodb:27017/
+      MONGO_USER: root
+      MONGO_PASSWORD: example
+      MONGO_URI: mongodb://root:example@prfg6-mongodb:27017/
       ME_CONFIG_BASICAUTH: false
     depends_on:
       - prfg6-mongodb
@@ -98,7 +111,7 @@ services:
     image: mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root 
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: prf-g6
     volumes:
       - mysql-bd:/var/lib/mysql:rw

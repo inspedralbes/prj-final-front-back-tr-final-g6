@@ -177,12 +177,23 @@ CREATE TABLE `usuari` (
 -- Crear tabla `sensor` (si aún no existe)
 CREATE TABLE `sensor` (
   `idSensor` INT(10) AUTO_INCREMENT PRIMARY KEY,
+  `mac` VARCHAR(100) NOT NULL,
+  `api_key` VARCHAR(255),
   `nombre` VARCHAR(100) NOT NULL,  -- Ejemplo de columna adicional
   `ubicacion` VARCHAR(100) NOT NULL,  -- Ejemplo de columna adicional
   `x` INT NOT NULL,  -- Coordenada x del sensor
   `y` INT NOT NULL,  -- Coordenada y del sensor
-  `idAula` INT NOT NULL,
+  `idAula` INT,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Crear tabla `newsensor` (si aún no existe)
+CREATE TABLE `newsensor` (
+  `idSensor` INT(10) AUTO_INCREMENT PRIMARY KEY,
+  `mac` VARCHAR(100) NOT NULL,
+  `ip_sensor` VARCHAR(255),
+  `accepted` BOOLEAN NOT NULL DEFAULT 0,
+  `banned` BOOLEAN NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Crear tabla `minuto`
@@ -290,12 +301,26 @@ INSERT INTO `dia` (`id`, `idAula`, `idSensor`, `tipus`, `max`, `min`, `average`,
 (4, 1, 1, 'volum', 38, 12, 20, '2025-02-13 00:00:00', '2025-02-14 00:00:00'),
 (5, 1, 1, 'volum', 100, 50, 75, '2025-02-14 00:00:00', '2025-02-15 00:00:00');
 
-INSERT INTO `sensor` (`idSensor`, `nombre`, `ubicacion`, `x`, `y`, `idAula`) VALUES
-(1, 'sensor1', 'aula1', 1, 1, 1),
-(2, 'sensor2', 'aula1', 2, 2, 1),
-(3, 'sensor3', 'aula1', 3, 3, 1),
-(4, 'sensor4', 'aula1', 4, 4, 1),
-(5, 'sensor5', 'aula1', 5, 5, 1);
+INSERT INTO `sensor` (`idSensor`, `mac`, `nombre`, `ubicacion`, `x`, `y`, `idAula`, `api_key`) VALUES
+(1, 'MAC1', 'sensor1', 'aula1', 1, 1, 1, NULL),
+(2, 'MAC2', 'sensor2', 'aula1', 2, 2, 1, NULL),
+(3, 'MAC3', 'sensor3', 'aula1', 3, 3, 1, 'API_KEY3'),
+(4, 'MAC4', 'sensor4', 'aula1', 4, 4, 1, 'API_KEY4'),
+(5, 'MAC5', 'sensor5', 'aula1', 5, 5, 1, 'API_KEY5'),
+(6, 'MAMAMAM', 'sensor6', 'aula1', 6, 6, 1, 'c8nlsy4955ju75tq5w3f');
+INSERT INTO `sensor` (`idSensor`, `mac`, `nombre`, `ubicacion`, `x`, `y`, `idAula`, `api_key`) VALUES
+(1, 'MAC1', 'sensor1', 'aula1', 1, 1, 1, NULL),
+(2, 'MAC2', 'sensor2', 'aula1', 2, 2, 1, NULL),
+(3, 'MAC3', 'sensor3', 'aula1', 3, 3, 1, 'API_KEY3'),
+(4, 'MAC4', 'sensor4', 'aula1', 4, 4, 1, 'API_KEY4'),
+(5, 'MAC5', 'sensor5', 'aula1', 5, 5, 1, 'API_KEY5'),
+(6, 'MAMAMAM', 'sensor6', 'aula1', 6, 6, 1, 'c8nlsy4955ju75tq5w3f');
+
+INSERT INTO `newsensor` (`idSensor`, `mac`, `ip_sensor`, `accepted`, `banned`) VALUES
+(1, 'MAC1', '192.168.1.1', 0, 0),
+(2, 'MAC2', '192.168.1.1', 0, 0),
+(3, 'MAC3', '192.168.1.1', 0, 0),
+(4, 'MAC4', '192.168.1.1', 0, 0);
 --
 -- Índexs per a les taules bolcades
 --

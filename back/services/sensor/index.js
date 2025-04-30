@@ -1,6 +1,6 @@
-const amqp = require('amqplib');
 const dotenv = require('dotenv');
-
+const amqp = require('amqplib');
+const { DateTime } = require("luxon");
 dotenv.config();
 
 // Funció per simular la lectura del volum en decibels en una aula de secundària
@@ -13,14 +13,17 @@ function getTemperatureInCelsius() {
     return (Math.random() * (26 - 18) + 18).toFixed(2); // Simula temperatura entre 18 i 26 graus
 }
 
-// Funció per seleccionar un id d'aula a l'atzar
+// Funció per seleccionar un id d'un sensor a l'atzar
 function getRandomAulaId() {
     return Math.floor(Math.random() * 3) + 1; // Genera un id entre 1 i 3
 }
 
-async function sendMessage(volume, temperature, id_aula, date) {
+const MAC = "MAMAMAM";
+const api_key = "c8nlsy4955ju75tq5w3f";
+
+async function sendMessage(api_key, volume, temperature, date, MAC) {
     const queue = 'SensorData';
-    const msg = { volume, temperature, id_aula, date};
+    const msg = { api_key, volume, temperature, date, MAC };
   
     try {
       const connection = await amqp.connect(process.env.RABBITMQ_URL);
@@ -28,7 +31,7 @@ async function sendMessage(volume, temperature, id_aula, date) {
   
       await channel.assertQueue(queue, { durable: false });
       channel.sendToQueue(queue, Buffer.from(JSON.stringify(msg)));
-      console.log(`🟢 Mensaje enviado: ${msg}`);
+      console.log(`🟢 Mensaje enviado`);
   
       setTimeout(() => {
         connection.close();
@@ -41,12 +44,11 @@ async function sendMessage(volume, temperature, id_aula, date) {
   async function logData() {
     const volume = getVolumeInDecibels();
     const temperature = getTemperatureInCelsius();
-    const id_aula = getRandomAulaId();
-    const date = new Date().toISOString();
+    const date = DateTime.now().setZone("Europe/Madrid").toISO();
 
-    console.log(`Volum: ${volume} dB, Temperatura: ${temperature}°C, Aula: ${id_aula}`);
+    console.log(`Volum: ${volume} dB, Temperatura: ${temperature}°C, Data: ${date}`);
 
-    sendMessage(volume, temperature, id_aula, date)
+    sendMessage(api_key, volume, temperature, date, MAC);
 }
 
 // Configurar l'interval per executar la funció cada 10 segons
