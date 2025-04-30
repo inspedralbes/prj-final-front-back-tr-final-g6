@@ -37,7 +37,7 @@ async function sendMessage(api_key, volume, temperature, date, MAC) {
         connection.close();
       }, 500);
     } catch (error) {
-      console.error('❌ Error al enviar mensaje', error);
+      console.error('❌ Error al enviar mensaje', error); 
     }
   }
 
