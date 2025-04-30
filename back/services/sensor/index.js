@@ -19,7 +19,7 @@ function getRandomAulaId() {
 }
 
 const MAC = "MAMAMAM";
-const api_key = "c8nlsy4955ju75tq5w3f";
+const api_key = "c8nlsy4955ju75tq5w3f"; 
 
 async function sendMessage(api_key, volume, temperature, date, MAC) {
     const queue = 'SensorData';
