@@ -1,6 +1,6 @@
 export function getBaseUrl() {
     const config = useRuntimeConfig();
-    return config.public.URL_PROD;
+    return config.public.URL;
 }
 
 // Nueva función para probar la conexión con la API
@@ -62,7 +62,7 @@ export async function getTotesAulas() {
         const data = await response.json();
         return data;
 
-    } catch (error)        {
+    } catch (error) {
         console.error(error);
         throw new Error(error.message || 'Hubo un error en la solicitud');
     }
@@ -191,34 +191,33 @@ export async function habilitarAula(aula) {
 
 }
 
-
 //GET MAPA
 
 export async function getMapa(bodyRequest) {
     try {
-      console.log("Enviando solicitud con bodyRequest:", bodyRequest);
-  
-      const baseUrl = getBaseUrl();  // Verifica la URL base
-      console.log("Base URL:", baseUrl);  // Agregado para verificar la URL
-      const response = await fetch(`${baseUrl}/api/mapa`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(bodyRequest)
-      });
-  
-      if (!response.ok) {
-        console.error("Error al obtener la respuesta:", response.statusText);
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al obtener las aulas');
-      } else {
-        const data = await response.json();
-        return data;
-      }
+        console.log("Enviando solicitud con bodyRequest:", bodyRequest);
+
+        const baseUrl = getBaseUrl();  // Verifica la URL base
+        console.log("Base URL:", baseUrl);  // Agregado para verificar la URL
+        const response = await fetch(`${baseUrl}/api/mapa`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bodyRequest)
+        });
+
+        if (!response.ok) {
+            console.error("Error al obtener la respuesta:", response.statusText);
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al obtener las aulas');
+        } else {
+            const data = await response.json();
+            return data;
+        }
     } catch (error) {
-      console.error("Error en la solicitud:", error);
-      throw new Error(error.message || 'Hubo un error en la solicitud');
+        console.error("Error en la solicitud:", error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
     }
 }
 
@@ -246,6 +245,246 @@ export async function getDadesGrafic(taula, tipus, idAula, dataIni, dataFi) {
 
     } catch (error) {
         console.error(error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
+export async function getAllSensors() {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/sensors`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al obtener los sensores');
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error al obtener los sensores:', error);
+        throw error;
+    }
+}
+
+export async function getNewsensors() {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/newsensors`);
+        if (!response.ok) {
+            throw new Error('Error al obtener los sensores');
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error al obtener los sensores:', error);
+        throw error;
+    }
+}
+
+// Aceptar un sensor nuevo
+export async function acceptSensor(idSensor) {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/newsensors/${idSensor}/accept`, { // Endpoint correcto
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al aceptar el sensor');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al aceptar el sensor:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
+export async function banSensor(idSensor, banned) {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/newsensors/${idSensor}/ban`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ banned }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al banear/desbanear el sensor');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al banear/desbanear el sensor:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
+// Rechazar (eliminar) un sensor nuevo
+export async function deletePendingSensor(idSensor) {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/sensors/${idSensor}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al eliminar el sensor pendiente');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al eliminar el sensor pendiente:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
+// Editar un sensor nuevo
+export async function updateSensor(sensorData) { // Cambiado para usar MAC
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/sensors`, { // Cambiado a /api/sensors
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(sensorData), // Enviar sensorData directamente
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al actualizar el sensor');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al actualizar el sensor:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
+export async function banPendingSensor(idSensor, banned) {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/sensors/${idSensor}/ban`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ banned }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al banear/desbanear el sensor');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al banear/desbanear el sensor:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
+export async function getBannedSensors() {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/newsensors/banned`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al obtener los sensores baneados');
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error al obtener los sensores baneados:', error);
+        throw new Error('Error al obtener los sensores baneados: ' + error.message);
+    }
+}
+
+export async function deleteSensor(idSensor) {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/sensors/${idSensor}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al eliminar el sensor');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al eliminar el sensor:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
+// Actualizar un sensor
+export async function updateSensorById(idSensor, sensorData) {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/sensors/${idSensor}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(sensorData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al actualizar el sensor');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al actualizar el sensor:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
+export async function updateSensorStatus(id, status) {
+    if (!['accept', 'reject'].includes(status)) {
+        throw new Error('El estado debe ser "accept" o "reject"');
+    }
+
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/newsensors/${id}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al actualizar el estado del sensor');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al actualizar el estado del sensor:', error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
+export async function unbanSensor(idSensor) {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/newsensors/${idSensor}/unban`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al desbanear el sensor');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error al desbanear el sensor:', error);
         throw new Error(error.message || 'Hubo un error en la solicitud');
     }
 }
