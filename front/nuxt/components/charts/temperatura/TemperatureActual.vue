@@ -1,48 +1,39 @@
 <template>
-    <div class="w-full h-full flex justify-center items-center">
-        <div class="w-full h-full relative">
-            <div v-if="loading" class="absolute inset-0 flex items-center justify-center">
-                <div class="text-white text-lg">Loading data...</div>
-            </div>
+    <div class="dashboard-container">
+        <div v-if="loading" class="loading-overlay">
+            <div class="loading-message">Loading data...</div>
+        </div>
 
-            <div v-else-if="error" class="absolute inset-0 flex items-center justify-center">
-                <div class="text-red-400 text-lg">{{ error }}</div>
-            </div>
+        <div v-else-if="error" class="error-overlay">
+            <div class="error-message">{{ error }}</div>
+        </div>
 
-            <div v-else class="flex flex-col h-full">
-                <!-- Current Temperature Value Display -->
-                <div class="mb-4 text-center">
-                    <div class="text-6xl font-bold" :class="{
-                        'text-blue-400': currentTemperature < 20,
-                        'text-green-400': currentTemperature >= 20 && currentTemperature < 30,
-                        'text-orange-400': currentTemperature >= 30 && currentTemperature < 35,
-                        'text-red-400': currentTemperature >= 35
-                    }">
+        <div v-else class="dashboard-content">
+            <!-- Header Section -->
+            <div class="dashboard-header">
+                <div class="temperature-display">
+                    <div class="current-temperature" :class="temperatureColorClass">
                         {{ currentTemperature }}°C
                     </div>
-                    <div class="text-teal-400 text-sm">Current Temperature</div>
+                    <div class="temperature-label">Current Temperature</div>
                 </div>
 
-                <!-- Sensor Info -->
-                <div class="text-center mb-4">
-                    <span class="text-gray-400 text-sm">Sensor ID: {{ sensorId || 'Not available' }}</span>
-                    <span class="text-gray-400 text-sm ml-4">Last update: {{ lastUpdate }}</span>
+                <div class="sensor-info">
+                    <span class="sensor-id">Sensor ID: {{ sensorId || 'Not available' }}</span>
+                    <span class="update-time">Last update: {{ lastUpdate }}</span>
                 </div>
+            </div>
 
-                <!-- Chart Container -->
-                <div class="flex-1 relative flex items-center justify-center">
-                    <!-- Line Chart -->
-                    <div class="w-full h-[350px]">
-                        <Line :data="chartData" :options="chartOptions" :key="lineChartKey" />
-                    </div>
-                </div>
+            <!-- Chart Section -->
+            <div class="chart-container">
+                <Line :data="chartData" :options="chartOptions" :key="lineChartKey" class="temperature-chart" />
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { Line } from 'vue-chartjs';
 import { getBaseUrl } from '~/utils/communicationManager';
 import {
@@ -80,6 +71,15 @@ const lastUpdate = ref('--:--');
 const recentTemperatures = ref([]);
 const lineChartKey = ref(0);
 
+// Computed properties
+const temperatureColorClass = computed(() => {
+    const temp = currentTemperature.value;
+    if (temp < 20) return 'temp-cool';
+    if (temp < 30) return 'temp-normal';
+    if (temp < 35) return 'temp-warm';
+    return 'temp-hot';
+});
+
 // Chart configurations
 const chartData = ref({
     labels: [],
@@ -94,12 +94,10 @@ const chartData = ref({
             },
             borderColor: '#2196F3',
             backgroundColor: 'rgba(33, 150, 243, 0.2)',
-            pointBackgroundColor: '#2196F3',
-            pointBorderColor: '#fff',
-            pointRadius: 0,
-            pointHoverRadius: 6,
-            tension: 0.2,
-            borderWidth: 2
+            tension: 0,
+            borderWidth: 2,
+            pointRadius: 0, // Hide points
+            pointHoverRadius: 0 // Hide points on hover
         },
     ],
 });
@@ -125,9 +123,10 @@ const chartOptions = ref({
         x: {
             ticks: {
                 color: '#9CA3AF',
-                maxRotation: 0,
+                maxRotation: 45,
+                minRotation: 45,
                 autoSkip: true,
-                maxTicksLimit: 8
+                maxTicksLimit: 12
             },
             grid: {
                 color: 'rgba(255, 255, 255, 0.05)'
@@ -152,8 +151,8 @@ const chartOptions = ref({
     },
     elements: {
         line: {
-            borderWidth: 3
-        },
+            borderWidth: 2
+        }
     }
 });
 
@@ -184,7 +183,7 @@ onMounted(() => {
                     lastUpdate.value = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
 
                     addTemperatureDataPoint(tempValue, lastUpdate.value);
-                    
+
                     console.log('Updated data: Temperature =', currentTemperature.value, 'Sensor =', sensorId.value);
                 }
             }
@@ -249,13 +248,113 @@ function addTemperatureDataPoint(temp, timestamp) {
 </script>
 
 <style scoped>
-.w-full.h-full {
+.dashboard-container {
+    width: 100%;
+    height: 100%;
+    background: #1a1a2e;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     position: relative;
 }
 
-.text-6xl {
-    font-size: 3.75rem;
+.loading-overlay,
+.error-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(26, 26, 46, 0.9);
+    z-index: 10;
+}
+
+.loading-message {
+    color: white;
+    font-size: 1.125rem;
+}
+
+.error-message {
+    color: #f87171;
+    font-size: 1.125rem;
+}
+
+.dashboard-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-header {
+    padding: 20px;
+    background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.temperature-display {
+    display: flex;
+    flex-direction: column;
+}
+
+.current-temperature {
+    font-size: 3.5rem;
+    font-weight: 700;
     line-height: 1;
-    transition: color 0.5s ease;
+}
+
+.temperature-label {
+    font-size: 0.9rem;
+    color: #a1a1aa;
+    margin-top: 4px;
+}
+
+.sensor-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.sensor-id,
+.update-time {
+    font-size: 0.85rem;
+    color: #a1a1aa;
+}
+
+.chart-container {
+    flex: 1;
+    padding: 16px;
+    min-height: 300px;
+}
+
+.temperature-chart {
+    width: 100%;
+    height: 100%;
+}
+
+/* Temperature color classes */
+.temp-cool {
+    color: #60a5fa;
+}
+
+.temp-normal {
+    color: #34d399;
+}
+
+.temp-warm {
+    color: #fbbf24;
+}
+
+.temp-hot {
+    color: #f87171;
+}
+
+/* Chart.js overrides */
+:deep(.chartjs-render-monitor) {
+    animation: none !important;
 }
 </style>

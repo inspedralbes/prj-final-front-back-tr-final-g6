@@ -54,10 +54,8 @@
             </div>
 
             <!-- Chart Container -->
-            <div class="bg-slate-800 rounded-lg p-6 shadow-lg">
-                <div class="h-[500px]"> <!-- Aumentado de 400px a 500px -->
+            <div class="h-[500px]"> <!-- Aumentado de 400px a 500px -->
                     <component :is="currentChart" />
-                </div>
             </div>
         </div>
     </div>
