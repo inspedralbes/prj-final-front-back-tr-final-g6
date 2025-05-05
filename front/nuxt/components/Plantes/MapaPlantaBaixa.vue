@@ -45,7 +45,7 @@ onMounted(async () => {
     const scaledHeight = imgHeight * scaleFactor;
 
     const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 2 + -20; // Subir un poco más la imagen (ajuste de +30)
+    const y = (canvasHeight - scaledHeight) / 2 + -20;
 
     const stage = new Konva.Stage({
       container: stageRef.value,
