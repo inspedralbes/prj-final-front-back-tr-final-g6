@@ -254,13 +254,16 @@ const updateChartData = (data) => {
     chartKey.value++;
 };
 
-// Handle new aggregated data from the socket
 const handleNewAggregatedData = (data) => {
     if (!data || !data.sensors) return;
+    
+    // Only process data if it's hourly aggregated data
+    if (data.timeSpan !== 'hora') return;
 
     const now = new Date();
     const timeString = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
+    // Calculate average temperature across all sensors
     let totalTemp = 0;
     let sensorCount = 0;
 
@@ -275,19 +278,18 @@ const handleNewAggregatedData = (data) => {
         const avgTemp = totalTemp / sensorCount;
 
         if (avgTemp >= 0 && avgTemp <= 40) {
-            const existingIndex = temperatureData.value.findIndex(item => item.time === timeString);
-            if (existingIndex !== -1) {
-                // Update the value at the existing index
-                temperatureData.value[existingIndex].value = avgTemp;
-            } else {
-                // Add a new entry
-                temperatureData.value.push({ time: timeString, value: avgTemp });
+            // Find the current hour in our data
+            const hourIndex = temperatureData.value.findIndex(item => item.time === timeString);
+            
+            if (hourIndex !== -1) {
+                // Update the temperature for this hour
+                temperatureData.value[hourIndex].value = avgTemp;
+                
+                // Trigger reactivity
+                temperatureData.value = [...temperatureData.value];
+                
+                updateChartData(temperatureData.value);
             }
-
-            // Reassign the array to itself to trigger reactivity
-            temperatureData.value = [...temperatureData.value];
-
-            updateChartData(temperatureData.value);
         }
     }
 };
