@@ -17,7 +17,7 @@
                     </div>
                     <div class="temperature-label">Current Temperature</div>
                 </div>
-                
+
                 <div class="time-range-info">
                     <div class="time-range-indicator">Last 24 hours</div>
                     <div class="update-time">Last update: {{ lastUpdateTime }}</div>
@@ -46,7 +46,8 @@ import {
     PointElement
 } from 'chart.js';
 import { io } from 'socket.io-client';
-import { getBaseUrl } from '~/utils/communicationManager';
+import { getBaseUrl, getDadesGrafic } from '~/utils/communicationManager';
+import { useRoute } from 'vue-router';
 
 // Register Chart.js components
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement);
@@ -57,19 +58,14 @@ const chartKey = ref(0);
 const socket = ref(null);
 const loading = ref(true);
 const error = ref(null);
+const route = useRoute();
 
-// Initialize with 24 hours
-const initializeHourlyData = () => {
-    const hours = [];
-    for (let i = 0; i <= 24; i++) {
-        hours.push({
-            time: `${i.toString().padStart(2, '0')}:00`,
-            value: null
-        });
+const props = defineProps({
+    idAula: {
+        type: Number,
+        default: null
     }
-    temperatureData.value = hours;
-    updateChartData(temperatureData.value);
-};
+});
 
 // Chart data configuration
 const chartData = ref({
@@ -109,7 +105,7 @@ const chartOptions = ref({
             titleColor: '#E5E7EB',
             bodyColor: '#E5E7EB',
             callbacks: {
-                label: (context) => `Temperature: ${parseFloat(context.raw).toFixed(2)}°C`
+                label: (context) => `Temperature: ${parseFloat(context.raw).toFixed(2)}°C` // Format to 2 decimals
             }
         }
     },
@@ -117,7 +113,7 @@ const chartOptions = ref({
         x: {
             title: {
                 display: true,
-                text: 'Hours',
+                text: 'Time',
                 color: '#9CA3AF',
                 font: {
                     size: 12
@@ -125,13 +121,21 @@ const chartOptions = ref({
             },
             ticks: {
                 color: '#9CA3AF',
-                autoSkip: false,
                 maxRotation: 45,
-                minRotation: 45
+                minRotation: 45,
+                autoSkip: false,
+                callback: function(value, index, values) {
+                    // Show only every 2nd hour
+                    const time = this.getLabelForValue(value);
+                    const hour = parseInt(time.split(':')[0], 10);
+                    return hour % 2 === 0 ? time : '';
+                }
             },
             grid: {
                 color: 'rgba(255, 255, 255, 0.05)'
-            }
+            },
+            min: '00:00',
+            max: '23:00'
         },
         y: {
             title: {
@@ -156,14 +160,21 @@ const chartOptions = ref({
 });
 
 const currentTemperature = computed(() => {
+    console.log('Temperature Data:', temperatureData.value); // Log the entire array
+
     // Find the most recent valid temperature value
     const latestValidDataPoint = [...temperatureData.value]
-        .reverse()
+        .reverse() // Reverse the array to start from the most recent data
         .find(dataPoint => dataPoint.value !== null && dataPoint.value !== undefined);
-    
-    return latestValidDataPoint?.value !== undefined 
-        ? latestValidDataPoint.value 
+
+    console.log('Latest Valid Data Point:', latestValidDataPoint); // Log the valid data point
+
+    const value = latestValidDataPoint?.value !== undefined
+        ? latestValidDataPoint.value // Do not round the value
         : null;
+
+    console.log(`Current Temperature: ${value}`);
+    return value;
 });
 
 const temperatureColorClass = computed(() => {
@@ -176,11 +187,62 @@ const temperatureColorClass = computed(() => {
 });
 
 const lastUpdateTime = computed(() => {
-    const latestData = [...temperatureData.value]
-        .reverse()
-        .find(dataPoint => dataPoint.value !== null && dataPoint.value !== undefined);
-    return latestData?.time || '--:--';
+    return temperatureData.value[temperatureData.value.length - 1]?.time || '--:--';
 });
+
+const fetchInitialData = async () => {
+    try {
+        // Get the current time
+        const now = new Date();
+        
+        // Always start from the beginning of the current day
+        const startOfDay = new Date(now);
+        startOfDay.setHours(0, 0, 0, 0);
+        
+        const endOfDay = new Date(startOfDay);
+        endOfDay.setDate(startOfDay.getDate() + 1);
+        
+        // Get idAula from props or route
+        const idAula = props.idAula || (route.params.id ? Number(route.params.id) : 1);
+        
+        // Use getDadesGrafic with 'hora' instead of 'minut'
+        const data = await getDadesGrafic(
+            'hora',
+            'temperatura',
+            idAula,
+            startOfDay.toISOString(),
+            endOfDay.toISOString()
+        );
+        
+        // Process data from the API
+        const filteredData = data
+            .filter(item => item.average >= 0 && item.average <= 40)
+            .map(item => ({
+                time: new Date(item.dataIni).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                value: item.average,
+            }));
+
+        // Create hour-by-hour labels for the full day (24 hours)
+        const labels = Array.from({ length: 24 }, (_, i) => {
+            const time = new Date(startOfDay.getTime() + i * 60 * 60 * 1000);
+            return time.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        });
+
+        // Fill in missing data points
+        const completeData = labels.map(label => {
+            const existing = filteredData.find(item => item.time === label);
+            return existing || { time: label, value: null };
+        });
+
+        temperatureData.value = completeData;
+        updateChartData(temperatureData.value);
+        loading.value = false;
+    } catch (error) {
+        console.error('Error fetching initial data:', error);
+        error.value = 'Failed to load initial data';
+        loading.value = false;
+    }
+};
 
 // Update chart data
 const updateChartData = (data) => {
@@ -192,15 +254,13 @@ const updateChartData = (data) => {
     chartKey.value++;
 };
 
-// Handle new aggregated hourly data from the socket
+// Handle new aggregated data from the socket
 const handleNewAggregatedData = (data) => {
     if (!data || !data.sensors) return;
 
     const now = new Date();
-    const currentHour = now.getHours();
-    const timeString = `${currentHour.toString().padStart(2, '0')}:00`;
+    const timeString = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
-    // Calculate average temperature across all sensors
     let totalTemp = 0;
     let sensorCount = 0;
 
@@ -215,65 +275,25 @@ const handleNewAggregatedData = (data) => {
         const avgTemp = totalTemp / sensorCount;
 
         if (avgTemp >= 0 && avgTemp <= 40) {
-            // Find the corresponding hour in our data
-            const hourIndex = temperatureData.value.findIndex(item => item.time === timeString);
-            
-            if (hourIndex !== -1) {
-                // Update the temperature for this hour
-                temperatureData.value[hourIndex].value = avgTemp;
-                
-                // Trigger reactivity
-                temperatureData.value = [...temperatureData.value];
-                
-                updateChartData(temperatureData.value);
+            const existingIndex = temperatureData.value.findIndex(item => item.time === timeString);
+            if (existingIndex !== -1) {
+                // Update the value at the existing index
+                temperatureData.value[existingIndex].value = avgTemp;
+            } else {
+                // Add a new entry
+                temperatureData.value.push({ time: timeString, value: avgTemp });
             }
+
+            // Reassign the array to itself to trigger reactivity
+            temperatureData.value = [...temperatureData.value];
+
+            updateChartData(temperatureData.value);
         }
-    }
-};
-
-// Fetch initial hourly data
-const fetchInitialData = async () => {
-    try {
-        const now = new Date();
-        const startOfDay = new Date(now.setHours(0, 0, 0, 0));
-        const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
-
-        const response = await fetch(
-            `${getBaseUrl()}/api/data/mongodb/hourly?startDate=${startOfDay.toISOString()}&endDate=${endOfDay.toISOString()}`
-        );
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch initial hourly data');
-        }
-
-        const data = await response.json();
-        
-        // Initialize with empty data for all hours
-        initializeHourlyData();
-
-        // Fill in the data we received
-        data.forEach(item => {
-            const hour = new Date(item.date).getHours();
-            const timeString = `${hour.toString().padStart(2, '0')}:00`;
-            const hourIndex = temperatureData.value.findIndex(h => h.time === timeString);
-            
-            if (hourIndex !== -1 && item.temperature) {
-                temperatureData.value[hourIndex].value = item.temperature;
-            }
-        });
-
-        updateChartData(temperatureData.value);
-        loading.value = false;
-    } catch (error) {
-        console.error('Error fetching initial hourly data:', error);
-        error.value = 'Failed to load hourly data';
-        loading.value = false;
     }
 };
 
 // Lifecycle hooks
 onMounted(() => {
-    initializeHourlyData();
     fetchInitialData();
 
     try {
@@ -408,11 +428,25 @@ onBeforeUnmount(() => {
 }
 
 /* Temperature color classes */
-.temp-cool { color: #60a5fa; }
-.temp-normal { color: #34d399; }
-.temp-warm { color: #fbbf24; }
-.temp-hot { color: #f87171; }
-.temp-neutral { color: #a1a1aa; }
+.temp-cool {
+    color: #60a5fa;
+}
+
+.temp-normal {
+    color: #34d399;
+}
+
+.temp-warm {
+    color: #fbbf24;
+}
+
+.temp-hot {
+    color: #f87171;
+}
+
+.temp-neutral {
+    color: #a1a1aa;
+}
 
 /* Chart.js overrides */
 :deep(.chartjs-render-monitor) {

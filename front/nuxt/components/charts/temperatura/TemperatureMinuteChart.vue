@@ -46,7 +46,8 @@ import {
     PointElement
 } from 'chart.js';
 import { io } from 'socket.io-client';
-import { getBaseUrl } from '~/utils/communicationManager';
+import { getBaseUrl, getDadesGrafic } from '~/utils/communicationManager';
+import { useRoute } from 'vue-router';
 
 // Register Chart.js components
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement);
@@ -57,6 +58,14 @@ const chartKey = ref(0);
 const socket = ref(null);
 const loading = ref(true);
 const error = ref(null);
+const route = useRoute();
+
+const props = defineProps({
+    idAula: {
+        type: Number,
+        default: null
+    }
+});
 
 // Chart data configuration
 const chartData = ref({
@@ -114,12 +123,19 @@ const chartOptions = ref({
                 color: '#9CA3AF',
                 maxRotation: 45,
                 minRotation: 45,
-                autoSkip: true,
-                maxTicksLimit: 12
+                autoSkip: false,
+                callback: function(value, index, values) {
+                    // Show only every 5th minute
+                    const time = this.getLabelForValue(value);
+                    const minutes = parseInt(time.split(':')[1], 10);
+                    return minutes % 5 === 0 ? time : '';
+                }
             },
             grid: {
                 color: 'rgba(255, 255, 255, 0.05)'
-            }
+            },
+            min: '10:00',
+            max: '11:00'
         },
         y: {
             title: {
@@ -174,36 +190,45 @@ const lastUpdateTime = computed(() => {
     return temperatureData.value[temperatureData.value.length - 1]?.time || '--:--';
 });
 
-// Fetch initial data for the current hour range
 const fetchInitialData = async () => {
     try {
+        // Get the current time
         const now = new Date();
-        const startOfHour = new Date(now.setMinutes(0, 0, 0));
-        const endOfHour = new Date(startOfHour.getTime() + 60 * 60 * 1000);
-        const endOfNextHour = new Date(endOfHour.getTime() + 60 * 1000);
-
-        const response = await fetch(
-            `${getBaseUrl()}/api/data/mongodb?startDate=${startOfHour.toISOString()}&endDate=${endOfNextHour.toISOString()}`
+        
+        // Always start from the beginning of the current hour
+        const startOfHour = new Date(now);
+        startOfHour.setMinutes(0, 0, 0);
+        
+        const endOfHour = new Date(startOfHour);
+        endOfHour.setHours(startOfHour.getHours() + 1);
+        
+        // Get idAula from props or route
+        const idAula = props.idAula || (route.params.id ? Number(route.params.id) : 1);
+        
+        // Use getDadesGrafic
+        const data = await getDadesGrafic(
+            'minut',
+            'temperatura',
+            idAula,
+            startOfHour.toISOString(),
+            endOfHour.toISOString()
         );
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch initial data');
-        }
-
-        const data = await response.json();
+        
+        // Process data from the API
         const filteredData = data
-            .filter(item => item.temperature >= 0 && item.temperature <= 40)
+            .filter(item => item.average >= 0 && item.average <= 40)
             .map(item => ({
-                time: new Date(item.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-                value: item.temperature,
+                time: new Date(item.dataIni).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                value: item.average,
             }));
 
-        // Fill missing minutes with null values
-        const labels = Array.from({ length: 61 }, (_, i) => {
+        // Create minute-by-minute labels for the full hour (60 minutes)
+        const labels = Array.from({ length: 60 }, (_, i) => {
             const time = new Date(startOfHour.getTime() + i * 60 * 1000);
             return time.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         });
 
+        // Fill in missing data points
         const completeData = labels.map(label => {
             const existing = filteredData.find(item => item.time === label);
             return existing || { time: label, value: null };
