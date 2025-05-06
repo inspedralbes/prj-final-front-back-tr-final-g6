@@ -279,8 +279,8 @@ app.post('/api/mapa', async (req, res) => {
 });
 
 // Get dades per gràfics
-app.post('/api/aules/:id/grafic', (req, res) => {
-  const { taula, tipus, dataIni, dataFi } = req.body;
+app.get('/api/aules/:id/grafic', (req, res) => {
+  const { taula, tipus, dataIni, dataFi } = req.query;
   const idAula = req.params.id;
 
   if (!taula || !tipus || !idAula || !dataIni || !dataFi) {
