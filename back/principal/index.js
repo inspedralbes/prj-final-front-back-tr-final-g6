@@ -675,8 +675,8 @@ app.post('/api/sendMessage', async (req, res) => {
 });
 
 // Endpoint per obtenir imatges
-app.get('/api/fileSensor', (req, res) => {
-  const { filename } = req.query;
+app.get('/api/fileSensor/:filepath', (req, res) => {
+  const filename = req.params.filepath;
 
   if (!filename) {
     return res.status(400).send({ message: 'El nom del fitxer és necessari' });
