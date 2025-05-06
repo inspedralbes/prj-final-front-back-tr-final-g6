@@ -32,6 +32,7 @@ jobs:
           # Copiar i configurar arxius .env
           echo "Copiant arxius .env.PROD a .env"
           cp -f ./back/principal/.env.PROD ./back/principal/.env
+          cp -f ./front/nuxt/.env.PROD ./front/next/.env
           echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> ./back/principal/.env
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> ./back/principal/.env
           echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> ./back/principal/.env
