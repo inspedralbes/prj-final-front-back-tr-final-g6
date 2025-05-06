@@ -20,7 +20,11 @@
 
                 <div class="time-range-info">
                     <div class="time-range-indicator">Last 60 minutes</div>
-                    <div class="update-time">Last update: {{ lastUpdateTime }}</div>
+                    <div class="update-time">Last update: {{ new Date().toLocaleTimeString('es-ES', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) }}
+                    </div>
                 </div>
             </div>
 
@@ -105,7 +109,7 @@ const chartOptions = ref({
             titleColor: '#E5E7EB',
             bodyColor: '#E5E7EB',
             callbacks: {
-                label: (context) => `Temperature: ${parseFloat(context.raw).toFixed(2)}°C` // Format to 2 decimals
+                label: (context) => `Temperature: ${parseFloat(context.raw).toFixed(2)}°C`
             }
         }
     },
@@ -124,18 +128,21 @@ const chartOptions = ref({
                 maxRotation: 45,
                 minRotation: 45,
                 autoSkip: false,
-                callback: function(value, index, values) {
-                    // Show only every 5th minute
+                callback: function (value, index, values) {
+                    // Show only every 5th minute and the last value
                     const time = this.getLabelForValue(value);
                     const minutes = parseInt(time.split(':')[1], 10);
+                    if (index === values.length - 1) {
+                        // Ensure the last value shows the full hour (e.g., 13:00 instead of 12:59)
+                        const lastHour = parseInt(time.split(':')[0], 10) + (minutes === 59 ? 1 : 0);
+                        return `${lastHour.toString().padStart(2, '0')}:00`;
+                    }
                     return minutes % 5 === 0 ? time : '';
                 }
             },
             grid: {
                 color: 'rgba(255, 255, 255, 0.05)'
-            },
-            min: '10:00',
-            max: '11:00'
+            }
         },
         y: {
             title: {
@@ -194,17 +201,17 @@ const fetchInitialData = async () => {
     try {
         // Get the current time
         const now = new Date();
-        
+
         // Always start from the beginning of the current hour
         const startOfHour = new Date(now);
         startOfHour.setMinutes(0, 0, 0);
-        
+
         const endOfHour = new Date(startOfHour);
         endOfHour.setHours(startOfHour.getHours() + 1);
-        
+
         // Get idAula from props or route
         const idAula = props.idAula || (route.params.id ? Number(route.params.id) : 1);
-        
+
         // Use getDadesGrafic
         const data = await getDadesGrafic(
             'minut',
@@ -213,7 +220,7 @@ const fetchInitialData = async () => {
             startOfHour.toISOString(),
             endOfHour.toISOString()
         );
-        
+
         // Process data from the API
         const filteredData = data
             .filter(item => item.average >= 0 && item.average <= 40)
