@@ -21,7 +21,7 @@ import path from 'path'; // Importa el mòdul path
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/fileSensors", express.static(path.join(__dirname, 'sensor'))); // Serveix fitxers estàtics des de la carpeta 'sensor'
+app.use("/api/fileSensor", express.static(path.join(__dirname, 'sensor'))); // Serveix fitxers estàtics des de la carpeta 'sensor'
 console.log("Serving static files from:", path.join(__dirname, 'sensor'));
 
 const server = createServer(app);
