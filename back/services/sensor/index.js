@@ -19,7 +19,7 @@ function getRandomAulaId() {
 }
 
 const MAC = "MAMAMAM";
-const api_key = "c8nlsy4955ju75tq5w3f";
+const api_key = "c8nlsy4955ju75tq5w3f"; 
 
 async function sendMessage(api_key, volume, temperature, date, MAC) {
     const queue = 'SensorData';
@@ -37,7 +37,7 @@ async function sendMessage(api_key, volume, temperature, date, MAC) {
         connection.close();
       }, 500);
     } catch (error) {
-      console.error('❌ Error al enviar mensaje', error);
+      console.error('❌ Error al enviar mensaje', error); 
     }
   }
 
