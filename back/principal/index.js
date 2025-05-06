@@ -11,6 +11,7 @@ import dotenv from 'dotenv';
 import ampq from 'amqplib';
 import { MongoClient } from 'mongodb';
 import moment from 'moment-timezone';
+import path from 'path'; // Importa el mòdul path
 
 app.use(cors());
 app.use(express.json());
@@ -673,6 +674,24 @@ app.post('/api/sendMessage', async (req, res) => {
   }
 });
 
+// Endpoint per obtenir imatges
+app.get('/api/fileSensor', (req, res) => {
+  const { filename } = req.query;
+
+  if (!filename) {
+    return res.status(400).send({ message: 'El nom del fitxer és necessari' });
+  }
+
+  const imagePath = path.join(__dirname, 'sensor', filename);
+
+  res.sendFile(imagePath, (err) => {
+    if (err) {
+      console.error('Error al enviar el fitxer:', err);
+      res.status(404).send({ message: 'Fitxer no trobat' });
+    }
+  });
+});
+
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
-}); 
+});
