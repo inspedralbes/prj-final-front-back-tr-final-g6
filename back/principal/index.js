@@ -21,6 +21,8 @@ import path from 'path'; // Importa el mòdul path
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/fileSensors", express.static(path.join(__dirname, 'sensor'))); // Serveix fitxers estàtics des de la carpeta 'sensor'
+
 const server = createServer(app);
 dotenv.config();
 
@@ -677,24 +679,6 @@ app.post('/api/sendMessage', async (req, res) => {
     console.error('❌ Error al enviar el missatge:', error);
     res.status(500).send({ message: 'Error al enviar el missatge', error: error.message });
   }
-});
-
-// Endpoint per obtenir imatges
-app.get('/api/fileSensor/:filepath', (req, res) => {
-  const filename = req.params.filepath;
-
-  if (!filename) {
-    return res.status(400).send({ message: 'El nom del fitxer és necessari' });
-  }
-
-  const imagePath = path.join(__dirname, 'sensor', filename);
-
-  res.sendFile(imagePath, (err) => {
-    if (err) {
-      console.error('Error al enviar el fitxer:', err);
-      res.status(404).send({ message: 'Fitxer no trobat' });
-    }
-  });
 });
 
 server.listen(PORT, '0.0.0.0', () => {
