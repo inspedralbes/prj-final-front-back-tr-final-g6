@@ -8,6 +8,7 @@ import { createServer } from 'http';
 import mysql2 from 'mysql2';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import ampq from 'amqplib';
 import { MongoClient } from 'mongodb';
 import moment from 'moment-timezone';
 
@@ -640,6 +641,36 @@ app.get('/api/sensors/banned', (req, res) => {
     }
     res.status(200).send(results);
   });
+});
+
+// Endpoint per enviar missatges a RabbitMQ
+app.post('/api/sendMessage', async (req, res) => {
+  const { api_key, volume, temperature, date, MAC } = req.body;
+
+  if (!api_key || !volume || !temperature || !date || !MAC) {
+    return res.status(400).send({ message: 'Falten dades necessàries' });
+  }
+
+  const queue = 'SensorData';
+  const msg = { api_key, volume, temperature, date, MAC };
+
+  try {
+    const connection = await amqp.connect(process.env.RABBITMQ_URL);
+    const channel = await connection.createChannel();
+
+    await channel.assertQueue(queue, { durable: false });
+    channel.sendToQueue(queue, Buffer.from(JSON.stringify(msg)));
+    console.log(`🟢 Missatge enviat:`, msg);
+
+    setTimeout(() => {
+      connection.close();
+    }, 500);
+
+    res.status(200).send({ message: 'Missatge enviat correctament' });
+  } catch (error) {
+    console.error('❌ Error al enviar el missatge:', error);
+    res.status(500).send({ message: 'Error al enviar el missatge', error: error.message });
+  }
 });
 
 server.listen(PORT, '0.0.0.0', () => {
