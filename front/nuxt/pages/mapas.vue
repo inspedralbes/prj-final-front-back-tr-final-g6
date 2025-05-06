@@ -1,5 +1,6 @@
 <template>
-  <div class="min-h-screen flex flex-col animated-bg">
+  <div class="min-h-screen flex flex-col bg-slate-900">
+    <Header />
     <!-- Gradient Header Section -->
     <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6 relative">
       <!-- Logo Acoubox -->
@@ -73,6 +74,9 @@
           </div>
         </button>
       </div>
+
+      <!-- Componente Mapa -->
+      <ComponentMapa />
 
       <!-- Contenedor del mapa -->
       <div
@@ -243,6 +247,7 @@
 </template>
 
 <script setup>
+import Header from '../components/header.vue';
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "~/stores/userStore";
@@ -457,25 +462,7 @@ onMounted(async () => {
 </script>
 
 <style>
-.animated-bg {
-  position: relative;
-  min-height: 100vh;
-  /* Animated gradient background */
-  background: linear-gradient(270deg, #0f172a, #134e4a, #1e293b, #0e7490, #0f172a);
-  background-size: 400% 400%;
-  animation: gradientBG 18s ease infinite;
-}
-@keyframes gradientBG {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
+
 
 .map-container {
   overflow: hidden;
