@@ -73,11 +73,48 @@
                 <div class="text-center text-lg font-medium text-teal-400 mb-4">
                   {{ aula.Etapa }}
                 </div>
-                <p class="text-slate-300 text-center text-xl font-medium mb-6">
+                <p class="text-slate-300 text-center text-xl font-medium mb-4">
                   {{ aula.Aula }}
                 </p>
+
+                <!-- Control del sensor -->
+                <div class="flex justify-center mb-4">
+                  <button
+                    @click.prevent="toggleSensor(aula.id)"
+                    :class="[
+                      'px-4 py-2 rounded-full font-medium flex items-center gap-2 transition-all duration-300',
+                      aula.sensorActivo ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'
+                    ]"
+                  >
+                    <i class="fas fa-power-off"></i>
+                    <span>{{ aula.sensorActivo ? 'Sensor Actiu' : 'Sensor Inactiu' }}</span>
+                  </button>
+                </div>
+
+                <!-- Indicadores de sensores -->
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                  <!-- Temperatura -->
+                  <div class="flex flex-col items-center p-2 rounded-lg bg-slate-700/50 border border-slate-600">
+                    <i class="fas fa-temperature-high text-amber-400 mb-1"></i>
+                    <span class="text-xs text-slate-300">Temp.</span>
+                    <span class="text-sm font-medium text-white">--°C</span>
+                  </div>
+                  <!-- CO2 -->
+                  <div class="flex flex-col items-center p-2 rounded-lg bg-slate-700/50 border border-slate-600">
+                    <i class="fas fa-wind text-emerald-400 mb-1"></i>
+                    <span class="text-xs text-slate-300">CO2</span>
+                    <span class="text-sm font-medium text-white">--ppm</span>
+                  </div>
+                  <!-- Volumen -->
+                  <div class="flex flex-col items-center p-2 rounded-lg bg-slate-700/50 border border-slate-600">
+                    <i class="fas fa-volume-up text-blue-400 mb-1"></i>
+                    <span class="text-xs text-slate-300">Vol.</span>
+                    <span class="text-sm font-medium text-white">--dB</span>
+                  </div>
+                </div>
+
                 <div class="mt-auto flex justify-center">
-                  <span class="inline-flex items-center px-5 py-2.5 bg-slate-700/80 hover:bg-slate-700 text-teal-400 text-base font-medium rounded-full transition-colors">
+                  <span class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-500 hover:to-blue-500 text-white text-base font-medium rounded-full transition-all duration-300 shadow-lg hover:shadow-xl">
                     Veure detalls
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -111,11 +148,25 @@
   
   onMounted(async () => {
     try {
-      aulas.value = await getAulas();
+      const aulasData = await getAulas();
+      // Agregar el estado del sensor a cada aula
+      aulas.value = aulasData.map(aula => ({
+        ...aula,
+        sensorActivo: true // Por defecto, todos los sensores están activos
+      }));
     } catch (error) {
       console.error('Error al cargar las aulas:', error.message);
     }
   });
+
+  const toggleSensor = (aulaId) => {
+    const aula = aulas.value.find(a => a.id === aulaId);
+    if (aula) {
+      aula.sensorActivo = !aula.sensorActivo;
+      // Aquí podrías hacer una llamada a la API para actualizar el estado en el backend
+      console.log(`Sensor del aula ${aulaId} ${aula.sensorActivo ? 'activado' : 'desactivado'}`);
+    }
+  };
   
   const filteredAulas = computed(() => {
     let filtered = aulas.value.filter(aula => {

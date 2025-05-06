@@ -3,13 +3,6 @@
     <Header />
     <!-- Gradient Header Section -->
     <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6 relative">
-      <!-- Logo Acoubox -->
-      <div
-        class="absolute left-6 top-1/2 transform -translate-y-1/2 flex items-center space-x-3"
-      >
-        <img src="/logo.jpg" alt="Acoubox Logo" class="h-10 w-10" />
-        <span class="text-white text-xl font-semibold">Acoubox</span>
-      </div>
       <!-- Botón de retroceso -->
       <NuxtLink to="/aulas" class="absolute right-6 top-1/2 transform -translate-y-1/2">
         <button
@@ -76,7 +69,7 @@
       </div>
 
       <!-- Componente Mapa -->
-      <ComponentMapa />
+      <ComponentMapa v-model:sensorType="selectedSensorType" />
 
       <!-- Contenedor del mapa -->
       <div
@@ -140,64 +133,23 @@
               <span>{{ popup.text }}</span>
               <span class="text-sm text-gray-400">ID: {{ popup.id }}</span>
             </div>
-            <div class="text-gray-300 space-y-3">
-              <!-- Temperatura -->
-              <div class="flex items-center justify-between">
+            <div class="text-gray-300">
+              <div class="flex items-center justify-between p-2">
                 <div class="flex items-center space-x-2">
                   <div
                     :class="[
                       'w-3 h-3 rounded-full',
-                      getSensorStatusColor(popup.temperature, 15, 30),
+                      getSensorStatusColorByType(popup),
                     ]"
                   ></div>
-                  <span>Temperatura:</span>
+                  <span class="text-sm">{{ getSensorLabel() }}</span>
                 </div>
                 <span
                   :class="[
-                    getSensorStatusColor(popup.temperature, 15, 30).replace(
-                      'bg-',
-                      'text-'
-                    ),
+                    getSensorStatusColorByType(popup).replace('bg-', 'text-'),
                   ]"
-                  >{{ popup.temperature }}°C</span
-                >
-              </div>
-
-              <!-- CO2 -->
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <div
-                    :class="[
-                      'w-3 h-3 rounded-full',
-                      getSensorStatusColor(popup.co2, 400, 2000),
-                    ]"
-                  ></div>
-                  <span>CO2:</span>
-                </div>
-                <span
-                  :class="[
-                    getSensorStatusColor(popup.co2, 400, 2000).replace('bg-', 'text-'),
-                  ]"
-                  >{{ popup.co2 }}ppm</span
-                >
-              </div>
-
-              <!-- Volumen -->
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <div
-                    :class="[
-                      'w-3 h-3 rounded-full',
-                      getSensorStatusColor(popup.volume, 35, 85),
-                    ]"
-                  ></div>
-                  <span>Volumen:</span>
-                </div>
-                <span
-                  :class="[
-                    getSensorStatusColor(popup.volume, 35, 85).replace('bg-', 'text-'),
-                  ]"
-                  >{{ popup.volume }}dB</span
+                  class="text-lg font-bold"
+                  >{{ getSensorValue(popup) }}</span
                 >
               </div>
             </div>
@@ -247,7 +199,7 @@
 </template>
 
 <script setup>
-import Header from '../components/header.vue';
+import Header from "../components/header.vue";
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "~/stores/userStore";
@@ -262,6 +214,7 @@ const plantas = ["PLANTA BAJA", "PLANTA 1", "PLANTA 2", "PLANTA 3", "PLANTA SUBT
 const plantaSeleccionada = ref("PLANTA 1");
 const aulaData = ref([]);
 const fetchDataText = ref("");
+const selectedSensorType = ref('temperature'); // Tipo de sensor seleccionado por defecto
 
 // Estado para los pop-ups personalizados
 const customPopups = ref([]);
@@ -356,13 +309,9 @@ const deletePopup = (id) => {
 // Ahora los popups solo se muestran al hacer clic en el marcador
 // y solo uno puede estar abierto a la vez
 const getMarkerColor = (popup) => {
-  // Normalizar cada valor en una escala de 0 a 1
-  const tempNorm = (popup.temperature - 15) / (30 - 15);
-  const co2Norm = (popup.co2 - 400) / (2000 - 400);
-  const volumeNorm = (popup.volume - 35) / (85 - 35);
-
-  // Obtener el valor normalizado más alto
-  const maxNorm = Math.max(tempNorm, co2Norm, volumeNorm);
+  const value = getSensorValueNumber(popup);
+  const { min, max } = getSensorRange();
+  const norm = (value - min) / (max - min);
 
   // Usar la misma escala de colores que getSensorStatusColor
   const colors = [
@@ -378,8 +327,67 @@ const getMarkerColor = (popup) => {
     "bg-red-500", // 90-100%
   ];
 
-  const colorIndex = Math.min(Math.floor(maxNorm * 10), 9);
+  const colorIndex = Math.min(Math.floor(norm * 10), 9);
   return colors[Math.max(0, colorIndex)];
+};
+
+const getSensorLabel = () => {
+  switch (selectedSensorType.value) {
+    case 'temperature':
+      return 'Temperatura';
+    case 'co2':
+      return 'CO2';
+    case 'volume':
+      return 'Volumen';
+    default:
+      return '';
+  }
+};
+
+const getSensorRange = () => {
+  switch (selectedSensorType.value) {
+    case 'temperature':
+      return { min: 15, max: 30 };
+    case 'co2':
+      return { min: 400, max: 2000 };
+    case 'volume':
+      return { min: 35, max: 85 };
+    default:
+      return { min: 0, max: 100 };
+  }
+};
+
+const getSensorValueNumber = (popup) => {
+  switch (selectedSensorType.value) {
+    case 'temperature':
+      return popup.temperature;
+    case 'co2':
+      return popup.co2;
+    case 'volume':
+      return popup.volume;
+    default:
+      return 0;
+  }
+};
+
+const getSensorValue = (popup) => {
+  const value = getSensorValueNumber(popup);
+  switch (selectedSensorType.value) {
+    case 'temperature':
+      return `${value}°C`;
+    case 'co2':
+      return `${value}ppm`;
+    case 'volume':
+      return `${value}dB`;
+    default:
+      return value;
+  }
+};
+
+const getSensorStatusColorByType = (popup) => {
+  const value = getSensorValueNumber(popup);
+  const { min, max } = getSensorRange();
+  return getSensorStatusColor(value, min, max);
 };
 
 const getAlertLevel = (value, normal, warning, critical) => {
@@ -462,8 +470,6 @@ onMounted(async () => {
 </script>
 
 <style>
-
-
 .map-container {
   overflow: hidden;
   position: relative;
