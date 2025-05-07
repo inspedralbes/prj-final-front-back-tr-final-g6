@@ -98,8 +98,9 @@ app.post('/api/login', (req, res) => {
     return res.status(400).send({ message: 'correu i contrasenya són necessaris' });
   }
 
-  const query = 'SELECT * FROM usuari WHERE correu = ? AND contrasenya = ?';
-  connexioBD.execute(query, [correu, contrasenya], (err, results) => {
+  // Primero buscamos el usuario solo por correo
+  const query = 'SELECT * FROM usuari WHERE correu = ?';
+  connexioBD.execute(query, [correu], (err, results) => {
     if (err) {
       console.error('Error en la consulta a la base de dades: ' + err.stack);
       res.status(500).send('Error en la consulta a la base de dades');
@@ -107,9 +108,21 @@ app.post('/api/login', (req, res) => {
     }
 
     if (results.length > 0) {
-      res.status(200).send({ message: 'Login successful', user: results[0] });
+      const user = results[0];
+      // Comparamos la contraseña proporcionada con la almacenada
+      if (user.contrasenya === contrasenya) {
+        // Eliminamos la contraseña antes de enviar los datos del usuario
+        const { contrasenya, ...userWithoutPassword } = user;
+        res.status(200).send({ 
+          message: 'Login successful', 
+          user: userWithoutPassword 
+        });
+      } else {
+        res.status(401).send({ message: 'Credencials incorrectes' });
+      }
     } else {
-      res.status(401).send({ message: 'Invalid correu or contrasenya' });
+      // No revelamos si el correo existe o no por seguridad
+      res.status(401).send({ message: 'Credencials incorrectes' });
     }
   });
 });
