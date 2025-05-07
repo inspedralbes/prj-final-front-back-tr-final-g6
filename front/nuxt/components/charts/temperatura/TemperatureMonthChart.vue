@@ -142,7 +142,11 @@ const chartOptions = ref({
             },
             grid: {
                 color: 'rgba(255, 255, 255, 0.05)'
-            }
+            },
+            beginAtZero: true,
+            suggestedMin: 0,
+            suggestedMax: 40,
+            grace: 0
         }
     }
 });
@@ -151,9 +155,9 @@ const currentTemperature = computed(() => {
     const latestValidDataPoint = [...temperatureData.value]
         .reverse()
         .find(dataPoint => dataPoint.value !== null && dataPoint.value !== undefined);
-    
-    return latestValidDataPoint?.value !== undefined 
-        ? latestValidDataPoint.value 
+
+    return latestValidDataPoint?.value !== undefined
+        ? latestValidDataPoint.value
         : null;
 });
 
@@ -174,17 +178,17 @@ const lastUpdateTime = computed(() => {
 });
 
 const formatMonthLabel = (date) => {
-    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     return monthNames[date.getMonth()];
 };
 
 const fetchInitialData = async () => {
     try {
         const now = new Date();
-        
+
         // Check if we already fetched data this month
-        if (lastDataFetchTime.value && 
+        if (lastDataFetchTime.value &&
             new Date(lastDataFetchTime.value).getMonth() === now.getMonth() &&
             new Date(lastDataFetchTime.value).getFullYear() === now.getFullYear()) {
             return; // Already fetched data this month
@@ -192,7 +196,7 @@ const fetchInitialData = async () => {
 
         loading.value = true;
         const currentYear = now.getFullYear();
-        
+
         // Create array for all months of the current year
         const months = Array.from({ length: 12 }, (_, i) => {
             const monthDate = new Date(currentYear, i, 1); // January to December
@@ -205,9 +209,9 @@ const fetchInitialData = async () => {
         // Calculate date range for API call (full year)
         const startDate = new Date(currentYear, 0, 1); // January 1st
         const endDate = new Date(currentYear, 11, 31); // December 31st
-        
+
         const idAula = props.idAula || (route.params.id ? Number(route.params.id) : 1);
-        
+
         // Get monthly data for the entire year
         const data = await getDadesGrafic(
             'mes',
@@ -222,13 +226,13 @@ const fetchInitialData = async () => {
             const monthEnd = new Date(month.monthDate);
             monthEnd.setMonth(monthEnd.getMonth() + 1);
             monthEnd.setDate(0); // Last day of month
-            
+
             // Find data point that falls within this month
             const dataPoint = data.find(item => {
                 const itemDate = new Date(item.dataIni);
                 return itemDate >= month.monthDate && itemDate <= monthEnd;
             });
-            
+
             return {
                 monthLabel: month.monthLabel,
                 value: dataPoint?.average || null,
@@ -260,7 +264,7 @@ const handleNewAggregatedData = (data) => {
     const currentMonthLabel = formatMonthLabel(now);
 
     // Only process if we're in a new month since last fetch
-    if (lastDataFetchTime.value && 
+    if (lastDataFetchTime.value &&
         new Date(lastDataFetchTime.value).getMonth() === now.getMonth() &&
         new Date(lastDataFetchTime.value).getFullYear() === now.getFullYear()) {
         return;
@@ -285,7 +289,7 @@ const handleNewAggregatedData = (data) => {
             const monthIndex = temperatureData.value.findIndex(
                 item => item.monthLabel === currentMonthLabel
             );
-            
+
             if (monthIndex !== -1) {
                 temperatureData.value[monthIndex].value = avgTemp;
                 temperatureData.value = [...temperatureData.value];
@@ -297,7 +301,7 @@ const handleNewAggregatedData = (data) => {
 
 const checkForMonthChange = () => {
     const now = new Date();
-    if (!lastDataFetchTime.value || 
+    if (!lastDataFetchTime.value ||
         new Date(lastDataFetchTime.value).getMonth() !== now.getMonth() ||
         new Date(lastDataFetchTime.value).getFullYear() !== now.getFullYear()) {
         fetchInitialData();
