@@ -83,6 +83,7 @@ import HumitatWeekChart from './charts/humitat/HumitatWeekChart.vue';
 import HumitatMonthChart from './charts/humitat/HumitatMonthChart.vue';
 import HumitatCourseChart from './charts/humitat/HumitatCourseChart.vue';
 
+import VolumeActual from './charts/volume/VolumeActual.vue';
 import VolumeMinuteChart from './charts/volume/VolumeMinuteChart.vue';
 import VolumeHourChart from './charts/volume/VolumeHourChart.vue';
 import VolumeDayChart from './charts/volume/VolumeDayChart.vue';
@@ -119,6 +120,7 @@ const chartComponents = {
         course: HumitatCourseChart,
     },
     Volum: {
+        actual: VolumeActual,
         minuts: VolumeMinuteChart,
         hours: VolumeHourChart,
         daily: VolumeDayChart,

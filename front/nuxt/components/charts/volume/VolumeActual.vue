@@ -11,11 +11,11 @@
         <div v-else class="dashboard-content">
             <!-- Header Section -->
             <div class="dashboard-header">
-                <div class="humidity-display">
-                    <div class="current-humidity" :class="humidityColorClass">
-                        {{ currentHumidity }}%
+                <div class="volume-display">
+                    <div class="current-volume" :class="volumeColorClass">
+                        {{ currentVolume }} dB
                     </div>
-                    <div class="humidity-label">Current Humidity</div>
+                    <div class="volume-label">Current Volume (dB)</div>
                 </div>
 
                 <div class="sensor-info">
@@ -26,7 +26,7 @@
 
             <!-- Chart Section -->
             <div class="chart-container">
-                <Line :data="chartData" :options="chartOptions" :key="lineChartKey" class="humidity-chart" />
+                <Line :data="chartData" :options="chartOptions" :key="lineChartKey" class="volume-chart" />
             </div>
         </div>
     </div>
@@ -65,38 +65,63 @@ ChartJS.register(
 const loading = ref(true);
 const error = ref(null);
 const socket = ref(null);
-const currentHumidity = ref(0);
+const currentVolume = ref(0);
 const sensorId = ref(null);
 const lastUpdate = ref('--:--');
-const recentHumidityReadings = ref([]);
+const recentVolumes = ref([]);
 const lineChartKey = ref(0);
 
 // Computed properties
-const humidityColorClass = computed(() => {
-    const humidity = currentHumidity.value;
-    if (humidity < 30) return 'humidity-low';
-    if (humidity < 60) return 'humidity-normal';
-    return 'humidity-high';
+const volumeColorClass = computed(() => {
+    const volume = currentVolume.value;
+    if (volume < 30) return 'volume-low';
+    if (volume < 60) return 'volume-normal';
+    if (volume < 90) return 'volume-high';
+    return 'volume-critical';
 });
 
-// Chart configurations
+// Get dynamic chart colors based on volume
+const chartColors = computed(() => {
+    const volume = currentVolume.value;
+    if (volume < 30) {
+        return {
+            borderColor: '#2ecc71',
+            backgroundColor: 'rgba(46, 204, 113, 0.2)'
+        };
+    } else if (volume < 60) {
+        return {
+            borderColor: '#f1c40f',
+            backgroundColor: 'rgba(241, 196, 15, 0.2)'
+        };
+    } else {
+        return {
+            borderColor: '#e74c3c',
+            backgroundColor: 'rgba(231, 76, 60, 0.2)'
+        };
+    }
+});
+
 const chartData = ref({
     labels: [],
     datasets: [
         {
-            label: 'Humidity (%)',
+            label: 'Volume (dB)', // Updated label to decibels
             data: [],
-            fill: {
-                target: 'origin',
-                above: 'rgba(0, 188, 212, 0.2)',
-                below: 'rgba(0, 188, 212, 0.2)'
-            },
-            borderColor: '#00BCD4',
-            backgroundColor: 'rgba(0, 188, 212, 0.2)',
+            borderColor: '#9CA3AF',
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
             tension: 0,
             borderWidth: 2,
-            pointRadius: 0, // Hide points
-            pointHoverRadius: 0 // Hide points on hover
+            pointRadius: 0,
+            pointHoverRadius: 0,
+            fill: {
+                target: 'origin',
+                above: 'rgba(0, 0, 0, 0.1)',
+                below: 'rgba(0, 0, 0, 0.1)'
+            },
+            segment: {
+                borderColor: '#9CA3AF',
+                backgroundColor: 'rgba(0, 0, 0, 0.1)'
+            }
         },
     ],
 });
@@ -114,7 +139,7 @@ const chartOptions = ref({
             titleColor: '#E5E7EB',
             bodyColor: '#E5E7EB',
             callbacks: {
-                label: (context) => `Humidity: ${context.raw}%`
+                label: (context) => `Volume: ${context.raw} dB` // Updated tooltip to show decibels
             }
         }
     },
@@ -133,7 +158,7 @@ const chartOptions = ref({
         },
         y: {
             min: 0,
-            max: 100,
+            max: 150,
             ticks: {
                 color: '#9CA3AF',
                 stepSize: 10
@@ -143,7 +168,7 @@ const chartOptions = ref({
             },
             title: {
                 display: true,
-                text: 'Humidity (%)',
+                text: 'Volume (dB)', // Updated axis title to decibels
                 color: '#9CA3AF'
             }
         }
@@ -169,20 +194,20 @@ onMounted(() => {
         socket.value.on('newRawData', (data) => {
             console.log('Received data via socket:', JSON.stringify(data, null, 2));
 
-            if (data && data.humidity !== undefined) {
-                const humidityValue = typeof data.humidity === 'string'
-                    ? parseFloat(data.humidity)
-                    : data.humidity;
+            if (data && data.volume !== undefined) {
+                const volumeValue = typeof data.volume === 'string'
+                    ? parseFloat(data.volume)
+                    : data.volume;
 
-                if (!isNaN(humidityValue)) {
+                if (!isNaN(volumeValue)) {
                     sensorId.value = data.id_sensor;
 
                     const date = new Date(data.date);
                     lastUpdate.value = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
 
-                    addHumidityDataPoint(humidityValue, lastUpdate.value);
+                    addVolumeDataPoint(volumeValue, lastUpdate.value);
 
-                    console.log('Updated data: Humidity =', currentHumidity.value, 'Sensor =', sensorId.value);
+                    console.log('Updated data: Volume =', currentVolume.value, 'Sensor =', sensorId.value);
                 }
             }
         });
@@ -219,31 +244,96 @@ onBeforeUnmount(() => {
     }
 });
 
-// Data handling functions
-function addHumidityDataPoint(humidity, timestamp) {
-    currentHumidity.value = humidity;
-    
-    recentHumidityReadings.value.push({
+function addVolumeDataPoint(volume, timestamp) {
+    currentVolume.value = volume;
+
+    recentVolumes.value.push({
         time: timestamp,
-        value: humidity
+        value: volume
     });
 
-    if (recentHumidityReadings.value.length > 100) {
-        recentHumidityReadings.value.shift();
+    if (recentVolumes.value.length > 100) {
+        recentVolumes.value.shift();
     }
 
+    updateChartData();
+    lineChartKey.value++;
+}
+
+function updateChartData() {
+    const labels = recentVolumes.value.map(item => item.time);
+    const dataPoints = recentVolumes.value.map(item => item.value);
+
+    // Definición de colores según los umbrales
+    const colorRanges = [
+        { max: 10, border: '#2ecc71', background: 'rgba(46, 204, 113, 0.5)' }, // Verde
+        { max: 50, border: '#f1c40f', background: 'rgba(241, 196, 15, 0.5)' }, // Amarillo
+        { max: 100, border: '#e73c3c', background: 'rgba(231, 60, 60, 0.5)' },  // Rojo
+        { max: Infinity, border: '#e01414', background: 'rgba(224, 20, 20, 0.5)' } // Rojo oscuro
+    ];
+
+    // Asignar colores a cada punto de forma segura
+    const pointColors = dataPoints.map(value => {
+        const range = colorRanges.find(r => value < r.max) || colorRanges[colorRanges.length - 1];
+        return {
+            border: range?.border || '#9CA3AF',
+            background: range?.background || 'rgba(0, 0, 0, 0.1)'
+        };
+    });
+
     chartData.value = {
-        ...chartData.value,
-        labels: recentHumidityReadings.value.map(item => item.time),
+        labels: labels,
         datasets: [
             {
-                ...chartData.value.datasets[0],
-                data: recentHumidityReadings.value.map(item => item.value)
+                label: 'Volume (dB)', // Updated label to decibels
+                data: dataPoints,
+                borderColor: pointColors.map(c => c.border),
+                backgroundColor: pointColors.map(c => c.background),
+                tension: 0,
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 0,
+                fill: {
+                    target: 'origin',
+                    above: (ctx) => {
+                        const index = ctx.dataIndex;
+                        return pointColors[index]?.background || 'rgba(0, 0, 0, 0.1)';
+                    },
+                    below: (ctx) => {
+                        const index = ctx.dataIndex;
+                        return pointColors[index]?.background || 'rgba(0, 0, 0, 0.1)';
+                    }
+                },
+                segment: {
+                    borderColor: ctx => {
+                        const p0 = ctx.p0?.parsed?.y;
+                        const p1 = ctx.p1?.parsed?.y;
+                        
+                        if (p0 === undefined || p1 === undefined) {
+                            return pointColors[0]?.border || '#9CA3AF';
+                        }
+
+                        // Encontrar el rango de color para el segmento
+                        const avgValue = (p0 + p1) / 2;
+                        const range = colorRanges.find(r => avgValue < r.max) || colorRanges[colorRanges.length - 1];
+                        return range?.border || '#9CA3AF';
+                    },
+                    backgroundColor: ctx => {
+                        const p0 = ctx.p0?.parsed?.y;
+                        const p1 = ctx.p1?.parsed?.y;
+                        
+                        if (p0 === undefined || p1 === undefined) {
+                            return pointColors[0]?.background || 'rgba(0, 0, 0, 0.1)';
+                        }
+
+                        const avgValue = (p0 + p1) / 2;
+                        const range = colorRanges.find(r => avgValue < r.max) || colorRanges[colorRanges.length - 1];
+                        return range?.background || 'rgba(0, 0, 0, 0.1)';
+                    }
+                }
             }
         ]
     };
-
-    lineChartKey.value++;
 }
 </script>
 
@@ -295,18 +385,18 @@ function addHumidityDataPoint(humidity, timestamp) {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.humidity-display {
+.volume-display {
     display: flex;
     flex-direction: column;
 }
 
-.current-humidity {
+.current-volume {
     font-size: 3.5rem;
     font-weight: 700;
     line-height: 1;
 }
 
-.humidity-label {
+.volume-label {
     font-size: 0.9rem;
     color: #a1a1aa;
     margin-top: 4px;
@@ -331,22 +421,30 @@ function addHumidityDataPoint(humidity, timestamp) {
     min-height: 300px;
 }
 
-.humidity-chart {
+.volume-chart {
     width: 100%;
     height: 100%;
 }
 
-/* Humidity color classes */
-.humidity-low {
-    color: #60a5fa;
+/* Volume color classes */
+.volume-low {
+    color: #2ecc71;
+    /* Green */
 }
 
-.humidity-normal {
-    color: #34d399;
+.volume-normal {
+    color: #f1c40f;
+    /* Yellow */
 }
 
-.humidity-high {
-    color: #f87171;
+.volume-high {
+    color: #e73c3c;
+    /* Red */
+}
+
+.volume-critical {
+    color: #e01414;
+    /* Darker red */
 }
 
 /* Chart.js overrides */

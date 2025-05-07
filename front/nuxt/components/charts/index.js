@@ -17,6 +17,7 @@ export { default as HumitatMonthlyChart } from './Humitat/HumitatMonthChart.vue'
 export { default as HumitatCourseChart } from './Humitat/HumitatCourseChart.vue';
 
 // Volum
+export { default as VolumeActual } from './volume/VolumeActual.vue';
 export { default as VolumeMinuteChart } from './volume/VolumeMinuteChart.vue';
 export { default as VolumeHourChart } from './volume/VolumeHourChart.vue';
 export { default as VolumeDayChart } from './volume/VolumeDayChart.vue';
