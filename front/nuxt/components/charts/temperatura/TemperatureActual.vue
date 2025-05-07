@@ -176,7 +176,6 @@ onMounted(() => {
                     : data.temperature;
 
                 if (!isNaN(tempValue)) {
-                    currentTemperature.value = tempValue;
                     sensorId.value = data.id_sensor;
 
                     const date = new Date(data.date);
@@ -223,6 +222,8 @@ onBeforeUnmount(() => {
 
 // Data handling functions
 function addTemperatureDataPoint(temp, timestamp) {
+    currentTemperature.value = temp;
+    
     recentTemperatures.value.push({
         time: timestamp,
         value: temp
