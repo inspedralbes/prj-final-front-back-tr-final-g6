@@ -594,9 +594,10 @@ app.post('/api/data/mysql', (req, res) => {
 
   const query = `INSERT INTO ${mysql2.escapeId(timeSpan)} (idAula, idSensor, tipus, max, min, average, dataIni, dataFi) VALUES ?`;
 
-  const currentDate = new Date(); 
-  const dataIni = currentDate.toISOString();
-  const dataFi = new Date(currentDate.getTime() + 60000).toISOString();
+
+  const currentDate = moment.tz('Europe/Madrid');
+  const dataIni = currentDate.format('YYYY-MM-DD HH:mm:ss'); 
+  const dataFi = currentDate.add(1, 'minute').format('YYYY-MM-DD HH:mm:ss'); 
 
   const values = Object.entries(sensors).flatMap(([idSensor, { volume, temperature }]) => [
     [1, idSensor, 'volum', volume.max, volume.min, volume.avg, dataIni, dataFi],
