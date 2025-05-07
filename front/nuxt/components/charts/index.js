@@ -1,4 +1,5 @@
 // Temperatura
+export { default as TemperatureActual } from './temperatura/TemperatureActual.vue';
 export { default as TemperaturaMinutsChart } from './temperatura/TemperatureMinuteChart.vue';
 export { default as TemperaturaHoursChart } from './temperatura/TemperatureHourChart.vue';
 export { default as TemperaturaDailyChart } from './temperatura/TemperatureDayChart.vue';
@@ -7,6 +8,7 @@ export { default as TemperaturaMonthlyChart } from './temperatura/TemperatureMon
 export { default as TemperaturaCourseChart } from './temperatura/TemperatureCourseChart.vue';
 
 // CO₂
+export { default as HumitatActual } from './humitat/HumitatActual.vue';
 export { default as HumitatMinutsChart } from './Humitat/HumitatMinuteChart.vue';
 export { default as HumitatHoursChart } from './Humitat/HumitatHourChart.vue';
 export { default as HumitatDailyChart } from './Humitat/HumitatDayChart.vue';

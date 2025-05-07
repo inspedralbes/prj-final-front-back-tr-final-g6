@@ -75,6 +75,7 @@ import TemperatureWeekChart from './charts/temperatura/TemperatureWeekChart.vue'
 import TemperatureMonthChart from './charts/temperatura/TemperatureMonthChart.vue';
 import TemperatureCourseChart from './charts/temperatura/TemperatureCourseChart.vue';
 
+import HumitatActual from './charts/humitat/HumitatActual.vue';
 import HumitatMinuteChart from './charts/humitat/HumitatMinuteChart.vue';
 import HumitatHourChart from './charts/humitat/HumitatHourChart.vue';
 import HumitatDayChart from './charts/humitat/HumitatDayChart.vue';
@@ -109,6 +110,7 @@ const chartComponents = {
         course: TemperatureCourseChart,
     },
     Humitat: {
+        actual: HumitatActual,
         minuts: HumitatMinuteChart,
         hours: HumitatHourChart,
         daily: HumitatDayChart,
