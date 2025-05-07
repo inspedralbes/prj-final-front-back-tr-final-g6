@@ -71,32 +71,29 @@ const lastUpdate = ref('--:--');
 const recentVolumes = ref([]);
 const lineChartKey = ref(0);
 
-// Computed properties
 const volumeColorClass = computed(() => {
     const volume = currentVolume.value;
-    if (volume < 30) return 'volume-low';
-    if (volume < 60) return 'volume-normal';
-    if (volume < 90) return 'volume-high';
-    return 'volume-critical';
+    if (volume < 70) return 'volume-low';      
+    if (volume < 80) return 'volume-normal';  
+    return 'volume-high';                     
 });
 
-// Get dynamic chart colors based on volume
 const chartColors = computed(() => {
     const volume = currentVolume.value;
-    if (volume < 30) {
+    if (volume < 70) {
         return {
             borderColor: '#2ecc71',
             backgroundColor: 'rgba(46, 204, 113, 0.2)'
         };
-    } else if (volume < 60) {
+    } else if (volume < 80) {
         return {
             borderColor: '#f1c40f',
             backgroundColor: 'rgba(241, 196, 15, 0.2)'
         };
     } else {
         return {
-            borderColor: '#e74c3c',
-            backgroundColor: 'rgba(231, 76, 60, 0.2)'
+            borderColor: '#e73c3c',
+            backgroundColor: 'rgba(231, 60, 60, 0.2)'
         };
     }
 });
@@ -158,7 +155,7 @@ const chartOptions = ref({
         },
         y: {
             min: 0,
-            max: 150,
+            max: 120,
             ticks: {
                 color: '#9CA3AF',
                 stepSize: 10
@@ -264,12 +261,11 @@ function updateChartData() {
     const labels = recentVolumes.value.map(item => item.time);
     const dataPoints = recentVolumes.value.map(item => item.value);
 
-    // Definición de colores según los umbrales
+    // Definición de colores según los umbrales específicos
     const colorRanges = [
-        { max: 10, border: '#2ecc71', background: 'rgba(46, 204, 113, 0.5)' }, // Verde
-        { max: 50, border: '#f1c40f', background: 'rgba(241, 196, 15, 0.5)' }, // Amarillo
-        { max: 100, border: '#e73c3c', background: 'rgba(231, 60, 60, 0.5)' },  // Rojo
-        { max: Infinity, border: '#e01414', background: 'rgba(224, 20, 20, 0.5)' } // Rojo oscuro
+        { max: 70, border: '#2ecc71', background: 'rgba(46, 204, 113, 0.5)' },  // Verde (db_good)
+        { max: 80, border: '#f1c40f', background: 'rgba(241, 196, 15, 0.5)' },  // Amarillo (db_normal)
+        { max: Infinity, border: '#e73c3c', background: 'rgba(231, 60, 60, 0.5)' } // Rojo (db_angry)
     ];
 
     // Asignar colores a cada punto de forma segura
@@ -285,7 +281,7 @@ function updateChartData() {
         labels: labels,
         datasets: [
             {
-                label: 'Volume (dB)', // Updated label to decibels
+                label: 'Volume (dB)',
                 data: dataPoints,
                 borderColor: pointColors.map(c => c.border),
                 backgroundColor: pointColors.map(c => c.background),
@@ -306,26 +302,24 @@ function updateChartData() {
                 },
                 segment: {
                     borderColor: ctx => {
-                        const p0 = ctx.p0?.parsed?.y;
-                        const p1 = ctx.p1?.parsed?.y;
-                        
-                        if (p0 === undefined || p1 === undefined) {
+                        // Verificación segura de los puntos
+                        if (!ctx.p0 || !ctx.p1 || !ctx.p0.parsed || !ctx.p1.parsed) {
                             return pointColors[0]?.border || '#9CA3AF';
                         }
-
-                        // Encontrar el rango de color para el segmento
+                        
+                        const p0 = ctx.p0.parsed.y;
+                        const p1 = ctx.p1.parsed.y;
                         const avgValue = (p0 + p1) / 2;
                         const range = colorRanges.find(r => avgValue < r.max) || colorRanges[colorRanges.length - 1];
                         return range?.border || '#9CA3AF';
                     },
                     backgroundColor: ctx => {
-                        const p0 = ctx.p0?.parsed?.y;
-                        const p1 = ctx.p1?.parsed?.y;
-                        
-                        if (p0 === undefined || p1 === undefined) {
+                        if (!ctx.p0 || !ctx.p1 || !ctx.p0.parsed || !ctx.p1.parsed) {
                             return pointColors[0]?.background || 'rgba(0, 0, 0, 0.1)';
                         }
-
+                        
+                        const p0 = ctx.p0.parsed.y;
+                        const p1 = ctx.p1.parsed.y;
                         const avgValue = (p0 + p1) / 2;
                         const range = colorRanges.find(r => avgValue < r.max) || colorRanges[colorRanges.length - 1];
                         return range?.background || 'rgba(0, 0, 0, 0.1)';
