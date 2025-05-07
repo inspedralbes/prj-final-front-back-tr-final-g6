@@ -42,7 +42,7 @@ const selectedSensorType = ref('temperature'); // Valor por defecto
 
 const items = [
   { label: 'Temperatura', value: 'temperature', icon: 'fas fa-thermometer-half' },
-  { label: 'CO2', value: 'co2', icon: 'fas fa-wind' },
+  { label: 'Humetat', value: 'humetat', icon: 'fas fa-tint' },
   { label: 'Volumen', value: 'volume', icon: 'fas fa-volume-up' }
 ];
 

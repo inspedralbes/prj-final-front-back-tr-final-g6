@@ -137,17 +137,12 @@
               <div class="flex items-center justify-between p-2">
                 <div class="flex items-center space-x-2">
                   <div
-                    :class="[
-                      'w-3 h-3 rounded-full',
-                      getSensorStatusColorByType(popup),
-                    ]"
+                    :class="['w-3 h-3 rounded-full', getSensorStatusColorByType(popup)]"
                   ></div>
                   <span class="text-sm">{{ getSensorLabel() }}</span>
                 </div>
                 <span
-                  :class="[
-                    getSensorStatusColorByType(popup).replace('bg-', 'text-'),
-                  ]"
+                  :class="[getSensorStatusColorByType(popup).replace('bg-', 'text-')]"
                   class="text-lg font-bold"
                   >{{ getSensorValue(popup) }}</span
                 >
@@ -214,7 +209,7 @@ const plantas = ["PLANTA BAJA", "PLANTA 1", "PLANTA 2", "PLANTA 3", "PLANTA SUBT
 const plantaSeleccionada = ref("PLANTA 1");
 const aulaData = ref([]);
 const fetchDataText = ref("");
-const selectedSensorType = ref('temperature'); // Tipo de sensor seleccionado por defecto
+const selectedSensorType = ref("temperature"); // Tipo de sensor seleccionado por defecto
 
 // Estado para los pop-ups personalizados
 const customPopups = ref([]);
@@ -333,24 +328,24 @@ const getMarkerColor = (popup) => {
 
 const getSensorLabel = () => {
   switch (selectedSensorType.value) {
-    case 'temperature':
-      return 'Temperatura';
-    case 'co2':
-      return 'CO2';
-    case 'volume':
-      return 'Volumen';
+    case "temperature":
+      return "Temperatura";
+    case "co2":
+      return "CO2";
+    case "volume":
+      return "Volumen";
     default:
-      return '';
+      return "";
   }
 };
 
 const getSensorRange = () => {
   switch (selectedSensorType.value) {
-    case 'temperature':
+    case "temperature":
       return { min: 15, max: 30 };
-    case 'co2':
+    case "co2":
       return { min: 400, max: 2000 };
-    case 'volume':
+    case "volume":
       return { min: 35, max: 85 };
     default:
       return { min: 0, max: 100 };
@@ -359,11 +354,11 @@ const getSensorRange = () => {
 
 const getSensorValueNumber = (popup) => {
   switch (selectedSensorType.value) {
-    case 'temperature':
+    case "temperature":
       return popup.temperature;
-    case 'co2':
+    case "co2":
       return popup.co2;
-    case 'volume':
+    case "volume":
       return popup.volume;
     default:
       return 0;
@@ -373,11 +368,11 @@ const getSensorValueNumber = (popup) => {
 const getSensorValue = (popup) => {
   const value = getSensorValueNumber(popup);
   switch (selectedSensorType.value) {
-    case 'temperature':
+    case "temperature":
       return `${value}°C`;
-    case 'co2':
+    case "co2":
       return `${value}ppm`;
-    case 'volume':
+    case "volume":
       return `${value}dB`;
     default:
       return value;
