@@ -665,7 +665,7 @@ app.post('/api/sendMessage', async (req, res) => {
   const msg = { api_key, volume, temperature, date, MAC };
 
   try {
-    const connection = await amqp.connect(process.env.RABBITMQ_URL);
+    const connection = await ampq.connect(process.env.RABBITMQ_URL);
     const channel = await connection.createChannel();
 
     await channel.assertQueue(queue, { durable: false });
