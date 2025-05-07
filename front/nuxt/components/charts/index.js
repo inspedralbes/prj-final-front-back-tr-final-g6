@@ -7,12 +7,12 @@ export { default as TemperaturaMonthlyChart } from './temperatura/TemperatureMon
 export { default as TemperaturaCourseChart } from './temperatura/TemperatureCourseChart.vue';
 
 // CO₂
-export { default as CO2MinutsChart } from './co2/Co2MinuteChart.vue';
-export { default as CO2HoursChart } from './co2/Co2HourChart.vue';
-export { default as CO2DailyChart } from './co2/Co2DayChart.vue';
-export { default as CO2WeeklyChart } from './co2/Co2WeekChart.vue';
-export { default as CO2MonthlyChart } from './co2/Co2MonthChart.vue';
-export { default as CO2CourseChart } from './co2/Co2CourseChart.vue';
+export { default as HumitatMinutsChart } from './Humitat/HumitatMinuteChart.vue';
+export { default as HumitatHoursChart } from './Humitat/HumitatHourChart.vue';
+export { default as HumitatDailyChart } from './Humitat/HumitatDayChart.vue';
+export { default as HumitatWeeklyChart } from './Humitat/HumitatWeekChart.vue';
+export { default as HumitatMonthlyChart } from './Humitat/HumitatMonthChart.vue';
+export { default as HumitatCourseChart } from './Humitat/HumitatCourseChart.vue';
 
 // Volum
 export { default as VolumeMinuteChart } from './volume/VolumeMinuteChart.vue';

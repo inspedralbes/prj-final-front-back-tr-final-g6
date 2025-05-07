@@ -75,12 +75,12 @@ import TemperatureWeekChart from './charts/temperatura/TemperatureWeekChart.vue'
 import TemperatureMonthChart from './charts/temperatura/TemperatureMonthChart.vue';
 import TemperatureCourseChart from './charts/temperatura/TemperatureCourseChart.vue';
 
-import Co2MinuteChart from './charts/co2/Co2MinuteChart.vue';
-import Co2HourChart from './charts/co2/Co2HourChart.vue';
-import Co2DayChart from './charts/co2/Co2DayChart.vue';
-import Co2WeekChart from './charts/co2/Co2WeekChart.vue';
-import Co2MonthChart from './charts/co2/Co2MonthChart.vue';
-import Co2CourseChart from './charts/co2/Co2CourseChart.vue';
+import HumitatMinuteChart from './charts/humitat/HumitatMinuteChart.vue';
+import HumitatHourChart from './charts/humitat/HumitatHourChart.vue';
+import HumitatDayChart from './charts/humitat/HumitatDayChart.vue';
+import HumitatWeekChart from './charts/humitat/HumitatWeekChart.vue';
+import HumitatMonthChart from './charts/humitat/HumitatMonthChart.vue';
+import HumitatCourseChart from './charts/humitat/HumitatCourseChart.vue';
 
 import VolumeMinuteChart from './charts/volume/VolumeMinuteChart.vue';
 import VolumeHourChart from './charts/volume/VolumeHourChart.vue';
@@ -108,13 +108,13 @@ const chartComponents = {
         monthly: TemperatureMonthChart,
         course: TemperatureCourseChart,
     },
-    Co2: {
-        minuts: Co2MinuteChart,
-        hours: Co2HourChart,
-        daily: Co2DayChart,
-        weekly: Co2WeekChart,
-        monthly: Co2MonthChart,
-        course: Co2CourseChart,
+    Humitat: {
+        minuts: HumitatMinuteChart,
+        hours: HumitatHourChart,
+        daily: HumitatDayChart,
+        weekly: HumitatWeekChart,
+        monthly: HumitatMonthChart,
+        course: HumitatCourseChart,
     },
     Volum: {
         minuts: VolumeMinuteChart,
@@ -128,7 +128,7 @@ const chartComponents = {
 
 const items = [
     { label: 'Temperatura', icon: 'pi pi-sun' },
-    { label: 'Co2', icon: 'pi pi-chart-line' },
+    { label: 'Humitat', icon: 'pi pi-cloud' },
     { label: 'Volum', icon: 'pi pi-volume-up' },
 ];
 
