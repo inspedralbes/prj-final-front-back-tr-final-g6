@@ -3,7 +3,7 @@ name: Desplegament a Producció
 on:
   push:
     branches:
-      - create-githubactions
+      - prod
 
 jobs:
   deploy:
