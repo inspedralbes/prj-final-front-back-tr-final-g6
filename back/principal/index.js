@@ -1,5 +1,10 @@
 import express from 'express';
 import { Server } from 'socket.io';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3020;
@@ -8,11 +13,16 @@ import { createServer } from 'http';
 import mysql2 from 'mysql2';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import ampq from 'amqplib';
 import { MongoClient } from 'mongodb';
 import moment from 'moment-timezone';
+import path from 'path'; // Importa el mòdul path
 
 app.use(cors());
 app.use(express.json());
+
+app.use("/api/fileSensor", express.static(path.join(__dirname, 'sensor'))); // Serveix fitxers estàtics des de la carpeta 'sensor'
+console.log("Serving static files from:", path.join(__dirname, 'sensor'));
 
 const server = createServer(app);
 dotenv.config();
@@ -237,7 +247,7 @@ app.put('/api/aules/:id/activa', (req, res) => {
 });
 
 // Get mitjanes de dades
-app.post('/api/mapa', async (req, res) => {
+app.get('/api/mapa', async (req, res) => {
   const { aules, tipus, data } = req.body;
 
   if (!aules || !tipus || !data) {
@@ -642,6 +652,36 @@ app.get('/api/sensors/banned', (req, res) => {
   });
 });
 
+// Endpoint per enviar missatges a RabbitMQ
+app.post('/api/sendMessage', async (req, res) => {
+  const { api_key, volume, temperature, date, MAC } = req.body;
+
+  if (!api_key || !volume || !temperature || !date || !MAC) {
+    return res.status(400).send({ message: 'Falten dades necessàries' });
+  }
+
+  const queue = 'SensorData';
+  const msg = { api_key, volume, temperature, date, MAC };
+
+  try {
+    const connection = await amqp.connect(process.env.RABBITMQ_URL);
+    const channel = await connection.createChannel();
+
+    await channel.assertQueue(queue, { durable: false });
+    channel.sendToQueue(queue, Buffer.from(JSON.stringify(msg)));
+    console.log(`🟢 Missatge enviat:`, msg);
+
+    setTimeout(() => {
+      connection.close();
+    }, 500);
+
+    res.status(200).send({ message: 'Missatge enviat correctament' });
+  } catch (error) {
+    console.error('❌ Error al enviar el missatge:', error);
+    res.status(500).send({ message: 'Error al enviar el missatge', error: error.message });
+  }
+});
+
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
-}); 
+});
