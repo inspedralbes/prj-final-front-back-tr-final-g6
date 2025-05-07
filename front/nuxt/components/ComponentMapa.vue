@@ -24,9 +24,9 @@
         :options="ranges"
         optionLabel="label"
         optionValue="value"
-        class="w-48 [&>div]:bg-slate-700 [&>div]:border-slate-600 [&>div]:text-white"
-        panelClass="bg-slate-700 border border-slate-600 text-white"
-        placeholder="Selecciona el Rango"
+        class="w-48 [&>div]:bg-slate-700 [&>div]:border-slate-600 [&>div]:text-white relative z-[1000]"
+        panelClass="bg-slate-700 border border-slate-600 text-white absolute z-[1000]"
+        placeholder="Selecciona el rang"
       />
     </div>
   </div>
@@ -41,16 +41,16 @@ const selectedRange = ref('');
 const selectedSensorType = ref('temperature'); // Valor por defecto
 
 const items = [
-  { label: 'Temperatura', value: 'temperature', icon: 'fas fa-thermometer-half' },
-  { label: 'Humetat', value: 'humetat', icon: 'fas fa-tint' },
-  { label: 'Volumen', value: 'volume', icon: 'fas fa-volume-up' }
+  { label: 'Temperatura', value: 'temperature', icon: 'fas fa-temperature-high' },
+  { label: 'Humitat', value: 'humetat', icon: 'fas fa-droplet' },
+  { label: 'Volum', value: 'volume', icon: 'fas fa-volume-high' }
 ];
 
 const ranges = [
   { label: 'Última hora', value: '1h' },
-  { label: 'Último día', value: '24h' },
-  { label: 'Última semana', value: '7d' },
-  { label: 'Último mes', value: '30d' }
+  { label: 'Últim dia', value: '24h' },
+  { label: 'Última setmana', value: '7d' },
+  { label: 'Últim mes', value: '30d' }
 ];
 
 const emit = defineEmits(['update:sensorType']);

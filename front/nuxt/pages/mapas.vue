@@ -486,12 +486,14 @@ body {
   cursor: crosshair;
   /* El área clickeable solo será el contenedor del mapa */
   pointer-events: all;
+  overflow: visible !important; /* Permitir que los popups se muestren fuera */
 }
 
 /* Asegurar que los pop-ups no interfieran con los clicks en el mapa */
 .custom-popup {
   pointer-events: none; /* Por defecto, ignorar clicks */
   z-index: 20;
+  position: absolute;
 }
 
 /* Pero permitir clicks en los elementos interactivos dentro del pop-up */
@@ -503,9 +505,16 @@ body {
 
 /* Ajustar el tamaño y posición del contenido del pop-up */
 .popup-content {
-  transform: translateY(1rem); /* Mover un poco hacia abajo para no tapar el marcador */
-  max-width: 300px; /* Limitar el ancho máximo */
-  z-index: 30;
+  position: absolute;
+  transform: translate(-50%, calc(100% + 0.5rem));
+  left: 50%;
+  max-width: 300px;
+  z-index: 9999; /* Asegurar que esté por encima de todo */
+  background: rgba(51, 65, 85, 0.95); /* Fondo semi-transparente */
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(100, 116, 139, 0.5);
 }
 
 .popup-content {
