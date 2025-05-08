@@ -567,8 +567,8 @@ app.get('/api/data/mongodb', async (req, res) => {
 
 app.post('/api/data/mongodb', async (req, res) => {
   console.log('Rebent dades per a MongoDB');
-  const { volume, temperature, date, MAC, api_key } = req.body;
-  if(volume == null || temperature == null || date == null || MAC == null || api_key == null) {
+  const { volume, temperature, humidity, date, MAC, api_key } = req.body;
+  if (volume == null || temperature == null || humidity == null || date == null || MAC == null || api_key == null) {
     return res.status(400).json({ message: 'Dades incompletes' });
   }
 
@@ -585,10 +585,10 @@ app.post('/api/data/mongodb', async (req, res) => {
     console.log('API key vàlida, inserint dades a MongoDB');
     const id_sensor = results[0].idSensor;
     try {
-      const result = await collection.insertOne({ volume, temperature, id_sensor, date });
+      const result = await collection.insertOne({ volume, temperature, humidity, id_sensor, date });
       console.log(`Dades inserides amb l'ID: ${result.insertedId}`);
 
-      io.emit('newRawData', { volume, temperature, id_sensor, date });
+      io.emit('newRawData', { volume, temperature, humidity, id_sensor, date });
 
       res.status(201).json({ message: 'Dades inserides correctament', id: result.insertedId });
     } catch (error) {
@@ -605,6 +605,8 @@ app.post('/api/data/mysql', (req, res) => {
     return res.status(400).json({ message: 'Es requereix un timeSpan' });
   }
 
+  console.log('Rebent dades per a MySQL: ', sensors);
+  console.log('TimeSpan: ', timeSpan);
   const query = `INSERT INTO ${mysql2.escapeId(timeSpan)} (idAula, idSensor, tipus, max, min, average, dataIni, dataFi) VALUES ?`;
 
 
@@ -612,9 +614,10 @@ app.post('/api/data/mysql', (req, res) => {
   const dataIni = currentDate.format('YYYY-MM-DD HH:mm:ss'); 
   const dataFi = currentDate.add(1, 'minute').format('YYYY-MM-DD HH:mm:ss'); 
 
-  const values = Object.entries(sensors).flatMap(([idSensor, { volume, temperature }]) => [
+  const values = Object.entries(sensors).flatMap(([idSensor, { volume, temperature, humidity }]) => [
     [1, idSensor, 'volum', volume.max, volume.min, volume.avg, dataIni, dataFi],
-    [1, idSensor, 'temperatura', temperature.max, temperature.min, temperature.avg, dataIni, dataFi]
+    [1, idSensor, 'temperatura', temperature.max, temperature.min, temperature.avg, dataIni, dataFi],
+    [1, idSensor, 'humitat', humidity.max, humidity.min, humidity.avg, dataIni, dataFi]
   ]);
 
   connexioBD.query(query, [values], (err, results) => {
