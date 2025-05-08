@@ -24,7 +24,7 @@
         <router-link
           v-if="!userStore.isLoggedIn"
           to="/login"
-          class="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all duration-200 border border-blue-500 shadow-sm"
+          class="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition-all duration-200 border border-slate-600 shadow-sm"
         >
           <i class="pi pi-sign-in text-lg"></i>
           <span class="hidden sm:inline">Iniciar Sessió</span>
