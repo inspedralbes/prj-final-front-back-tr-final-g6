@@ -113,6 +113,24 @@
         </div>
 
         <div class="flex-grow w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
+            <!-- Tabs for Sensor Types -->
+            <div class="flex border-b border-slate-600">
+                <button @click="activeTab = 'active'"
+                    :class="{ 'border-b-2 border-teal-500 text-teal-400': activeTab === 'active', 'text-slate-400': activeTab !== 'active' }"
+                    class="px-4 py-2 font-medium">
+                    Sensores Activos
+                </button>
+                <button @click="activeTab = 'pending'"
+                    :class="{ 'border-b-2 border-teal-500 text-teal-400': activeTab === 'pending', 'text-slate-400': activeTab !== 'pending' }"
+                    class="px-4 py-2 font-medium">
+                    Sensores Pendientes
+                </button>
+                <button @click="activeTab = 'banned'"
+                    :class="{ 'border-b-2 border-teal-500 text-teal-400': activeTab === 'banned', 'text-slate-400': activeTab !== 'banned' }"
+                    class="px-4 py-2 font-medium">
+                    Sensores Bannejats
+                </button>
+            </div>
 
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-4 justify-center">

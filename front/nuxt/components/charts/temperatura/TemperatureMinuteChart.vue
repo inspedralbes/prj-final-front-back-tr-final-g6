@@ -166,23 +166,7 @@ const chartOptions = ref({
     }
 });
 
-const currentTemperature = computed(() => {
-    console.log('Temperature Data:', temperatureData.value); // Log the entire array
-
-    // Find the most recent valid temperature value
-    const latestValidDataPoint = [...temperatureData.value]
-        .reverse() // Reverse the array to start from the most recent data
-        .find(dataPoint => dataPoint.value !== null && dataPoint.value !== undefined);
-
-    console.log('Latest Valid Data Point:', latestValidDataPoint); // Log the valid data point
-
-    const value = latestValidDataPoint?.value !== undefined
-        ? latestValidDataPoint.value // Do not round the value
-        : null;
-
-    console.log(`Current Temperature: ${value}`);
-    return value;
-});
+const currentTemperature = ref(null);
 
 const temperatureColorClass = computed(() => {
     const temp = currentTemperature.value;
@@ -201,18 +185,22 @@ const fetchInitialData = async () => {
     try {
         // Get the current time
         const now = new Date();
+        console.log('Current time:', now.toISOString());
 
         // Always start from the beginning of the current hour
         const startOfHour = new Date(now);
         startOfHour.setMinutes(0, 0, 0);
-
+        
         const endOfHour = new Date(startOfHour);
         endOfHour.setHours(startOfHour.getHours() + 1);
+        
+        console.log('Fetching data from:', startOfHour.toISOString(), 'to', endOfHour.toISOString());
 
         // Get idAula from props or route
         const idAula = props.idAula || (route.params.id ? Number(route.params.id) : 1);
+        console.log('Using idAula:', idAula);
 
-        // Use getDadesGrafic
+        // Use getDadesGrafic to get data for the current hour
         const data = await getDadesGrafic(
             'minut',
             'temperatura',
@@ -220,14 +208,19 @@ const fetchInitialData = async () => {
             startOfHour.toISOString(),
             endOfHour.toISOString()
         );
+        
+        console.log('Raw data from API:', data);
 
         // Process data from the API
         const filteredData = data
-            .filter(item => item.average >= 0 && item.average <= 40)
+            .filter(item => typeof item.average === 'number' && item.average >= 0 && item.average <= 40)
             .map(item => ({
                 time: new Date(item.dataIni).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
                 value: item.average,
+                date: new Date(item.dataIni)
             }));
+            
+        console.log('Filtered data:', filteredData);
 
         // Create minute-by-minute labels for the full hour (60 minutes)
         const labels = Array.from({ length: 60 }, (_, i) => {
@@ -236,13 +229,102 @@ const fetchInitialData = async () => {
         });
 
         // Fill in missing data points
-        const completeData = labels.map(label => {
+        let completeData = labels.map(label => {
             const existing = filteredData.find(item => item.time === label);
             return existing || { time: label, value: null };
         });
+        
+        console.log('Complete data with all minute slots:', completeData);
 
+        // Find the most recent data point from the filtered data
+        let mostRecentData = null;
+        
+        if (filteredData.length > 0) {
+            // Sort by date descending to get the most recent first
+            const sortedData = [...filteredData].sort((a, b) => b.date - a.date);
+            mostRecentData = sortedData[0];
+            console.log('Most recent temperature data point:', mostRecentData);
+        }
+
+        // Set the current temperature value
+        if (mostRecentData && mostRecentData.value !== null) {
+            console.log('Setting current temperature to:', mostRecentData.value);
+            currentTemperature.value = mostRecentData.value;
+        } else {
+            console.log('No valid temperature data found for the current hour. Looking for latest available.');
+            
+            // If no data for current hour, try to get the latest from past 24 hours
+            try {
+                const latestData = await getDadesGrafic(
+                    'minut',
+                    'temperatura',
+                    idAula,
+                    new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString(), // Last 24 hours
+                    now.toISOString()
+                );
+                
+                console.log('Latest data from past 24 hours:', latestData);
+                
+                if (latestData && latestData.length > 0) {
+                    // Sort by date to get the most recent
+                    const sortedLatestData = [...latestData].sort((a, b) => 
+                        new Date(b.dataIni) - new Date(a.dataIni)
+                    );
+                    
+                    // Get the last hour's worth of data
+                    const latestHourData = sortedLatestData
+                        .filter(item => new Date(item.dataIni) >= new Date(now.getTime() - 60 * 60 * 1000))
+                        .map(item => ({
+                            time: new Date(item.dataIni).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                            value: item.average,
+                            date: new Date(item.dataIni)
+                        }));
+                    
+                    if (latestHourData.length > 0) {
+                        console.log('Using latest hour data for chart:', latestHourData);
+                        
+                        // Create a mapping of historical minutes to current hour minutes
+                        const historicalDataMap = new Map();
+                        
+                        latestHourData.forEach(dataPoint => {
+                            const minute = dataPoint.time.split(':')[1];
+                            // Map this historical minute to the current hour's same minute
+                            const currentHourTime = `${startOfHour.getHours().toString().padStart(2, '0')}:${minute}`;
+                            historicalDataMap.set(currentHourTime, dataPoint.value);
+                        });
+                        
+                        // Fill in the complete data with historical values mapped to current hour
+                        completeData = completeData.map(item => {
+                            const minute = item.time.split(':')[1];
+                            const mappedValue = historicalDataMap.get(item.time);
+                            return {
+                                time: item.time,
+                                value: mappedValue !== undefined ? mappedValue : null
+                            };
+                        });
+                    }
+                    
+                    const latestPoint = sortedLatestData[0];
+                    
+                    console.log('Latest available temperature point:', latestPoint);
+                    // Now we can safely set the ref value
+                    currentTemperature.value = latestPoint.average;
+                    console.log('Current temperature set to:', currentTemperature.value);
+                } else {
+                    console.log('No temperature data available at all');
+                    currentTemperature.value = null;
+                }
+            } catch (err) {
+                console.error('Error getting latest temperature:', err);
+                currentTemperature.value = null;
+            }
+        }
+
+        // Update the chart data
         temperatureData.value = completeData;
+        console.log('Temperature data updated for chart:', temperatureData.value);
         updateChartData(temperatureData.value);
+        
         loading.value = false;
     } catch (error) {
         console.error('Error fetching initial data:', error);
@@ -282,6 +364,10 @@ const handleNewAggregatedData = (data) => {
         const avgTemp = totalTemp / sensorCount;
 
         if (avgTemp >= 0 && avgTemp <= 40) {
+            // Update the current temperature value with the new real-time data
+            currentTemperature.value = avgTemp;
+            console.log('Updated current temperature to:', avgTemp);
+
             const existingIndex = temperatureData.value.findIndex(item => item.time === timeString);
             if (existingIndex !== -1) {
                 // Update the value at the existing index

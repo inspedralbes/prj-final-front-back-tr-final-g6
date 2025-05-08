@@ -41,37 +41,22 @@
       <div class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div class="flex flex-wrap gap-2">
-            <Button
-              v-for="item in items"
-              :key="item.label"
-              :label="item.label"
-              :icon="item.icon"
-              @click="selectedChart = item.label"
-              :class="{
+            <Button v-for="item in items" :key="item.label" :label="item.label" :icon="item.icon"
+              @click="selectedChart = item.label" :class="{
                 'bg-teal-600 border-teal-600': selectedChart === item.label,
                 'bg-slate-700 border-slate-600': selectedChart !== item.label,
               }"
-              class="text-white font-medium py-2 px-4 rounded-lg border transition-all duration-300 hover:scale-[1.02]"
-            />
+              class="text-white font-medium py-2 px-4 rounded-lg border transition-all duration-300 hover:scale-[1.02]" />
           </div>
 
-          <Dropdown
-            v-model="selectedRange"
-            :options="ranges"
-            optionLabel="label"
-            optionValue="value"
+          <Dropdown v-model="selectedRange" :options="ranges" optionLabel="label" optionValue="value"
             class="w-48 [&>div]:bg-slate-700 [&>div]:border-slate-600 [&>div]:text-white"
-            panelClass="bg-slate-700 border border-slate-600 text-white"
-            placeholder="Selecciona el Rango"
-          />
+            panelClass="bg-slate-700 border border-slate-600 text-white" placeholder="Selecciona el Rango" />
         </div>
       </div>
 
-      <!-- Chart Container -->
-      <div class="bg-slate-800 rounded-lg p-6 shadow-lg">
-        <div class="h-[400px]">
-          <component :is="currentChart" />
-        </div>
+      <div class="h-[500px]">
+        <component :is="currentChart" />
       </div>
     </div>
   </div>
@@ -91,19 +76,21 @@ import TemperatureWeekChart from "./charts/temperatura/TemperatureWeekChart.vue"
 import TemperatureMonthChart from "./charts/temperatura/TemperatureMonthChart.vue";
 import TemperatureCourseChart from "./charts/temperatura/TemperatureCourseChart.vue";
 
-import HumetatMinuteChart from "./charts/co2/HumetatMinuteChart.vue";
-import HumetatHourChart from "./charts/co2/HumetatHourChart.vue";
-import HumetatDayChart from "./charts/co2/HumetatDayChart.vue";
-import HumetatWeekChart from "./charts/co2/HumetatWeekChart.vue";
-import HumetatMonthChart from "./charts/co2/HumetatMonthChart.vue";
-import HumetatCourseChart from "./charts/co2/HumetatCourseChart.vue";
+import HumitatActual from './charts/humitat/HumitatActual.vue';
+import HumitatMinuteChart from './charts/humitat/HumitatMinuteChart.vue';
+import HumitatHourChart from './charts/humitat/HumitatHourChart.vue';
+import HumitatDayChart from './charts/humitat/HumitatDayChart.vue';
+import HumitatWeekChart from './charts/humitat/HumitatWeekChart.vue';
+import HumitatMonthChart from './charts/humitat/HumitatMonthChart.vue';
+import HumitatCourseChart from './charts/humitat/HumitatCourseChart.vue';
 
-import VolumeMinuteChart from "./charts/volume/VolumeMinuteChart.vue";
-import VolumeHourChart from "./charts/volume/VolumeHourChart.vue";
-import VolumeDayChart from "./charts/volume/VolumeDayChart.vue";
-import VolumeWeekChart from "./charts/volume/VolumeWeekChart.vue";
-import VolumeMonthChart from "./charts/volume/VolumeMonthChart.vue";
-import VolumeCourseChart from "./charts/volume/VolumeCourseChart.vue";
+import VolumeActual from './charts/volume/VolumeActual.vue';
+import VolumeMinuteChart from './charts/volume/VolumeMinuteChart.vue';
+import VolumeHourChart from './charts/volume/VolumeHourChart.vue';
+import VolumeDayChart from './charts/volume/VolumeDayChart.vue';
+import VolumeWeekChart from './charts/volume/VolumeWeekChart.vue';
+import VolumeMonthChart from './charts/volume/VolumeMonthChart.vue';
+import VolumeCourseChart from './charts/volume/VolumeCourseChart.vue';
 
 const route = useRoute();
 const aulaId = route.params.id;
@@ -116,7 +103,7 @@ const aula = ref({
 
 const chartComponents = {
   Temperatura: {
-        actual: TemperatureActual,
+    actual: TemperatureActual,
     minuts: TemperatureMinuteChart,
     hours: TemperatureHourChart,
     daily: TemperatureDayChart,
@@ -125,14 +112,16 @@ const chartComponents = {
     course: TemperatureCourseChart,
   },
   Humitat: {
-    minuts: HumetatMinuteChart,
-    hours: HumetatHourChart,
-    daily: HumetatDayChart,
-    weekly: HumetatWeekChart,
-    monthly: HumetatMonthChart,
-    course: HumetatCourseChart,
+    actual: HumitatActual,
+    minuts: HumitatMinuteChart,
+    hours: HumitatHourChart,
+    daily: HumitatDayChart,
+    weekly: HumitatWeekChart,
+    monthly: HumitatMonthChart,
+    course: HumitatCourseChart,
   },
   Volum: {
+    actual: VolumeActual,
     minuts: VolumeMinuteChart,
     hours: VolumeHourChart,
     daily: VolumeDayChart,
@@ -143,13 +132,13 @@ const chartComponents = {
 };
 
 const items = [
-  { label: "Temperatura", icon: "pi pi-sun" },
-  { label: "Humitat", icon: "pi pi-cloud" },
-  { label: "Volum", icon: "pi pi-volume-up" },
+  { label: 'Temperatura', icon: 'pi pi-sun' },
+  { label: 'Humitat', icon: 'pi pi-cloud' },
+  { label: 'Volum', icon: 'pi pi-volume-up' },
 ];
 
 const ranges = [
-    { label: 'Actual', value: 'actual'},
+  { label: 'Actual', value: 'actual' },
   { label: "Minuts", value: "minuts" },
   { label: "Hores", value: "hours" },
   { label: "Diari", value: "daily" },
@@ -206,9 +195,7 @@ button {
   color: rgb(45, 212, 191);
 }
 
-:deep(.p-dropdown-panel
-    .p-dropdown-items
-    .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover) {
+:deep(.p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover) {
   background: rgb(51, 65, 85);
   color: white;
 }

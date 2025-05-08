@@ -124,18 +124,18 @@ const chartOptions = ref({
                 maxRotation: 45,
                 minRotation: 45,
                 autoSkip: false,
-                callback: function(value, index, values) {
-                    // Show only every 2nd hour
+                callback: function (value, index, values) {
+                    // Mostrar la etiqueta 24:00 al final
                     const time = this.getLabelForValue(value);
                     const hour = parseInt(time.split(':')[0], 10);
-                    return hour % 2 === 0 ? time : '';
+                    return hour % 2 === 0 || hour === 24 ? time : '';  // Mostrar solo las horas pares y 24:00
                 }
             },
             grid: {
                 color: 'rgba(255, 255, 255, 0.05)'
             },
             min: '00:00',
-            max: '23:00'
+            max: '24:00'  // Ajustar para mostrar hasta 24:00
         },
         y: {
             title: {
@@ -194,17 +194,17 @@ const fetchInitialData = async () => {
     try {
         // Get the current time
         const now = new Date();
-        
+
         // Always start from the beginning of the current day
         const startOfDay = new Date(now);
         startOfDay.setHours(0, 0, 0, 0);
-        
+
         const endOfDay = new Date(startOfDay);
         endOfDay.setDate(startOfDay.getDate() + 1);
-        
+
         // Get idAula from props or route
         const idAula = props.idAula || (route.params.id ? Number(route.params.id) : 1);
-        
+
         // Use getDadesGrafic with 'hora' instead of 'minut'
         const data = await getDadesGrafic(
             'hora',
@@ -213,7 +213,7 @@ const fetchInitialData = async () => {
             startOfDay.toISOString(),
             endOfDay.toISOString()
         );
-        
+
         // Process data from the API
         const filteredData = data
             .filter(item => item.average >= 0 && item.average <= 40)
@@ -223,12 +223,14 @@ const fetchInitialData = async () => {
             }));
 
         // Create hour-by-hour labels for the full day (24 hours)
-        const labels = Array.from({ length: 24 }, (_, i) => {
+        const labels = Array.from({ length: 25 }, (_, i) => {
+            if (i === 24) {
+                return '24:00';
+            }
             const time = new Date(startOfDay.getTime() + i * 60 * 60 * 1000);
             return time.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         });
-
-        // Fill in missing data points
+        // Fill in missing data points, including for the 24:00 hour
         const completeData = labels.map(label => {
             const existing = filteredData.find(item => item.time === label);
             return existing || { time: label, value: null };
@@ -236,6 +238,7 @@ const fetchInitialData = async () => {
 
         temperatureData.value = completeData;
         updateChartData(temperatureData.value);
+
         loading.value = false;
     } catch (error) {
         console.error('Error fetching initial data:', error);
@@ -256,7 +259,7 @@ const updateChartData = (data) => {
 
 const handleNewAggregatedData = (data) => {
     if (!data || !data.sensors) return;
-    
+
     // Only process data if it's hourly aggregated data
     if (data.timeSpan !== 'hora') return;
 
@@ -280,14 +283,14 @@ const handleNewAggregatedData = (data) => {
         if (avgTemp >= 0 && avgTemp <= 40) {
             // Find the current hour in our data
             const hourIndex = temperatureData.value.findIndex(item => item.time === timeString);
-            
+
             if (hourIndex !== -1) {
                 // Update the temperature for this hour
                 temperatureData.value[hourIndex].value = avgTemp;
-                
+
                 // Trigger reactivity
                 temperatureData.value = [...temperatureData.value];
-                
+
                 updateChartData(temperatureData.value);
             }
         }
