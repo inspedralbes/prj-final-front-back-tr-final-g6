@@ -83,6 +83,7 @@ import { useRoute } from "vue-router";
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
 
+import TemperatureActual from './charts/temperatura/TemperatureActual.vue';
 import TemperatureMinuteChart from "./charts/temperatura/TemperatureMinuteChart.vue";
 import TemperatureHourChart from "./charts/temperatura/TemperatureHourChart.vue";
 import TemperatureDayChart from "./charts/temperatura/TemperatureDayChart.vue";
@@ -115,6 +116,7 @@ const aula = ref({
 
 const chartComponents = {
   Temperatura: {
+        actual: TemperatureActual,
     minuts: TemperatureMinuteChart,
     hours: TemperatureHourChart,
     daily: TemperatureDayChart,
@@ -147,6 +149,7 @@ const items = [
 ];
 
 const ranges = [
+    { label: 'Actual', value: 'actual'},
   { label: "Minuts", value: "minuts" },
   { label: "Hores", value: "hours" },
   { label: "Diari", value: "daily" },
@@ -156,7 +159,7 @@ const ranges = [
 ];
 
 const selectedChart = ref("Temperatura");
-const selectedRange = ref("minuts");
+const selectedRange = ref("actual");
 
 // Computed para determinar el componente actual basado en el tipo de gráfico y el rango
 const currentChart = computed(() => {

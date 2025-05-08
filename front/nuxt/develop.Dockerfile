@@ -26,6 +26,7 @@ FROM base as build
 COPY --link package.json package-lock.json ./
 RUN npm install
 RUN npm install @rollup/rollup-linux-x64-gnu
+RUN npm install socket.io-client # Instalar socket.io-client
 COPY --link . .
 
 # Ensure postinstall script runs

@@ -19,6 +19,8 @@ services:
     depends_on:
       - prfg6-mysql
       - prfg6-mongodb
+    volumes:
+      - ./back/principal/sensor:/usr/src/app/sensor
 
   prfg6-mongodb:
     container_name: prfg6-mongodb

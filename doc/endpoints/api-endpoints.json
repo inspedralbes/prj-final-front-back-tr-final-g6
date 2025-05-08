@@ -246,5 +246,171 @@
                 "description": "Database query error"
             }
         }
+    },
+    {
+        "endpoint": "/api/sensors",
+        "method": "GET",
+        "description": "Get all sensors",
+        "response": {
+            "200": {
+                "description": "List of all sensors",
+                "body": "array"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sensors",
+        "method": "PUT",
+        "description": "Update a sensor",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "MAC": "string",
+                "nombre": "string",
+                "ubicacion": "string",
+                "x": "number",
+                "y": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor updated successfully",
+                "body": {
+                    "message": "Sensor actualitzat correctament"
+                }
+            },
+            "404": {
+                "description": "Sensor not found"
+            },
+            "500": {
+                "description": "Database update error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors",
+        "method": "GET",
+        "description": "Get all new sensors",
+        "response": {
+            "200": {
+                "description": "List of all new sensors",
+                "body": "array"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors",
+        "method": "POST",
+        "description": "Add a new sensor",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "MAC": "string"
+            }
+        },
+        "response": {
+            "201": {
+                "description": "New sensor created successfully",
+                "body": {
+                    "message": "Sensor creat correctament",
+                    "id": "number"
+                }
+            },
+            "400": {
+                "description": "Sensor not accepted"
+            },
+            "500": {
+                "description": "Database insertion error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/data/mongodb",
+        "method": "GET",
+        "description": "Get data from MongoDB within a date range",
+        "request": {
+            "query": {
+                "startDate": "string",
+                "endDate": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Data retrieved successfully",
+                "body": "array"
+            },
+            "400": {
+                "description": "Missing or invalid date range"
+            },
+            "500": {
+                "description": "Error retrieving data from MongoDB"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/data/mongodb",
+        "method": "POST",
+        "description": "Insert data into MongoDB",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "volume": "number",
+                "temperature": "number",
+                "date": "string",
+                "MAC": "string",
+                "api_key": "string"
+            }
+        },
+        "response": {
+            "201": {
+                "description": "Data inserted successfully",
+                "body": {
+                    "message": "Dades inserides correctament",
+                    "id": "string"
+                }
+            },
+            "400": {
+                "description": "Incomplete data"
+            },
+            "403": {
+                "description": "Invalid API key"
+            },
+            "500": {
+                "description": "Error inserting data into MongoDB"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/data/mysql",
+        "method": "POST",
+        "description": "Insert aggregated data into MySQL",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "timeSpan": "string",
+                "sensors": "object"
+            }
+        },
+        "response": {
+            "201": {
+                "description": "Data inserted successfully",
+                "body": {
+                    "message": "Dades inserides correctament",
+                    "affectedRows": "number"
+                }
+            },
+            "400": {
+                "description": "Missing or invalid timeSpan or sensors data"
+            },
+            "500": {
+                "description": "Database insertion error"
+            }
+        }
     }
 ]
