@@ -43,7 +43,7 @@ onMounted(async () => {
     const scaledWidth = imgWidth * scaleFactor;
     const scaledHeight = imgHeight * scaleFactor;
     const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 2;
+    const y = (canvasHeight - scaledHeight) / 2 - 200; // ← Imagen más arriba
 
     const stage = new Konva.Stage({
       container: stageRef.value,

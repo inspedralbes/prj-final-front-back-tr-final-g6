@@ -12,11 +12,10 @@ const props = defineProps({
 });
 
 const stageRef = ref(null);
-const aulaData = ref([]); // Aquí almacenamos los datos de la base de datos
-const popups = ref([]); // Lista de popups
-const fetchDataText = ref(""); // Esta variable se usará para mostrar la información completa debajo del mapa
+const aulaData = ref([]);
+const popups = ref([]);
+const fetchDataText = ref("");
 
-// Obtener los datos desde el backend
 const fetchData = async () => {
   try {
     const bodyRequest = {
@@ -28,7 +27,6 @@ const fetchData = async () => {
     const response = await getMapa(bodyRequest);
     aulaData.value = response;
 
-    // Crear una cadena con la información para mostrar debajo del mapa
     fetchDataText.value = response
       .map((aula) => {
         return `Aula: ${aula.Curs}, Volumen: ${aula.average}`;
@@ -42,7 +40,7 @@ const fetchData = async () => {
 };
 
 const closePopup = (index) => {
-  popups.value.splice(index, 1); // Eliminar el popup de la lista
+  popups.value.splice(index, 1);
 };
 
 const getInterpolatedColor = (value, min, max) => {
@@ -74,7 +72,7 @@ onMounted(async () => {
     const scaledWidth = imgWidth * scaleFactor;
     const scaledHeight = imgHeight * scaleFactor;
     const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 2;
+    const y = (canvasHeight - scaledHeight) / 2 - 200; // ← Imagen más arriba
 
     const stage = new Konva.Stage({
       container: stageRef.value,
@@ -94,6 +92,16 @@ onMounted(async () => {
     });
 
     layer.add(konvaImage);
+
+    const points = aulaData.value.map((aula) => ({
+      x: aula.x,
+      y: aula.y,
+      popupX: aula.popupX,
+      popupY: aula.popupY,
+      idAula: aula.idAula,
+      volumen: aula.average,
+      enabled: true,
+    }));
 
     console.log("Puntos procesados:", points);
 
@@ -118,7 +126,6 @@ onMounted(async () => {
       circle.on("click", () => {
         if (!point.enabled) return;
 
-        // Agregar nuevo popup a la lista
         popups.value.push({
           idAula: point.idAula,
           Curs: aulaData.value.find((a) => a.idAula == point.idAula)?.Curs || "",
@@ -139,7 +146,6 @@ onMounted(async () => {
 
 <template>
   <div ref="stageRef" class="canvas-container">
-    <!-- Mostrar múltiples InfoCard dependiendo de la lista popups -->
     <InfoCard
       v-for="(popup, index) in popups"
       :key="index"
@@ -148,7 +154,6 @@ onMounted(async () => {
       @close="closePopup(index)"
     />
 
-    <!-- Mostrar la información de la base de datos debajo del mapa -->
     <div class="info-text">
       <h3>Información de Aulas</h3>
       <pre>{{ fetchDataText }}</pre>
@@ -173,7 +178,7 @@ onMounted(async () => {
   color: white;
   padding: 10px;
   max-width: 100%;
-  white-space: pre-wrap; /* Esto asegura que el texto se ajuste correctamente */
+  white-space: pre-wrap;
   z-index: 10;
 }
 

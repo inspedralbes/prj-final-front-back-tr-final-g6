@@ -7,7 +7,7 @@
                     class="w-12 h-12 rounded-full bg-gradient-to-r from-teal-600 to-blue-800 flex items-center justify-center mr-3 overflow-hidden">
                     <img src="../public/logo.jpg" alt="Logo Institut Pedralbes" class="w-full h-full object-cover" />
                 </div>
-                <span class="text-xl font-semibold text-white hidden md:inline">ACOUBOX</span>
+                <span class="text-xl font-semibold text-white hidden md:inline"></span>
             </router-link>
 
             <!-- Menu Dropdown -->
