@@ -30,11 +30,15 @@ export const useUserStore = defineStore('user', () => {
     // Computado para verificar si el usuario es administrador
     const isAdmin = computed(() => user.value?.admin === 1);
 
+    // Computado para verificar si el usuario está logueado
+    const isLoggedIn = computed(() => user.value !== null);
+
     return {
         user,
         setUser,
         logout,
-        userId,  // Exponemos el id del usuario
-        isAdmin, // Exponemos si el usuario es administrador
+        userId,     // Exponemos el id del usuario
+        isAdmin,    // Exponemos si el usuario es administrador
+        isLoggedIn, // Exponemos si el usuario está logueado
     };
 });
