@@ -41,37 +41,22 @@
       <div class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div class="flex flex-wrap gap-2">
-            <Button
-              v-for="item in items"
-              :key="item.label"
-              :label="item.label"
-              :icon="item.icon"
-              @click="selectedChart = item.label"
-              :class="{
+            <Button v-for="item in items" :key="item.label" :label="item.label" :icon="item.icon"
+              @click="selectedChart = item.label" :class="{
                 'bg-teal-600 border-teal-600': selectedChart === item.label,
                 'bg-slate-700 border-slate-600': selectedChart !== item.label,
               }"
-              class="text-white font-medium py-2 px-4 rounded-lg border transition-all duration-300 hover:scale-[1.02]"
-            />
+              class="text-white font-medium py-2 px-4 rounded-lg border transition-all duration-300 hover:scale-[1.02]" />
           </div>
 
-          <Dropdown
-            v-model="selectedRange"
-            :options="ranges"
-            optionLabel="label"
-            optionValue="value"
+          <Dropdown v-model="selectedRange" :options="ranges" optionLabel="label" optionValue="value"
             class="w-48 [&>div]:bg-slate-700 [&>div]:border-slate-600 [&>div]:text-white"
-            panelClass="bg-slate-700 border border-slate-600 text-white"
-            placeholder="Selecciona el Rango"
-          />
+            panelClass="bg-slate-700 border border-slate-600 text-white" placeholder="Selecciona el Rango" />
         </div>
       </div>
 
-      <!-- Chart Container -->
-      <div class="bg-slate-800 rounded-lg p-6 shadow-lg">
-        <div class="h-[400px]">
-          <component :is="currentChart" />
-        </div>
+      <div class="h-[500px]">
+        <component :is="currentChart" />
       </div>
     </div>
   </div>
@@ -118,42 +103,42 @@ const aula = ref({
 
 const chartComponents = {
   Temperatura: {
-        actual: TemperatureActual,
-        minuts: TemperatureMinuteChart,
-        hours: TemperatureHourChart,
-        daily: TemperatureDayChart,
-        weekly: TemperatureWeekChart,
-        monthly: TemperatureMonthChart,
-        course: TemperatureCourseChart,
-    },
-    Humitat: {
-        actual: HumitatActual,
-        minuts: HumitatMinuteChart,
-        hours: HumitatHourChart,
-        daily: HumitatDayChart,
-        weekly: HumitatWeekChart,
-        monthly: HumitatMonthChart,
-        course: HumitatCourseChart,
-    },
-    Volum: {
-        actual: VolumeActual,
-        minuts: VolumeMinuteChart,
-        hours: VolumeHourChart,
-        daily: VolumeDayChart,
-        weekly: VolumeWeekChart,
-        monthly: VolumeMonthChart,
-        course: VolumeCourseChart,
-    },
+    actual: TemperatureActual,
+    minuts: TemperatureMinuteChart,
+    hours: TemperatureHourChart,
+    daily: TemperatureDayChart,
+    weekly: TemperatureWeekChart,
+    monthly: TemperatureMonthChart,
+    course: TemperatureCourseChart,
+  },
+  Humitat: {
+    actual: HumitatActual,
+    minuts: HumitatMinuteChart,
+    hours: HumitatHourChart,
+    daily: HumitatDayChart,
+    weekly: HumitatWeekChart,
+    monthly: HumitatMonthChart,
+    course: HumitatCourseChart,
+  },
+  Volum: {
+    actual: VolumeActual,
+    minuts: VolumeMinuteChart,
+    hours: VolumeHourChart,
+    daily: VolumeDayChart,
+    weekly: VolumeWeekChart,
+    monthly: VolumeMonthChart,
+    course: VolumeCourseChart,
+  },
 };
 
 const items = [
-    { label: 'Temperatura', icon: 'pi pi-sun' },
-    { label: 'Humitat', icon: 'pi pi-cloud' },
-    { label: 'Volum', icon: 'pi pi-volume-up' },
+  { label: 'Temperatura', icon: 'pi pi-sun' },
+  { label: 'Humitat', icon: 'pi pi-cloud' },
+  { label: 'Volum', icon: 'pi pi-volume-up' },
 ];
 
 const ranges = [
-    { label: 'Actual', value: 'actual'},
+  { label: 'Actual', value: 'actual' },
   { label: "Minuts", value: "minuts" },
   { label: "Hores", value: "hours" },
   { label: "Diari", value: "daily" },
@@ -210,9 +195,7 @@ button {
   color: rgb(45, 212, 191);
 }
 
-:deep(.p-dropdown-panel
-    .p-dropdown-items
-    .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover) {
+:deep(.p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover) {
   background: rgb(51, 65, 85);
   color: white;
 }
