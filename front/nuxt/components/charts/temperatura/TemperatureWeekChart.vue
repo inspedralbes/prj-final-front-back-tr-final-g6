@@ -13,9 +13,16 @@
             <div class="dashboard-header">
                 <div class="temperature-display">
                     <div class="current-temperature" :class="temperatureColorClass">
-                        {{ currentTemperature !== null ? parseFloat(currentTemperature).toFixed(2) : '--' }}°C
+                        {{ currentTemperature !== null ? parseFloat(currentTemperature.avg).toFixed(2) : '--' }}°C
                     </div>
-                    <div class="temperature-label">Current Temperature</div>
+                    <div class="temperature-range">
+                        <span class="min-temp">{{ currentTemperature?.min !== undefined ?
+                            parseFloat(currentTemperature.min).toFixed(2) : '--' }}°C</span>
+                        <span class="range-separator">-</span>
+                        <span class="max-temp">{{ currentTemperature?.max !== undefined ?
+                            parseFloat(currentTemperature.max).toFixed(2) : '--' }}°C</span>
+                    </div>
+                    <div class="temperature-label">Current Temperature (Avg/Min/Max)</div>
                 </div>
 
                 <div class="time-range-info">
@@ -27,6 +34,22 @@
             <!-- Chart Section -->
             <div class="chart-container">
                 <Bar :key="chartKey" :data="chartData" :options="chartOptions" class="temperature-chart" />
+            </div>
+
+            <!-- Legend Section -->
+            <div class="chart-legend">
+                <div class="legend-item">
+                    <span class="legend-color avg-color"></span>
+                    <span class="legend-label">Average</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color max-color"></span>
+                    <span class="legend-label">Maximum</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color min-color"></span>
+                    <span class="legend-label">Minimum</span>
+                </div>
             </div>
         </div>
     </div>
@@ -71,12 +94,26 @@ const chartData = ref({
     labels: [],
     datasets: [
         {
-            label: 'Temperature (°C)',
+            label: 'Average Temperature (°C)',
             data: [],
-            backgroundColor: 'rgba(33, 150, 243, 0.8)',
-            borderColor: '#2196F3',
+            backgroundColor: '#10B981',
+            borderColor: '#10B981',
             borderWidth: 1,
         },
+        {
+            label: 'Maximum Temperature (°C)',
+            data: [],
+            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+            borderColor: '#EF4444',
+            borderWidth: 1,
+        },
+        {
+            label: 'Minimum Temperature (°C)',
+            data: [],
+            backgroundColor: '#2196F3',
+            borderColor: '#2196F3',
+            borderWidth: 1,
+        }
     ],
 });
 
@@ -95,7 +132,10 @@ const chartOptions = ref({
             titleColor: '#E5E7EB',
             bodyColor: '#E5E7EB',
             callbacks: {
-                label: (context) => `Temperature: ${parseFloat(context.raw).toFixed(2)}°C`
+                label: (context) => {
+                    const datasetLabel = context.dataset.label || '';
+                    return `${datasetLabel}: ${parseFloat(context.raw).toFixed(2)}°C`;
+                }
             }
         }
     },
@@ -141,16 +181,14 @@ const chartOptions = ref({
 const currentTemperature = computed(() => {
     const latestValidDataPoint = [...temperatureData.value]
         .reverse()
-        .find(dataPoint => dataPoint.value !== null && dataPoint.value !== undefined);
-    
-    return latestValidDataPoint?.value !== undefined 
-        ? latestValidDataPoint.value 
-        : null;
+        .find(dataPoint => dataPoint.value?.avg !== null && dataPoint.value?.avg !== undefined);
+
+    return latestValidDataPoint?.value || null;
 });
 
 const temperatureColorClass = computed(() => {
-    const temp = currentTemperature.value;
-    if (temp === null) return 'temp-neutral';
+    const temp = currentTemperature.value?.avg;
+    if (temp === null || temp === undefined) return 'temp-neutral';
     if (temp < 20) return 'temp-cool';
     if (temp < 30) return 'temp-normal';
     if (temp < 35) return 'temp-warm';
@@ -160,20 +198,20 @@ const temperatureColorClass = computed(() => {
 const lastUpdateTime = computed(() => {
     const latestData = [...temperatureData.value]
         .reverse()
-        .find(dataPoint => dataPoint.value !== null && dataPoint.value !== undefined);
+        .find(dataPoint => dataPoint.value?.avg !== null && dataPoint.value?.avg !== undefined);
     return latestData?.weekLabel || '--/--';
 });
 
 const formatWeekLabel = (startDate) => {
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 6);
-    
+
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const startDay = startDate.getDate();
     const startMonth = monthNames[startDate.getMonth()];
     const endDay = endDate.getDate();
     const endMonth = monthNames[endDate.getMonth()];
-    
+
     return `${startMonth} ${startDay}-${endMonth} ${endDay}`;
 };
 
@@ -181,19 +219,19 @@ const fetchInitialData = async () => {
     try {
         loading.value = true;
         const now = new Date();
-        
+
         // Calculate start date (4 weeks ago)
         const startDate = new Date(now);
         startDate.setDate(startDate.getDate() - 28); // 4 weeks * 7 days
         startDate.setHours(0, 0, 0, 0);
-        
+
         // End date is today
         const endDate = new Date(now);
         endDate.setHours(23, 59, 59, 999);
-        
+
         const idAula = props.idAula || (route.params.id ? Number(route.params.id) : 1);
-        
-        // Get only weekly data for the last 4 weeks
+
+        // Get weekly data for the last 4 weeks
         const data = await getDadesGrafic(
             'setmana',
             'temperatura',
@@ -201,7 +239,7 @@ const fetchInitialData = async () => {
             startDate.toISOString(),
             endDate.toISOString()
         );
-        
+
         // Create array for the last 4 weeks
         const weeks = Array.from({ length: 4 }, (_, i) => {
             const weekStart = new Date(startDate);
@@ -216,16 +254,20 @@ const fetchInitialData = async () => {
         const completeData = weeks.map(week => {
             const weekEnd = new Date(week.weekStart);
             weekEnd.setDate(weekEnd.getDate() + 6);
-            
+
             // Find data point that falls within this week
             const dataPoint = data.find(item => {
                 const itemDate = new Date(item.dataIni);
                 return itemDate >= week.weekStart && itemDate <= weekEnd;
             });
-            
+
             return {
                 weekLabel: week.weekLabel,
-                value: dataPoint?.average || null,
+                value: dataPoint ? {
+                    avg: dataPoint.average,
+                    min: dataPoint.min,
+                    max: dataPoint.max
+                } : null,
                 date: week.weekStart
             };
         });
@@ -234,9 +276,9 @@ const fetchInitialData = async () => {
         temperatureData.value = completeData.slice(0, 4);
         updateChartData(temperatureData.value);
         loading.value = false;
-    } catch (error) {
-        console.error('Error fetching weekly data:', error);
-        error.value = 'Failed to load weekly data';
+    } catch (err) {
+        console.error('Error fetching weekly data:', err);
+        error.value = err.message || 'Failed to load weekly data';
         loading.value = false;
     }
 };
@@ -244,13 +286,15 @@ const fetchInitialData = async () => {
 const updateChartData = (data) => {
     // Reverse the array to show most recent week at top
     const reversedData = [...data].reverse();
-    chartData.value.labels = data.map(item => item.weekLabel);
-    chartData.value.datasets[0].data = data.map(item => item.value);
+    chartData.value.labels = reversedData.map(item => item.weekLabel);
+    chartData.value.datasets[0].data = reversedData.map(item => item.value?.avg || null);
+    chartData.value.datasets[1].data = reversedData.map(item => item.value?.max || null);
+    chartData.value.datasets[2].data = reversedData.map(item => item.value?.min || null);
     chartKey.value++;
 };
 
 const handleNewAggregatedData = (data) => {
-    if (!data || !data.sensors) return;
+    if (!data || !data.sensors || data.timeSpan !== 'setmana') return;
 
     const now = new Date();
     const currentWeekStart = new Date(now);
@@ -258,13 +302,17 @@ const handleNewAggregatedData = (data) => {
     currentWeekStart.setHours(0, 0, 0, 0);
     const currentWeekLabel = formatWeekLabel(currentWeekStart);
 
-    // Calculate average temperature
+    // Calculate average, min and max temperature across all sensors
     let totalTemp = 0;
+    let minTemp = Infinity;
+    let maxTemp = -Infinity;
     let sensorCount = 0;
 
     Object.values(data.sensors).forEach(sensor => {
         if (sensor.temperature && typeof sensor.temperature.avg === 'number') {
             totalTemp += sensor.temperature.avg;
+            if (sensor.temperature.min < minTemp) minTemp = sensor.temperature.min;
+            if (sensor.temperature.max > maxTemp) maxTemp = sensor.temperature.max;
             sensorCount++;
         }
     });
@@ -277,9 +325,13 @@ const handleNewAggregatedData = (data) => {
             const weekIndex = temperatureData.value.findIndex(
                 item => item.weekLabel === currentWeekLabel
             );
-            
+
             if (weekIndex !== -1) {
-                temperatureData.value[weekIndex].value = avgTemp;
+                temperatureData.value[weekIndex].value = {
+                    avg: avgTemp,
+                    min: minTemp,
+                    max: maxTemp
+                };
                 temperatureData.value = [...temperatureData.value];
                 updateChartData(temperatureData.value);
             }
@@ -383,6 +435,27 @@ onBeforeUnmount(() => {
     line-height: 1;
 }
 
+.temperature-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.min-temp {
+    color: #10B981;
+    font-weight: 500;
+}
+
+.max-temp {
+    color: #EF4444;
+    font-weight: 500;
+}
+
+.range-separator {
+    color: #a1a1aa;
+}
+
 .temperature-label {
     font-size: 0.9rem;
     color: #a1a1aa;
@@ -419,6 +492,45 @@ onBeforeUnmount(() => {
 .temperature-chart {
     width: 100%;
     height: 100%;
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-color {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.avg-color {
+    background-color: #10B981;
+}
+
+.max-color {
+    background-color: #EF4444;
+}
+
+.min-color {
+    background-color: #2196F3;
+}
+
+.legend-label {
+    font-size: 0.8rem;
+    color: #a1a1aa;
 }
 
 /* Temperature color classes */
