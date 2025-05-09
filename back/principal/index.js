@@ -508,7 +508,7 @@ app.post('/api/newsensors', (req, res) => {
           res.status(500).send('Error en la inserció a la base de dades');
           return;
         }
-        res.status(201).send({ message: 'Sensor creat correctament', id: results.insertId });
+        res.status(200).send({ message: 'Sensor creat correctament', id: results.insertId });
       });
     }
 
@@ -521,24 +521,25 @@ app.post('/api/newsensors', (req, res) => {
           return;
         }
         if (results.length !== 0) {
-          res.status(201).send({ message: 'El sensor ja existeix', apiKey: results[0].api_key });
+          res.status(200).send({ message: 'El sensor ja existeix', apiKey: results[0].api_key });
           return;
         }
-      });
-
-      const apiKey = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      const query2 = 'INSERT INTO sensor (mac, api_key, nombre, ubicacion, x, y) VALUES (?, ?, ?, ?, ?, ?)';
-      const nombre = 'Sensor ' + MAC;
-      connexioBD.execute(query2, [MAC, apiKey, nombre, 'Aula 1', 0, 0], (err, results) => {
-        if (err) {
-          console.error('Error en la inserció a la base de dades: ' + err.stack);
-          res.status(500).send('Error en la inserció a la base de dades');
-          return;
+        if (results.length === 0) {
+          const apiKey = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+          const query2 = 'INSERT INTO sensor (mac, api_key, nombre, ubicacion, x, y) VALUES (?, ?, ?, ?, ?, ?)';
+          const nombre = 'Sensor ' + MAC;
+          connexioBD.execute(query2, [MAC, apiKey, nombre, 'Aula 1', 0, 0], (err, results) => {
+            if (err) {
+              console.error('Error en la inserció a la base de dades: ' + err.stack);
+              res.status(500).send('Error en la inserció a la base de dades');
+              return;
+            }
+            res.status(201).send({ message: 'Sensor creat correctament', id: results.insertId, apiKey });
+          });
+        } else if (results.length === 1 && results[0].accepted === 0) {
+          res.status(400).send({ message: 'El sensor no esta acceptat' });
         }
-        res.status(201).send({ message: 'Sensor creat correctament', id: results.insertId, apiKey });
       });
-    } else if (results.length === 1 && results[0].accepted === 0) {
-      res.status(400).send({ message: 'El sensor no esta acceptat' });
     }
   });
 });
