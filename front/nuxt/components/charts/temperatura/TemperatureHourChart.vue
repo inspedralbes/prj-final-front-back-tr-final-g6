@@ -91,7 +91,6 @@ const chartData = ref({
     ],
 });
 
-// Chart options
 const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
@@ -105,7 +104,7 @@ const chartOptions = ref({
             titleColor: '#E5E7EB',
             bodyColor: '#E5E7EB',
             callbacks: {
-                label: (context) => `Temperature: ${parseFloat(context.raw).toFixed(2)}°C` // Format to 2 decimals
+                label: (context) => `Temperature: ${parseFloat(context.raw).toFixed(2)}°C`
             }
         }
     },
@@ -124,18 +123,17 @@ const chartOptions = ref({
                 maxRotation: 45,
                 minRotation: 45,
                 autoSkip: false,
-                callback: function (value, index, values) {
-                    // Mostrar la etiqueta 24:00 al final
-                    const time = this.getLabelForValue(value);
-                    const hour = parseInt(time.split(':')[0], 10);
-                    return hour % 2 === 0 || hour === 24 ? time : '';  // Mostrar solo las horas pares y 24:00
+                callback: function(value, index, values) {
+                    // Mostrar todas las etiquetas, convirtiendo 00:00 a 24:00 para la última
+                    if (index === values.length - 1) return '24:00';
+                    return this.getLabelForValue(value);
                 }
             },
             grid: {
                 color: 'rgba(255, 255, 255, 0.05)'
             },
             min: '00:00',
-            max: '24:00'  // Ajustar para mostrar hasta 24:00
+            max: '24:00'
         },
         y: {
             title: {
@@ -214,42 +212,68 @@ const fetchInitialData = async () => {
             endOfDay.toISOString()
         );
 
-        // Process data from the API
-        const filteredData = data
-            .filter(item => item.average >= 0 && item.average <= 40)
-            .map(item => ({
-                time: new Date(item.dataIni).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-                value: item.average,
-            }));
+        // Verifica si hay datos
+        if (!data || !Array.isArray(data) || data.length === 0) {
+            throw new Error("No se recibieron datos del servidor");
+        }
 
-        // Create hour-by-hour labels for the full day (24 hours)
+        // Generar etiquetas de 00:00 a 24:00
         const labels = Array.from({ length: 25 }, (_, i) => {
-            if (i === 24) {
-                return '24:00';
-            }
+            if (i === 24) return '24:00';
             const time = new Date(startOfDay.getTime() + i * 60 * 60 * 1000);
             return time.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         });
-        // Fill in missing data points, including for the 24:00 hour
+
+        // Mapear los datos recibidos a las horas correspondientes
         const completeData = labels.map(label => {
-            const existing = filteredData.find(item => item.time === label);
-            return existing || { time: label, value: null };
+            // Para 24:00, buscamos datos de 23:00-00:00
+            if (label === '24:00') {
+                const midnightData = data.find(item => {
+                    const itemHour = new Date(item.dataIni).getHours();
+                    return itemHour === 23; // Buscamos datos de las 23:00
+                });
+                return midnightData ? { 
+                    time: '24:00', 
+                    value: midnightData.average 
+                } : { 
+                    time: '24:00', 
+                    value: null 
+                };
+            }
+            
+            // Para otras horas, buscamos coincidencia exacta
+            const hour = parseInt(label.split(':')[0]);
+            const found = data.find(item => {
+                const itemHour = new Date(item.dataIni).getHours();
+                return itemHour === hour;
+            });
+            
+            return found ? { 
+                time: label, 
+                value: found.average 
+            } : { 
+                time: label, 
+                value: null 
+            };
         });
 
         temperatureData.value = completeData;
         updateChartData(temperatureData.value);
 
         loading.value = false;
-    } catch (error) {
-        console.error('Error fetching initial data:', error);
-        error.value = 'Failed to load initial data';
+    } catch (err) {
+        console.error('Error fetching initial data:', err);
+        error.value = err.message || 'Failed to load initial data';
         loading.value = false;
     }
 };
 
-// Update chart data
 const updateChartData = (data) => {
-    const labels = data.map(item => item.time);
+    // Asegurarse de que la última etiqueta sea 24:00
+    const labels = data.map((item, index) => 
+        index === data.length - 1 ? '24:00' : item.time
+    );
+    
     const values = data.map(item => item.value);
 
     chartData.value.labels = labels;
