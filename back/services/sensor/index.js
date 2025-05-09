@@ -13,6 +13,10 @@ function getTemperatureInCelsius() {
     return (Math.random() * (26 - 18) + 18).toFixed(2); // Simula temperatura entre 18 i 26 graus
 }
 
+function getHumidityInPercentage() {
+    return Math.floor(Math.random() * (100 - 0 + 1)) + 0; // Simula humitat entre 0 i 100%
+}
+
 // Funció per seleccionar un id d'un sensor a l'atzar
 function getRandomAulaId() {
     return Math.floor(Math.random() * 3) + 1; // Genera un id entre 1 i 3
@@ -21,9 +25,9 @@ function getRandomAulaId() {
 const MAC = "MAMAMAM";
 const api_key = "c8nlsy4955ju75tq5w3f"; 
 
-async function sendMessage(api_key, volume, temperature, date, MAC) {
+async function sendMessage(api_key, volume, temperature, humidity, date, MAC) {
     const queue = 'SensorData';
-    const msg = { api_key, volume, temperature, date, MAC };
+    const msg = { api_key, volume, temperature, humidity, date, MAC };
   
     try {
       const connection = await amqp.connect(process.env.RABBITMQ_URL);
@@ -44,12 +48,13 @@ async function sendMessage(api_key, volume, temperature, date, MAC) {
   async function logData() {
     const volume = getVolumeInDecibels();
     const temperature = getTemperatureInCelsius();
+    const humidity = getHumidityInPercentage();
     const date = DateTime.now().setZone("Europe/Madrid").toISO();
 
-    console.log(`Volum: ${volume} dB, Temperatura: ${temperature}°C, Data: ${date}`);
+    console.log(`Volum: ${volume} dB, Temperatura: ${temperature}°C, Humitat: ${humidity}%, Data: ${date}`);
 
-    sendMessage(api_key, volume, temperature, date, MAC);
+    sendMessage(api_key, volume, temperature, humidity, date, MAC);
 }
 
 // Configurar l'interval per executar la funció cada 10 segons
-setInterval(logData, 10000);
+setInterval(logData, 1000);

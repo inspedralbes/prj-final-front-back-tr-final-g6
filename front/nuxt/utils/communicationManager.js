@@ -1,6 +1,6 @@
 export function getBaseUrl() {
     const config = useRuntimeConfig();
-    return config.public.URL_PROD;
+    return config.public.URL;
 }
 
 // Nueva función para probar la conexión con la API
@@ -227,12 +227,12 @@ export async function getDadesGrafic(taula, tipus, idAula, dataIni, dataFi) {
     }
 
     try {
-        const response = await fetch(`${getBaseUrl()}/api/aules/${idAula}/grafic`, {
-            method: 'POST',
+        const queryParams = new URLSearchParams({ taula, tipus, dataIni, dataFi }).toString();
+        const response = await fetch(`${getBaseUrl()}/api/aules/${idAula}/grafic?${queryParams}`, {
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ taula, tipus, dataIni, dataFi }),
         });
 
         if (!response.ok) {

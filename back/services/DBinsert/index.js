@@ -15,9 +15,9 @@ async function receiveMessage() {
   
       channel.consume(queue, (msg) => {
         const data = JSON.parse(msg.content.toString());
-        const { api_key, volume, temperature, MAC, date } = data;
-        console.log(`🔵 Mensaje recibido - Volum: ${volume} dB, Temperatura: ${temperature}°C, Data: ${date}`);
-        insertDataToMongoDB(volume, temperature, date, MAC, api_key);
+        const { api_key, volume, temperature, humidity, MAC, date } = data;
+        console.log(`🔵 Mensaje recibido - Volum: ${volume} dB, Temperatura: ${temperature}°C, Humitat: ${humidity}% Data: ${date}`);
+        insertDataToMongoDB(volume, temperature, humidity, date, MAC, api_key);
       }, {
         noAck: true
       });
@@ -27,9 +27,9 @@ async function receiveMessage() {
   }
 
 
-async function insertDataToMongoDB(volume, temperature, date, MAC, api_key) {
+async function insertDataToMongoDB(volume, temperature, humidity, date, MAC, api_key) {
   console.log('🔵 Enviando datos a MongoDB...')
-  console.log(`🔵 Volum: ${volume} dB, Temperatura: ${temperature}°C, Data: ${date}`);
+  console.log(`🔵 Volum: ${volume} dB, Temperatura: ${temperature}°C, Humitat: ${humidity}%, Data: ${date}`);
   const url = process.env.BACK_URL + "/api/data/mongodb";
 
   try {
@@ -41,6 +41,7 @@ async function insertDataToMongoDB(volume, temperature, date, MAC, api_key) {
       body: JSON.stringify({
         volume,
         temperature,
+        humidity,
         date,
         MAC,
         api_key

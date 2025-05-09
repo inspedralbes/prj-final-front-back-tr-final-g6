@@ -40,6 +40,9 @@
                             class="w-full px-4 py-3 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 focus:outline-none transition-colors"
                             placeholder="••••••••" required />
                     </div>
+                    <div v-if="errorMessage" class="text-red-500 text-sm text-center mb-4">
+                        {{ errorMessage }}
+                    </div>
                     <div class="flex justify-center pt-4">
                         <button type="submit"
                             class="bg-teal-600 hover:bg-teal-500 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-slate-800">
@@ -61,6 +64,7 @@ const email = ref('');
 const password = ref('');
 const router = useRouter();
 const userStore = useUserStore();
+const errorMessage = ref('');
 
 const handleLogin = async () => {
     try {
@@ -69,15 +73,16 @@ const handleLogin = async () => {
 
         if (response && response.user) {
             console.log('Login exitoso, datos del usuario:', response.user);
-
+            errorMessage.value = '';
             userStore.setUser(response.user);
-
             router.push('/aulas');
         } else {
             console.error('Respuesta incorrecta:', response);
+            errorMessage.value = 'Credencials incorrectes. Si us plau, comprova el correu i la contrasenya.';
         }
     } catch (error) {
         console.error('Error al iniciar sesión:', error.message);
+        errorMessage.value = 'Error al iniciar sessió. Si us plau, torna-ho a provar.';
     }
 };
 </script>

@@ -108,8 +108,9 @@ app.post('/api/login', (req, res) => {
     return res.status(400).send({ message: 'correu i contrasenya són necessaris' });
   }
 
-  const query = 'SELECT * FROM usuari WHERE correu = ? AND contrasenya = ?';
-  connexioBD.execute(query, [correu, contrasenya], (err, results) => {
+  // Primero buscamos el usuario solo por correo
+  const query = 'SELECT * FROM usuari WHERE correu = ?';
+  connexioBD.execute(query, [correu], (err, results) => {
     if (err) {
       console.error('Error en la consulta a la base de dades: ' + err.stack);
       res.status(500).send('Error en la consulta a la base de dades');
@@ -117,9 +118,21 @@ app.post('/api/login', (req, res) => {
     }
 
     if (results.length > 0) {
-      res.status(200).send({ message: 'Login successful', user: results[0] });
+      const user = results[0];
+      // Comparamos la contraseña proporcionada con la almacenada
+      if (user.contrasenya === contrasenya) {
+        // Eliminamos la contraseña antes de enviar los datos del usuario
+        const { contrasenya, ...userWithoutPassword } = user;
+        res.status(200).send({ 
+          message: 'Login successful', 
+          user: userWithoutPassword 
+        });
+      } else {
+        res.status(401).send({ message: 'Credencials incorrectes' });
+      }
     } else {
-      res.status(401).send({ message: 'Invalid correu or contrasenya' });
+      // No revelamos si el correo existe o no por seguridad
+      res.status(401).send({ message: 'Credencials incorrectes' });
     }
   });
 });
@@ -289,8 +302,8 @@ app.get('/api/mapa', async (req, res) => {
 });
 
 // Get dades per gràfics
-app.post('/api/aules/:id/grafic', (req, res) => {
-  const { taula, tipus, dataIni, dataFi } = req.body;
+app.get('/api/aules/:id/grafic', (req, res) => {
+  const { taula, tipus, dataIni, dataFi } = req.query;
   const idAula = req.params.id;
 
   if (!taula || !tipus || !idAula || !dataIni || !dataFi) {
@@ -554,8 +567,8 @@ app.get('/api/data/mongodb', async (req, res) => {
 
 app.post('/api/data/mongodb', async (req, res) => {
   console.log('Rebent dades per a MongoDB');
-  const { volume, temperature, date, MAC, api_key } = req.body;
-  if(volume == null || temperature == null || date == null || MAC == null || api_key == null) {
+  const { volume, temperature, humidity, date, MAC, api_key } = req.body;
+  if (volume == null || temperature == null || humidity == null || date == null || MAC == null || api_key == null) {
     return res.status(400).json({ message: 'Dades incompletes' });
   }
 
@@ -572,10 +585,10 @@ app.post('/api/data/mongodb', async (req, res) => {
     console.log('API key vàlida, inserint dades a MongoDB');
     const id_sensor = results[0].idSensor;
     try {
-      const result = await collection.insertOne({ volume, temperature, id_sensor, date });
+      const result = await collection.insertOne({ volume, temperature, humidity, id_sensor, date });
       console.log(`Dades inserides amb l'ID: ${result.insertedId}`);
 
-      io.emit('newRawData', { volume, temperature, id_sensor, date });
+      io.emit('newRawData', { volume, temperature, humidity, id_sensor, date });
 
       res.status(201).json({ message: 'Dades inserides correctament', id: result.insertedId });
     } catch (error) {
@@ -592,15 +605,19 @@ app.post('/api/data/mysql', (req, res) => {
     return res.status(400).json({ message: 'Es requereix un timeSpan' });
   }
 
+  console.log('Rebent dades per a MySQL: ', sensors);
+  console.log('TimeSpan: ', timeSpan);
   const query = `INSERT INTO ${mysql2.escapeId(timeSpan)} (idAula, idSensor, tipus, max, min, average, dataIni, dataFi) VALUES ?`;
 
-  const currentDate = new Date(); 
-  const dataIni = currentDate.toISOString();
-  const dataFi = new Date(currentDate.getTime() + 60000).toISOString();
 
-  const values = Object.entries(sensors).flatMap(([idSensor, { volume, temperature }]) => [
+  const currentDate = moment.tz('Europe/Madrid');
+  const dataIni = currentDate.format('YYYY-MM-DD HH:mm:ss'); 
+  const dataFi = currentDate.add(1, 'minute').format('YYYY-MM-DD HH:mm:ss'); 
+
+  const values = Object.entries(sensors).flatMap(([idSensor, { volume, temperature, humidity }]) => [
     [1, idSensor, 'volum', volume.max, volume.min, volume.avg, dataIni, dataFi],
-    [1, idSensor, 'temperatura', temperature.max, temperature.min, temperature.avg, dataIni, dataFi]
+    [1, idSensor, 'temperatura', temperature.max, temperature.min, temperature.avg, dataIni, dataFi],
+    [1, idSensor, 'humitat', humidity.max, humidity.min, humidity.avg, dataIni, dataFi]
   ]);
 
   connexioBD.query(query, [values], (err, results) => {
@@ -664,7 +681,7 @@ app.post('/api/sendMessage', async (req, res) => {
   const msg = { api_key, volume, temperature, date, MAC };
 
   try {
-    const connection = await amqp.connect(process.env.RABBITMQ_URL);
+    const connection = await ampq.connect(process.env.RABBITMQ_URL);
     const channel = await connection.createChannel();
 
     await channel.assertQueue(queue, { durable: false });
