@@ -569,7 +569,7 @@ app.post('/api/data/mongodb', async (req, res) => {
   console.log('Rebent dades per a MongoDB');
   const { volume, temperature, humidity, date, MAC, api_key } = req.body;
   if (volume == null || temperature == null || humidity == null || date == null || MAC == null || api_key == null) {
-    return res.status(400).json({ message: 'Dades incompletes' });
+    return res.status(400).json({ message: 'Dades incompletes' }); 
   }
 
   const query = 'SELECT * FROM sensor WHERE mac = ? AND api_key = ?';
