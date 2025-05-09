@@ -557,7 +557,7 @@ app.get('/api/data/mongodb', async (req, res) => {
       }
     }).toArray();
 
-    console.log('Dades rebudes de MongoDB: ', results);
+    console.log('Dades rebudes de MongoDB: ', results); 
     res.status(200).json(results);
   } catch (error) {
     console.error('Error obtenint les dades de MongoDB:', error);
