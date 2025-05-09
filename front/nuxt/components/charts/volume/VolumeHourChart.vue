@@ -124,9 +124,9 @@ const chartData = ref({
         {
             label: 'Minimum Volume (dB)',
             data: [],
-            borderColor: '#9b59b6',
-            backgroundColor: 'rgba(155, 89, 182, 0.1)',
-            pointBackgroundColor: '#9b59b6',
+            borderColor: '#2196F3',
+            backgroundColor: '#2196F3',
+            pointBackgroundColor: '#2196F3',
             pointBorderColor: '#fff',
             pointRadius: 2,
             pointHoverRadius: 4,
@@ -541,7 +541,7 @@ onBeforeUnmount(() => {
 }
 
 .min-color {
-    background-color: #9b59b6;
+    background-color: #2196F3;
 }
 
 .legend-label {

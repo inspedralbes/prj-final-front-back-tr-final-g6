@@ -94,7 +94,7 @@ const props = defineProps({
 const chartData = ref({
     labels: [],
     datasets: [
-        {
+    {
             label: 'Average Temperature (°C)',
             data: [],
             fill: {
@@ -102,9 +102,9 @@ const chartData = ref({
                 above: 'rgba(33, 150, 243, 0.1)',
                 below: 'rgba(33, 150, 243, 0.1)'
             },
-            borderColor: '#2196F3',
-            backgroundColor: 'rgba(33, 150, 243, 0.2)',
-            pointBackgroundColor: '#2196F3',
+            borderColor: '#10B981',
+            backgroundColor: '10B981',
+            pointBackgroundColor: '#10B981',
             pointBorderColor: '#fff',
             pointRadius: 3,
             pointHoverRadius: 5,
@@ -126,9 +126,9 @@ const chartData = ref({
         {
             label: 'Minimum Temperature (°C)',
             data: [],
-            borderColor: '#10B981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            pointBackgroundColor: '#10B981',
+            borderColor: '#2196F3',
+            backgroundColor: '#2196F3',
+            pointBackgroundColor: '#2196F3',
             pointBorderColor: '#fff',
             pointRadius: 2,
             pointHoverRadius: 4,
@@ -619,7 +619,7 @@ onBeforeUnmount(() => {
 }
 
 .avg-color {
-    background-color: #2196F3;
+    background-color: #10B981;
 }
 
 .max-color {
@@ -627,7 +627,7 @@ onBeforeUnmount(() => {
 }
 
 .min-color {
-    background-color: #10B981;
+    background-color: #2196F3;
 }
 
 .legend-label {
