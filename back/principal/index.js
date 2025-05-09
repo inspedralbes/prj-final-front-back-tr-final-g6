@@ -511,7 +511,7 @@ app.post('/api/newsensors', (req, res) => {
         res.status(201).send({ message: 'Sensor creat correctament', id: results.insertId });
       });
     }
-    
+
     else if (results.length === 1 && results[0].accepted === 1) {
       const query4 = 'SELECT * FROM sensor WHERE mac = ?';
       connexioBD.execute(query4, [MAC], (err, results) => {
@@ -521,7 +521,7 @@ app.post('/api/newsensors', (req, res) => {
           return;
         }
         if (results.length !== 0) {
-          res.status(400).send({ message: 'El sensor ja existeix', apiKey: results[0].api_key });
+          res.status(201).send({ message: 'El sensor ja existeix', apiKey: results[0].api_key });
           return;
         }
       });
