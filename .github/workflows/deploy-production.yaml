@@ -26,7 +26,7 @@ jobs:
 
           # Actualitzar el codi des de GitHub
           cd /root/PROD/prj-final-front-back-tr-final-g6
-          git switch create-githubactions
+          git switch prod
           git pull
 
           # Copiar i configurar arxius .env
