@@ -572,7 +572,7 @@ app.post('/api/data/mongodb', async (req, res) => {
     return res.status(400).json({ message: 'Dades incompletes' }); 
   }
 
-  const query = 'SELECT * FROM sensor WHERE mac = ? AND api_key = ?';
+  const query = 'SELECT * FROM sensor WHERE mac = ? AND api_key = ?'; 
   connexioBD.execute(query, [MAC, api_key], async (err, results) => {
     if (err) {
       console.error('Error en la consulta a la base de dades: ' + err.stack);
