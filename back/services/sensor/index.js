@@ -56,5 +56,5 @@ async function sendMessage(api_key, volume, temperature, humidity, date, MAC) {
     sendMessage(api_key, volume, temperature, humidity, date, MAC);
 }
 
-// Configurar l'interval per executar la funció cada 10 segons
+// Configurar l'interval per executar la funció cada segon
 setInterval(logData, 1000);
