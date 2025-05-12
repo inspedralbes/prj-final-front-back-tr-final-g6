@@ -686,14 +686,14 @@ app.get('/api/sensors/banned', (req, res) => {
 
 // Endpoint per enviar missatges a RabbitMQ
 app.post('/api/sendMessage', async (req, res) => {
-  const { api_key, volume, temperature, date, MAC } = req.body;
+  const { api_key, volume, temperature, humidity, date, MAC } = req.body;
 
   if (!api_key || !volume || !temperature || !date || !MAC) {
     return res.status(400).send({ message: 'Falten dades necessàries' });
   }
 
   const queue = 'SensorData';
-  const msg = { api_key, volume, temperature, date, MAC };
+  const msg = { api_key, volume, temperature, humidity, date, MAC };
 
   try {
     const connection = await ampq.connect(process.env.RABBITMQ_URL);
