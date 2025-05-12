@@ -16,9 +16,11 @@
                         {{ currentTemperature !== null ? parseFloat(currentTemperature).toFixed(2) : '--' }}°C
                     </div>
                     <div class="temperature-range">
-                        <span class="min-temp">{{ minTemperature !== null ? parseFloat(minTemperature).toFixed(2) : '--' }}°C</span>
+                        <span class="min-temp">{{ minTemperature !== null ? parseFloat(minTemperature).toFixed(2) : '--'
+                            }}°C</span>
                         <span class="range-separator">-</span>
-                        <span class="max-temp">{{ maxTemperature !== null ? parseFloat(maxTemperature).toFixed(2) : '--' }}°C</span>
+                        <span class="max-temp">{{ maxTemperature !== null ? parseFloat(maxTemperature).toFixed(2) : '--'
+                            }}°C</span>
                     </div>
                     <div class="temperature-label">Current Temperature (Avg/Min/Max)</div>
                 </div>
@@ -94,7 +96,7 @@ const props = defineProps({
 const chartData = ref({
     labels: [],
     datasets: [
-    {
+        {
             label: 'Average Temperature (°C)',
             data: [],
             fill: {
@@ -173,7 +175,7 @@ const chartOptions = ref({
                 maxRotation: 45,
                 minRotation: 45,
                 autoSkip: false,
-                callback: function(value, index, values) {
+                callback: function (value, index, values) {
                     if (index === values.length - 1) return '24:00';
                     return this.getLabelForValue(value);
                 }
@@ -255,7 +257,6 @@ const fetchInitialData = async () => {
         // Get idAula from props or route
         const idAula = props.idAula || (route.params.id ? Number(route.params.id) : 1);
 
-        // Use getDadesGrafic with 'hora' instead of 'minut'
         const data = await getDadesGrafic(
             'hora',
             'temperatura',
@@ -263,6 +264,7 @@ const fetchInitialData = async () => {
             startOfDay.toISOString(),
             endOfDay.toISOString()
         );
+        console.log('API Response:', data);
 
         if (!data || !Array.isArray(data) || data.length === 0) {
             throw new Error("No se recibieron datos del servidor");
@@ -282,27 +284,27 @@ const fetchInitialData = async () => {
                     const itemHour = new Date(item.dataIni).getHours();
                     return itemHour === 23;
                 });
-                return midnightData ? { 
-                    time: '24:00', 
-                    value: midnightData.average 
-                } : { 
-                    time: '24:00', 
-                    value: null 
+                return midnightData ? {
+                    time: '24:00',
+                    value: midnightData.average
+                } : {
+                    time: '24:00',
+                    value: null
                 };
             }
-            
+
             const hour = parseInt(label.split(':')[0]);
             const found = data.find(item => {
                 const itemHour = new Date(item.dataIni).getHours();
                 return itemHour === hour;
             });
-            
-            return found ? { 
-                time: label, 
-                value: found.average 
-            } : { 
-                time: label, 
-                value: null 
+
+            return found ? {
+                time: label,
+                value: found.average
+            } : {
+                time: label,
+                value: null
             };
         });
 
@@ -312,27 +314,27 @@ const fetchInitialData = async () => {
                     const itemHour = new Date(item.dataIni).getHours();
                     return itemHour === 23;
                 });
-                return midnightData ? { 
-                    time: '24:00', 
-                    value: midnightData.min 
-                } : { 
-                    time: '24:00', 
-                    value: null 
+                return midnightData ? {
+                    time: '24:00',
+                    value: midnightData.min
+                } : {
+                    time: '24:00',
+                    value: null
                 };
             }
-            
+
             const hour = parseInt(label.split(':')[0]);
             const found = data.find(item => {
                 const itemHour = new Date(item.dataIni).getHours();
                 return itemHour === hour;
             });
-            
-            return found ? { 
-                time: label, 
-                value: found.min 
-            } : { 
-                time: label, 
-                value: null 
+
+            return found ? {
+                time: label,
+                value: found.min
+            } : {
+                time: label,
+                value: null
             };
         });
 
@@ -342,27 +344,27 @@ const fetchInitialData = async () => {
                     const itemHour = new Date(item.dataIni).getHours();
                     return itemHour === 23;
                 });
-                return midnightData ? { 
-                    time: '24:00', 
-                    value: midnightData.max 
-                } : { 
-                    time: '24:00', 
-                    value: null 
+                return midnightData ? {
+                    time: '24:00',
+                    value: midnightData.max
+                } : {
+                    time: '24:00',
+                    value: null
                 };
             }
-            
+
             const hour = parseInt(label.split(':')[0]);
             const found = data.find(item => {
                 const itemHour = new Date(item.dataIni).getHours();
                 return itemHour === hour;
             });
-            
-            return found ? { 
-                time: label, 
-                value: found.max 
-            } : { 
-                time: label, 
-                value: null 
+
+            return found ? {
+                time: label,
+                value: found.max
+            } : {
+                time: label,
+                value: null
             };
         });
 
@@ -380,10 +382,10 @@ const fetchInitialData = async () => {
 };
 
 const updateChartData = (avgData, minData, maxData) => {
-    const labels = avgData.map((item, index) => 
+    const labels = avgData.map((item, index) =>
         index === avgData.length - 1 ? '24:00' : item.time
     );
-    
+
     const avgValues = avgData.map(item => item.value);
     const minValues = minData.map(item => item.value);
     const maxValues = maxData.map(item => item.value);
