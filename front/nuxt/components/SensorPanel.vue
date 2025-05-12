@@ -72,6 +72,17 @@
                             </select>
                         </div>
 
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-1">Sensor Real</label>
+                            <select v-model="editForm.sensorReal"
+                                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                                <option :value="null">Selecciona un sensor</option>
+                                <option v-for="sensor in sensoresReales" :key="sensor.id" :value="sensor.id">
+                                    {{ sensor.mac }} - {{ sensor.tipo }}
+                                </option>
+                            </select>
+                        </div>
+
                         <div class="flex justify-end gap-3 pt-4">
                             <button type="button" @click="showEditModal = false"
                                 class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all">
@@ -400,8 +411,16 @@ const editForm = ref({
     ubicacion: '',
     x: 0,
     y: 0,
-    idAula: null
+    idAula: null,
+    sensorReal: null
 });
+
+// Lista temporal de sensores reales (esto vendrá del backend más tarde)
+const sensoresReales = ref([
+    { id: 1, mac: '00:11:22:33:44:55', tipo: 'Temperatura' },
+    { id: 2, mac: '66:77:88:99:AA:BB', tipo: 'Humedad' },
+    { id: 3, mac: 'CC:DD:EE:FF:00:11', tipo: 'CO2' }
+]);
 const currentEditingSensor = ref(null);
 
 const handleEditSensor = (sensor) => {
@@ -412,19 +431,26 @@ const handleEditSensor = (sensor) => {
         ubicacion: sensor.ubicacion || '',
         x: sensor.x || 0,
         y: sensor.y || 0,
-        idAula: sensor.idAula || null
+        idAula: sensor.idAula || null,
+        sensorReal: sensor.sensorReal || null
     };
     showEditModal.value = true;
 };
 
 const submitEditForm = async () => {
     try {
+        if (!editForm.value.sensorReal) {
+            alert('Debes seleccionar un sensor real');
+            return;
+        }
+
         await updateSensorById(editForm.value.idSensor, {
             nombre: editForm.value.nombre,
             ubicacion: editForm.value.ubicacion,
             x: editForm.value.x,
             y: editForm.value.y,
-            idAula: editForm.value.idAula
+            idAula: editForm.value.idAula,
+            sensorReal: editForm.value.sensorReal
         });
 
         // Actualizar el sensor en la lista correspondiente

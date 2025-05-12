@@ -666,6 +666,60 @@ app.get('/api/sensors/banned', (req, res) => {
   });
 });
 
+// Endpoint para obtener todos los datos de gráficos
+app.get('/api/grafics/all', (req, res) => {
+    const { dataIni, dataFi } = req.query;
+
+    if (!dataIni || !dataFi) {
+        return res.status(400).json({ message: 'dataIni i dataFi són necessaris' });
+    }
+
+    // Consulta para temperatura
+    const queryTemp = `
+        SELECT s.idSensor, s.nombre, s.ubicacion, a.id as aulaId, a.Curs, 
+               t.temperatura, t.data_lectura
+        FROM sensor s
+        LEFT JOIN aula a ON s.idAula = a.id
+        JOIN temperatura t ON s.idSensor = t.idSensor
+        WHERE t.data_lectura BETWEEN ? AND ?
+        ORDER BY t.data_lectura ASC`;
+
+    // Consulta para volumen
+    const queryVol = `
+        SELECT s.idSensor, s.nombre, s.ubicacion, a.id as aulaId, a.Curs, 
+               v.volumen, v.data_lectura
+        FROM sensor s
+        LEFT JOIN aula a ON s.idAula = a.id
+        JOIN volumen v ON s.idSensor = v.idSensor
+        WHERE v.data_lectura BETWEEN ? AND ?
+        ORDER BY v.data_lectura ASC`;
+
+    Promise.all([
+        new Promise((resolve, reject) => {
+            connexioBD.query(queryTemp, [dataIni, dataFi], (err, tempResults) => {
+                if (err) reject(err);
+                resolve(tempResults);
+            });
+        }),
+        new Promise((resolve, reject) => {
+            connexioBD.query(queryVol, [dataIni, dataFi], (err, volResults) => {
+                if (err) reject(err);
+                resolve(volResults);
+            });
+        })
+    ])
+    .then(([temperaturas, volumenes]) => {
+        res.json({
+            temperaturas,
+            volumenes
+        });
+    })
+    .catch(err => {
+        console.error('Error al obtener datos:', err);
+        res.status(500).json({ message: 'Error al obtener los datos', error: err.message });
+    });
+});
+
 // Endpoint per enviar missatges a RabbitMQ
 app.post('/api/sendMessage', async (req, res) => {
   const { api_key, volume, temperature, date, MAC } = req.body;
