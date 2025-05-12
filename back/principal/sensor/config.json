@@ -11,6 +11,8 @@
     "db_normal": 70,
     "db_angry": 80,
 
+    "vref_sound": 0.7,
+
     "url_newsensor": "https://dev.acubox.cat/back/api/newsensors",
     "url_sensor": "https://dev.acubox.cat/back/api/sendMessage",
 
@@ -21,6 +23,6 @@
         "https://dev.acubox.cat/back/api/fileSensor/images/angry.jpg",
         "https://dev.acubox.cat/back/api/fileSensor/images/connected.jpg",
         "https://dev.acubox.cat/back/api/fileSensor/images/disconnected.jpg",
-        "https://dev.acubox.cat/back/api/fileSensor/images/accespoint.jpg"
+        "https://dev.acubox.cat/back/api/fileSensor/images/accesspoint.jpg"
     ]
 }
