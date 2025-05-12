@@ -16,10 +16,14 @@ import dotenv from 'dotenv';
 import ampq from 'amqplib';
 import { MongoClient } from 'mongodb';
 import moment from 'moment-timezone';
-import path from 'path'; // Importa el mòdul path
-const config = require('./config.json');
+import path from 'path'; // Importa el mòdul path 
+import fs from 'fs';
 
-app.use(cors());
+app.use(cors({
+  origin: ['https://dev.acubox.cat'], // Replace with your production domain
+  methods: ['GET', 'POST'],
+  credentials: true,
+}));
 app.use(express.json());
 
 app.use("/api/fileSensor", express.static(path.join(__dirname, 'sensor'))); // Serveix fitxers estàtics des de la carpeta 'sensor'
@@ -86,6 +90,7 @@ const io = new Server(server, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
+    credentials: true,
   }
 });
 
@@ -509,23 +514,38 @@ app.post('/api/newsensors', (req, res) => {
           res.status(500).send('Error en la inserció a la base de dades');
           return;
         }
-        res.status(201).send({ message: 'Sensor creat correctament', id: results.insertId });
+        res.status(200).send({ message: 'Sensor creat correctament', id: results.insertId });
       });
     }
+
     else if (results.length === 1 && results[0].accepted === 1) {
-      const apiKey = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      const query2 = 'INSERT INTO sensor (mac, api_key, nombre, ubicacion, x, y) VALUES (?, ?, ?, ?, ?, ?)';
-      const nombre = 'Sensor ' + MAC;
-      connexioBD.execute(query2, [MAC, apiKey, nombre, 'Aula 1', 0, 0], (err, results) => {
+      const query4 = 'SELECT * FROM sensor WHERE mac = ?';
+      connexioBD.execute(query4, [MAC], (err, results) => {
         if (err) {
-          console.error('Error en la inserció a la base de dades: ' + err.stack);
-          res.status(500).send('Error en la inserció a la base de dades');
+          console.error('Error en la consulta a la base de dades: ' + err.stack);
+          res.status(500).send('Error en la consulta a la base de dades');
           return;
         }
-        res.status(201).send({ message: 'Sensor creat correctament', id: results.insertId, apiKey });
+        if (results.length !== 0) {
+          res.status(200).send({ message: 'El sensor ja existeix', apiKey: results[0].api_key });
+          return;
+        }
+        if (results.length === 0) {
+          const apiKey = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+          const query2 = 'INSERT INTO sensor (mac, api_key, nombre, ubicacion, x, y) VALUES (?, ?, ?, ?, ?, ?)';
+          const nombre = 'Sensor ' + MAC;
+          connexioBD.execute(query2, [MAC, apiKey, nombre, 'Aula 1', 0, 0], (err, results) => {
+            if (err) {
+              console.error('Error en la inserció a la base de dades: ' + err.stack);
+              res.status(500).send('Error en la inserció a la base de dades');
+              return;
+            }
+            res.status(201).send({ message: 'Sensor creat correctament', id: results.insertId, apiKey });
+          });
+        } else if (results.length === 1 && results[0].accepted === 0) {
+          res.status(400).send({ message: 'El sensor no esta acceptat' });
+        }
       });
-    } else if (results.length === 1 && results[0].accepted === 0) {
-      res.status(400).send({ message: 'El sensor no esta acceptat' });
     }
   });
 });
@@ -558,7 +578,7 @@ app.get('/api/data/mongodb', async (req, res) => {
       }
     }).toArray();
 
-    console.log('Dades rebudes de MongoDB: ', results);
+    console.log('Dades rebudes de MongoDB: ', results); 
     res.status(200).json(results);
   } catch (error) {
     console.error('Error obtenint les dades de MongoDB:', error);
@@ -570,10 +590,10 @@ app.post('/api/data/mongodb', async (req, res) => {
   console.log('Rebent dades per a MongoDB');
   const { volume, temperature, humidity, date, MAC, api_key } = req.body;
   if (volume == null || temperature == null || humidity == null || date == null || MAC == null || api_key == null) {
-    return res.status(400).json({ message: 'Dades incompletes' });
+    return res.status(400).json({ message: 'Dades incompletes' }); 
   }
 
-  const query = 'SELECT * FROM sensor WHERE mac = ? AND api_key = ?';
+  const query = 'SELECT * FROM sensor WHERE mac = ? AND api_key = ?'; 
   connexioBD.execute(query, [MAC, api_key], async (err, results) => {
     if (err) {
       console.error('Error en la consulta a la base de dades: ' + err.stack);
@@ -636,38 +656,6 @@ app.post('/api/data/mysql', (req, res) => {
   });
 });
 
-app.get('/api/data/mysql', (req, res) => {
-  var { timeSpan, dataIni, dataFi } = req.query;
-  if (!timeSpan || !dataIni || !dataFi) {
-    return res.status(400).json({ message: 'Es requereix un timeSpan, dataIni i dataFi' });
-  }
-
-  dataIni = dataIni.replace('T', ' ');
-  dataFi = dataFi.replace('T', ' ');
-  
-  if (timeSpan === 'hora') {
-    timeSpan = 'minut';
-  } else if (timeSpan === 'dia') {
-    timeSpan = 'hora';
-  } else if (timeSpan === 'setmana') {
-    timeSpan = 'dia';
-  } else if (timeSpan === 'mes') {
-    timeSpan = 'setmana';
-  } else if (timeSpan === 'any') {
-    timeSpan = 'mes';
-  }
-
-  const query = `SELECT * FROM ${mysql2.escapeId(timeSpan)} WHERE dataIni BETWEEN ? AND ?`;
-  console.log('Query: ', query);
-  connexioBD.query(query, [dataIni, dataFi], (err, results) => {
-    if (err) {
-      console.error('Error en la consulta a la base de dades: ' + err.stack);
-      return res.status(500).json({ message: 'Error en la consulta a la base de dades' });
-    }
-    res.status(200).json(results);
-  });
-});
-
 
 async function verifyAPI(req, res, next) {
   const apiKey = req.headers['x-api-key'];
@@ -704,14 +692,14 @@ app.get('/api/sensors/banned', (req, res) => {
 
 // Endpoint per enviar missatges a RabbitMQ
 app.post('/api/sendMessage', async (req, res) => {
-  const { api_key, volume, temperature, date, MAC } = req.body;
+  const { api_key, volume, temperature, humidity, date, MAC } = req.body;
 
   if (!api_key || !volume || !temperature || !date || !MAC) {
     return res.status(400).send({ message: 'Falten dades necessàries' });
   }
 
   const queue = 'SensorData';
-  const msg = { api_key, volume, temperature, date, MAC };
+  const msg = { api_key, volume, temperature, humidity, date, MAC };
 
   try {
     const connection = await ampq.connect(process.env.RABBITMQ_URL);
@@ -724,6 +712,11 @@ app.post('/api/sendMessage', async (req, res) => {
     setTimeout(() => {
       connection.close();
     }, 500);
+
+    const configPath = path.join(__dirname, 'config.json');
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+
+    console.log('date', config.date);
 
     res.status(200).send({ message: 'Missatge enviat correctament', date: config.date });
   } catch (error) {
