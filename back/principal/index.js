@@ -17,6 +17,7 @@ import ampq from 'amqplib';
 import { MongoClient } from 'mongodb';
 import moment from 'moment-timezone';
 import path from 'path'; // Importa el mòdul path 
+import fs from 'fs';
 
 app.use(cors({
   origin: ['https://dev.acubox.cat'], // Replace with your production domain
@@ -711,6 +712,11 @@ app.post('/api/sendMessage', async (req, res) => {
     setTimeout(() => {
       connection.close();
     }, 500);
+
+    const configPath = path.join(__dirname, 'config.json');
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+
+    console.log('date', config.date);
 
     res.status(200).send({ message: 'Missatge enviat correctament', date: config.date });
   } catch (error) {
