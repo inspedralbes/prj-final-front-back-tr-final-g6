@@ -16,7 +16,7 @@ import dotenv from 'dotenv';
 import ampq from 'amqplib';
 import { MongoClient } from 'mongodb';
 import moment from 'moment-timezone';
-import path from 'path'; // Importa el mòdul path
+import path from 'path'; // Importa el mòdul path 
 
 app.use(cors({
   origin: ['https://dev.acubox.cat'], // Replace with your production domain
