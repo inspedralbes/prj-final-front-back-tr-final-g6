@@ -17,13 +17,28 @@ BARCELONA_TZ = pytz.timezone('Europe/Madrid')
 
 # Functions
 
-def get_dades(start_date, end_date):
+def get_dades_mongo(start_date, end_date):
     response = requests.get('http://prfg6-back:3020/api/data/mongodb', params={
         'startDate': start_date,
         'endDate': end_date
     })
     app.logger.info("Dades obtingudes de l'API: %s", response.json())
     return response.json()
+
+def get_dades_mysql(timeSpan, dataIni, dataFi):
+    params = {
+        'timeSpan': timeSpan,
+        'dataIni': dataIni,
+        'dataFi': dataFi
+    }
+    response = requests.get('http://prfg6-back:3020/api/data/mysql', params=params)
+    
+    if response.status_code == 200:
+        app.logger.info("Dades obtingudes de l'API: %s", response.json())
+        return response.json()
+    else:
+        app.logger.error("Error en obtenir les dades de l'API: %s", response.text)
+        response.raise_for_status()
 
 def run_script(script_name, data, timeSpan):
     script_path = os.path.join(os.path.dirname(__file__), 'scripts', script_name)
@@ -42,31 +57,58 @@ def execute_scheduled_script(timeSpan):
     if timeSpan == "minut":
         end_date = current_date.replace(second=0, microsecond=0)
         start_date = end_date - timedelta(minutes=1)
+
+        # Obtenim les dades de l'API
+        data = get_dades_mongo(start_date.isoformat(), end_date.isoformat())
+        app.logger.info("Dades obtingudes amb èxit: %s", data)
+
+        # Executem el script d'agregació amb les dades obtingudes
+        output = run_script('agregationMinute.py', data, timeSpan)
+        app.logger.info("Script d'agregació executat amb èxit: %s", output)
+
     elif timeSpan == "hora":
         end_date = current_date.replace(minute=0, second=0, microsecond=0)
         start_date = end_date - timedelta(hours=1)
+
+        data = get_dades_mysql(timeSpan, start_date.isoformat(), end_date.isoformat())
+        app.logger.info("Dades obtingudes amb èxit: %s", data)
+
+        output = run_script('agregationSql.py', data, timeSpan)
+        app.logger.info("Script d'agregació executat amb èxit: %s", output)
+
     elif timeSpan == "dia":
         end_date = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
         start_date = end_date - timedelta(days=1)
+
+        data = get_dades_mysql(timeSpan, start_date.isoformat(), end_date.isoformat())
+        app.logger.info("Dades obtingudes amb èxit: %s", data)
+
+        output = run_script('agregationSql.py', data, timeSpan)
+        app.logger.info("Script d'agregació executat amb èxit: %s", output)
+
     elif timeSpan == "setmana":
         end_date = current_date.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=current_date.weekday())
         start_date = end_date - timedelta(weeks=1)
+
+        data = get_dades_mysql(timeSpan, start_date.isoformat(), end_date.isoformat())
+        app.logger.info("Dades obtingudes amb èxit: %s", data)
+
+        output = run_script('agregationSql.py', data, timeSpan)
+        app.logger.info("Script d'agregació executat amb èxit: %s", output)
+
     elif timeSpan == "mes":
         end_date = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         start_date = (end_date - timedelta(days=1)).replace(day=1)
+
+        data = get_dades_mysql(timeSpan, start_date.isoformat(), end_date.isoformat())
+        app.logger.info("Dades obtingudes amb èxit: %s", data)
+
+        output = run_script('agregationSql.py', data, timeSpan)
+        app.logger.info("Script d'agregació executat amb èxit: %s", output)
     else:
         app.logger.error(f"Interval de temps no reconegut: {timeSpan}")
         return
 
-    app.logger.info(f"Start date: {start_date}, End date: {end_date}")
-
-    # Obtenim les dades de l'API
-    data = get_dades(start_date.isoformat(), end_date.isoformat())
-    app.logger.info("Dades obtingudes amb èxit: %s", data)
-
-    # Executem el script d'agregació amb les dades obtingudes
-    output = run_script('agregation.py', data, timeSpan)
-    app.logger.info("Script d'agregació executat amb èxit: %s", output)
     send_agregated_data(output)
 
 def send_agregated_data(data):
