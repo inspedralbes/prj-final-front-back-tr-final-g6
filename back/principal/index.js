@@ -17,6 +17,7 @@ import ampq from 'amqplib';
 import { MongoClient } from 'mongodb';
 import moment from 'moment-timezone';
 import path from 'path'; // Importa el mòdul path
+const config = require('./config.json');
 
 app.use(cors());
 app.use(express.json());
@@ -724,7 +725,7 @@ app.post('/api/sendMessage', async (req, res) => {
       connection.close();
     }, 500);
 
-    res.status(200).send({ message: 'Missatge enviat correctament' });
+    res.status(200).send({ message: 'Missatge enviat correctament', date: config.date });
   } catch (error) {
     console.error('❌ Error al enviar el missatge:', error);
     res.status(500).send({ message: 'Error al enviar el missatge', error: error.message });
