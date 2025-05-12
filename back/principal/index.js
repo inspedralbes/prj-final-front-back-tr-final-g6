@@ -17,6 +17,8 @@ import ampq from 'amqplib';
 import { MongoClient } from 'mongodb';
 import moment from 'moment-timezone';
 import path from 'path'; // Importa el mòdul path
+import multer from 'multer';
+import fs from 'fs';
 
 app.use(cors());
 app.use(express.json());
@@ -85,6 +87,31 @@ const io = new Server(server, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
+  }
+});
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = path.join(__dirname, 'sensor/images');
+    
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Solo se permiten archivos de imagen'), false);
+    }
+    cb(null, true);
   }
 });
 
@@ -301,6 +328,8 @@ app.get('/api/mapa', async (req, res) => {
   }
 });
 
+
+
 // Get dades per gràfics
 app.get('/api/aules/:id/grafic', (req, res) => {
   const { taula, tipus, dataIni, dataFi } = req.query;
@@ -387,6 +416,157 @@ app.put('/api/sensors/:id', (req, res) => {
       res.status(404).send({ message: 'Sensor no encontrado' });
     }
   });
+});
+
+app.get('/api/sensor-config', (req, res) => {
+  try {
+    const configPath = path.join(__dirname, 'sensor/config.json');
+    
+    if (!fs.existsSync(configPath)) {
+      const defaultConfig = {
+        startglow: 50,
+        glowlevels: [0, 10, 50, 150, 255],
+        ldrThreshold: 1000,
+        displayRotation: 0,
+        fractalDelay: 5000,
+        logoDelay: 15000,
+        wifi_ssid: "winewithcola",
+        wifi_password: "siquetieneswifi",
+        db_good: 30,
+        db_normal: 50,
+        db_angry: 70,
+        db_very_angry: 90,
+        url_newsensor: "https://dev.acubox.cat/back/api/newsensors",
+        url_sensor: "https://dev.acubox.cat/back/api/sendMessage",
+        images: [
+          "/api/fileSensor/images/normal.jpg",
+          "/api/fileSensor/images/good.jpg",
+          "/api/fileSensor/images/angry.jpg",
+          "/api/fileSensor/images/normal.jpg",
+          "/api/fileSensor/images/connected.jpg",
+          "/api/fileSensor/images/disconnected.jpg"
+        ]
+      };
+      
+      fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
+    }
+    
+    const configData = fs.readFileSync(configPath, 'utf8');
+    res.json(JSON.parse(configData));
+  } catch (error) {
+    console.error('Error al leer la configuración:', error);
+    res.status(500).json({ error: 'Error al leer la configuración' });
+  }
+});
+
+app.put('/api/sensor-config', (req, res) => {
+  try {
+    const configPath = path.join(__dirname, 'sensor/config.json');
+    const newConfig = req.body;
+    
+    if (!newConfig || typeof newConfig !== 'object') {
+      return res.status(400).json({ error: 'Configuración no válida' });
+    }
+    
+    const requiredFields = [
+      'startglow', 'glowlevels', 'ldrThreshold', 'displayRotation',
+      'fractalDelay', 'logoDelay', 'wifi_ssid', 'wifi_password',
+      'db_good', 'db_normal', 'db_angry', 'db_very_angry',
+      'url_newsensor', 'url_sensor', 'images'
+    ];
+    
+    for (const field of requiredFields) {
+      if (!(field in newConfig)) {
+        return res.status(400).json({ error: `Campo requerido faltante: ${field}` });
+      }
+    }
+    
+    if (!Array.isArray(newConfig.glowlevels) || newConfig.glowlevels.length !== 5) {
+      return res.status(400).json({ error: 'glowlevels debe ser un array de 5 elementos' });
+    }
+    
+    if (!Array.isArray(newConfig.images)) {
+      return res.status(400).json({ error: 'images debe ser un array' });
+    }
+    
+    fs.writeFileSync(configPath, JSON.stringify(newConfig, null, 2), 'utf8');
+    
+    res.json({ message: 'Configuración actualizada correctamente' });
+  } catch (error) {
+    console.error('Error al guardar la configuración:', error);
+    res.status(500).json({ error: 'Error al guardar la configuración' });
+  }
+});
+
+app.post('/api/sensor-config/upload-image', upload.single('image'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No se ha subido ningún archivo' });
+    }
+    
+    const allowedNames = [
+      'normal.jpg', 'good.jpg', 'angry.jpg', 
+      'connected.jpg', 'disconnected.jpg'
+    ];
+    
+    if (!allowedNames.includes(req.file.originalname)) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ 
+        error: 'Nombre de archivo no permitido',
+        allowedNames: allowedNames
+      });
+    }
+    
+    const imageUrl = `/api/fileSensor/images/${req.file.filename}`;
+    
+    res.json({ 
+      message: 'Imagen subida correctamente',
+      imageUrl: imageUrl
+    });
+  } catch (error) {
+    console.error('Error al subir la imagen:', error);
+    res.status(500).json({ error: 'Error al subir la imagen' });
+  }
+});
+
+app.post('/api/sensor-config/reset', (req, res) => {
+  try {
+    const configPath = path.join(__dirname, 'sensor/config.json');
+    const defaultConfig = {
+      startglow: 50,
+      glowlevels: [0, 10, 50, 150, 255],
+      ldrThreshold: 1000,
+      displayRotation: 0,
+      fractalDelay: 5000,
+      logoDelay: 15000,
+      wifi_ssid: "winewithcola",
+      wifi_password: "siquetieneswifi",
+      db_good: 30,
+      db_normal: 50,
+      db_angry: 70,
+      db_very_angry: 90,
+      url_newsensor: "https://dev.acubox.cat/back/api/newsensors",
+      url_sensor: "https://dev.acubox.cat/back/api/sendMessage",
+      images: [
+        "/api/fileSensor/images/normal.jpg",
+        "/api/fileSensor/images/good.jpg",
+        "/api/fileSensor/images/angry.jpg",
+        "/api/fileSensor/images/normal.jpg",
+        "/api/fileSensor/images/connected.jpg",
+        "/api/fileSensor/images/disconnected.jpg"
+      ]
+    };
+    
+    fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2), 'utf8');
+    
+    res.json({ 
+      message: 'Configuración restablecida a valores por defecto',
+      config: defaultConfig
+    });
+  } catch (error) {
+    console.error('Error al restablecer la configuración:', error);
+    res.status(500).json({ error: 'Error al restablecer la configuración' });
+  }
 });
 
 app.get('/api/newsensors', (req, res) => {

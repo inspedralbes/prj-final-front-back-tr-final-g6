@@ -130,6 +130,11 @@
                     class="px-4 py-2 font-medium">
                     Sensores Bannejats
                 </button>
+                <button @click="activeTab = 'settings'"
+                    :class="{ 'border-b-2 border-teal-500 text-teal-400': activeTab === 'settings', 'text-slate-400': activeTab !== 'settings' }"
+                    class="px-4 py-2 font-medium">
+                    Configurar Sensors
+                </button>
             </div>
 
             <!-- Action Buttons -->
@@ -361,6 +366,11 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Settings Tab -->
+            <div v-if="activeTab === 'settings'" class="space-y-6">
+                <ConfigurarSensors v-if="activeTab === 'settings'" />
+            </div>
         </div>
     </div>
 </template>
@@ -383,6 +393,7 @@ import {
     unbanSensor
 } from '~/utils/communicationManager';
 import { getTotesAulas } from '~/utils/communicationManager';
+import ConfigurarSensors from '~/components/ConfigurarSensors.vue';
 
 const router = useRouter();
 const activeSensors = ref([]);
