@@ -79,24 +79,47 @@ const humidityColorClass = computed(() => {
     return 'humidity-high';
 });
 
-// Chart configurations
+const humidityColors = computed(() => {
+    const humidity = currentHumidity.value;
+    if (humidity < 30) {
+        return {
+            borderColor: '#60a5fa', // blue
+            backgroundColor: 'rgba(96, 165, 250, 0.2)'
+        };
+    } else if (humidity < 60) {
+        return {
+            borderColor: '#34d399', // green
+            backgroundColor: 'rgba(52, 211, 153, 0.2)'
+        };
+    } else {
+        return {
+            borderColor: '#f87171', // red
+            backgroundColor: 'rgba(248, 113, 113, 0.2)'
+        };
+    }
+});
+
 const chartData = ref({
     labels: [],
     datasets: [
         {
             label: 'Humidity (%)',
             data: [],
-            fill: {
-                target: 'origin',
-                above: 'rgba(0, 188, 212, 0.2)',
-                below: 'rgba(0, 188, 212, 0.2)'
-            },
-            borderColor: '#00BCD4',
-            backgroundColor: 'rgba(0, 188, 212, 0.2)',
+            borderColor: '#9CA3AF',
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
             tension: 0,
             borderWidth: 2,
-            pointRadius: 0, // Hide points
-            pointHoverRadius: 0 // Hide points on hover
+            pointRadius: 0,
+            pointHoverRadius: 0,
+            fill: {
+                target: 'origin',
+                above: 'rgba(0, 0, 0, 0.1)',
+                below: 'rgba(0, 0, 0, 0.1)'
+            },
+            segment: {
+                borderColor: '#9CA3AF',
+                backgroundColor: 'rgba(0, 0, 0, 0.1)'
+            }
         },
     ],
 });
@@ -219,7 +242,6 @@ onBeforeUnmount(() => {
     }
 });
 
-// Data handling functions
 function addHumidityDataPoint(humidity, timestamp) {
     currentHumidity.value = humidity;
     
@@ -232,18 +254,81 @@ function addHumidityDataPoint(humidity, timestamp) {
         recentHumidityReadings.value.shift();
     }
 
+    updateChartData();
+    lineChartKey.value++;
+}
+
+function updateChartData() {
+    const labels = recentHumidityReadings.value.map(item => item.time);
+    const dataPoints = recentHumidityReadings.value.map(item => item.value);
+
+    // Definición de colores según los umbrales de humedad
+    const colorRanges = [
+        { max: 30, border: '#60a5fa', background: 'rgba(96, 165, 250, 0.5)' },  // Azul (humedad baja)
+        { max: 60, border: '#34d399', background: 'rgba(52, 211, 153, 0.5)' },  // Verde (humedad normal)
+        { max: Infinity, border: '#f87171', background: 'rgba(248, 113, 113, 0.5)' } // Rojo (humedad alta)
+    ];
+
+    // Asignar colores a cada punto de forma segura
+    const pointColors = dataPoints.map(value => {
+        const range = colorRanges.find(r => value < r.max) || colorRanges[colorRanges.length - 1];
+        return {
+            border: range?.border || '#9CA3AF',
+            background: range?.background || 'rgba(0, 0, 0, 0.1)'
+        };
+    });
+
     chartData.value = {
-        ...chartData.value,
-        labels: recentHumidityReadings.value.map(item => item.time),
+        labels: labels,
         datasets: [
             {
-                ...chartData.value.datasets[0],
-                data: recentHumidityReadings.value.map(item => item.value)
+                label: 'Humidity (%)',
+                data: dataPoints,
+                borderColor: pointColors.map(c => c.border),
+                backgroundColor: pointColors.map(c => c.background),
+                tension: 0,
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 0,
+                fill: {
+                    target: 'origin',
+                    above: (ctx) => {
+                        const index = ctx.dataIndex;
+                        return pointColors[index]?.background || 'rgba(0, 0, 0, 0.1)';
+                    },
+                    below: (ctx) => {
+                        const index = ctx.dataIndex;
+                        return pointColors[index]?.background || 'rgba(0, 0, 0, 0.1)';
+                    }
+                },
+                segment: {
+                    borderColor: ctx => {
+                        // Verificación segura de los puntos
+                        if (!ctx.p0 || !ctx.p1 || !ctx.p0.parsed || !ctx.p1.parsed) {
+                            return pointColors[0]?.border || '#9CA3AF';
+                        }
+                        
+                        const p0 = ctx.p0.parsed.y;
+                        const p1 = ctx.p1.parsed.y;
+                        const avgValue = (p0 + p1) / 2;
+                        const range = colorRanges.find(r => avgValue < r.max) || colorRanges[colorRanges.length - 1];
+                        return range?.border || '#9CA3AF';
+                    },
+                    backgroundColor: ctx => {
+                        if (!ctx.p0 || !ctx.p1 || !ctx.p0.parsed || !ctx.p1.parsed) {
+                            return pointColors[0]?.background || 'rgba(0, 0, 0, 0.1)';
+                        }
+                        
+                        const p0 = ctx.p0.parsed.y;
+                        const p1 = ctx.p1.parsed.y;
+                        const avgValue = (p0 + p1) / 2;
+                        const range = colorRanges.find(r => avgValue < r.max) || colorRanges[colorRanges.length - 1];
+                        return range?.background || 'rgba(0, 0, 0, 0.1)';
+                    }
+                }
             }
         ]
     };
-
-    lineChartKey.value++;
 }
 </script>
 
@@ -338,15 +423,15 @@ function addHumidityDataPoint(humidity, timestamp) {
 
 /* Humidity color classes */
 .humidity-low {
-    color: #60a5fa;
+    color: #60a5fa; /* Blue */
 }
 
 .humidity-normal {
-    color: #34d399;
+    color: #34d399; /* Green */
 }
 
 .humidity-high {
-    color: #f87171;
+    color: #f87171; /* Red */
 }
 
 /* Chart.js overrides */

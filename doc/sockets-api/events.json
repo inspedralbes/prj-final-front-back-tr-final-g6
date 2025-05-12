@@ -7,6 +7,7 @@
                 "payload": {
                     "volume": "Número que representa el volum.",
                     "temperature": "Número que representa la temperatura.",
+                    "humidity": "Número que representa la humitat.",
                     "id_sensor": "Identificador del sensor.",
                     "date": "Data i hora de les dades."
                 }
@@ -29,6 +30,11 @@
                             "max": 25.91,
                             "min": 20.8,
                             "avg": 23.516666666666666
+                        },
+                        "humidity": {
+                            "max": 60,
+                            "min": 50,
+                            "avg": 55.0
                         }
                     },
                     "1": {
@@ -41,6 +47,11 @@
                             "max": 22.22,
                             "min": 18.93,
                             "avg": 20.575
+                        },
+                        "humidity": {
+                            "max": 55,
+                            "min": 45,
+                            "avg": 50.0
                         }
                     },
                     "3": {
@@ -53,6 +64,11 @@
                             "max": 24.52,
                             "min": 24.52,
                             "avg": 24.52
+                        },
+                        "humidity": {
+                            "max": 50,
+                            "min": 50,
+                            "avg": 50.0
                         }
                     }
                 }
