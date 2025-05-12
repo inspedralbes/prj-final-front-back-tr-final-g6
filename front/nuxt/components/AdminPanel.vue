@@ -26,16 +26,6 @@
                     </svg>
                     Configurar Sensors
                 </button>
-
-                <button @click="showCreateAulaForm = !showCreateAulaForm"
-                    class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    {{ showCreateAulaForm ? 'Cancel·lar' : 'Crear Aula' }}
-                </button>
             </div>
 
             <!-- Search and Filter -->
@@ -50,6 +40,16 @@
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
+
+                    <button @click="showCreateAulaForm = !showCreateAulaForm"
+                        class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        {{ showCreateAulaForm ? 'Cancel·lar' : 'Crear Aula' }}
+                    </button>
 
                     <div class="relative w-full md:w-48">
                         <select v-model="selectedEtapa"
