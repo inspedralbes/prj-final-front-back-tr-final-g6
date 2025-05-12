@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <!-- Logo/Link Section -->
       <router-link
-        to="/aulas"
+        to="/"
         class="flex items-center group transition-opacity hover:opacity-90"
       >
         <div
@@ -22,7 +22,7 @@
       <div class="flex items-center space-x-2">
         <!-- Login Button -->
         <router-link
-          v-if="!userStore.isLoggedIn"
+          v-if="userStore.isReady && !userStore.isLoggedIn"
           to="/login"
           class="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all duration-200 border border-blue-500 shadow-sm"
         >
@@ -60,21 +60,12 @@
             >
               <div class="py-1">
                 <router-link
-                  to="/aulas"
+                  to="/"
                   class="flex items-center px-4 py-3 text-slate-200 hover:bg-slate-700 transition-colors"
                   @click="isMenuVisible = false"
                 >
                   <i class="pi pi-home mr-3"></i>
                   <span>Aules</span>
-                </router-link>
-
-                <router-link
-                  to="/mapas"
-                  class="flex items-center px-4 py-3 text-slate-200 hover:bg-slate-700 transition-colors"
-                  @click="isMenuVisible = false"
-                >
-                  <i class="pi pi-map mr-3"></i>
-                  <span>Mapes</span>
                 </router-link>
 
                 <router-link
@@ -118,7 +109,7 @@ const toggleMenu = () => {
 
 const logout = () => {
   userStore.logout();
-  router.push("/login");
+  router.push("/");
   isMenuVisible.value = false;
 };
 

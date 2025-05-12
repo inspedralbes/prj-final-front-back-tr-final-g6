@@ -75,7 +75,7 @@ const handleLogin = async () => {
             console.log('Login exitoso, datos del usuario:', response.user);
             errorMessage.value = '';
             userStore.setUser(response.user);
-            router.push('/aulas');
+            router.push('/');
         } else {
             console.error('Respuesta incorrecta:', response);
             errorMessage.value = 'Credencials incorrectes. Si us plau, comprova el correu i la contrasenya.';
