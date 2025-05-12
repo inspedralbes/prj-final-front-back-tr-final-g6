@@ -712,7 +712,7 @@ app.post('/api/sendMessage', async (req, res) => {
       connection.close();
     }, 500);
 
-    res.status(200).send({ message: 'Missatge enviat correctament' });
+    res.status(200).send({ message: 'Missatge enviat correctament', date: config.date });
   } catch (error) {
     console.error('❌ Error al enviar el missatge:', error);
     res.status(500).send({ message: 'Error al enviar el missatge', error: error.message });
