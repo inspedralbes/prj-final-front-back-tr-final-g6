@@ -18,7 +18,11 @@ import { MongoClient } from 'mongodb';
 import moment from 'moment-timezone';
 import path from 'path'; // Importa el mòdul path
 
-app.use(cors());
+app.use(cors({
+  origin: ['https://dev.acubox.cat'], // Replace with your production domain
+  methods: ['GET', 'POST'],
+  credentials: true,
+}));
 app.use(express.json());
 
 app.use("/api/fileSensor", express.static(path.join(__dirname, 'sensor'))); // Serveix fitxers estàtics des de la carpeta 'sensor'
@@ -85,6 +89,7 @@ const io = new Server(server, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
+    credentials: true,
   }
 });
 
