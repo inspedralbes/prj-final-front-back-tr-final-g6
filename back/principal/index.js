@@ -17,8 +17,8 @@ import ampq from 'amqplib';
 import { MongoClient } from 'mongodb';
 import moment from 'moment-timezone';
 import path from 'path'; // Importa el mòdul path
-const config = require('./config.json');
 import fs from 'fs';
+import multer from 'multer';
 
 app.use(cors());
 app.use(express.json());
@@ -783,6 +783,29 @@ app.put('/api/sensor/config', (req, res) => {
     });
   });
 });
+
+const imagesDir = path.join(__dirname, 'sensor', 'images');
+if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, imagesDir);
+  },
+  filename: function (req, file, cb) {
+    // El frontend ya fuerza el nombre correcto (logo.jpg, normal.jpg, etc)
+    cb(null, file.originalname);
+  }
+});
+const upload = multer({ storage: storage });
+
+app.post('/api/sensor/images', upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+  // Devuelve la URL accesible desde el frontend
+  const url = `${process.env.PUBLIC_URL || 'https://dev.acubox.cat/back'}/api/fileSensor/images/${req.file.filename}`;
+  res.json({ url });
+});
+
+
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
