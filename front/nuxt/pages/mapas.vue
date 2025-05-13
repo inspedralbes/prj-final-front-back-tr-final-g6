@@ -123,7 +123,10 @@
             <!-- Contenido del popup -->
             <div
               v-if="showingPopupId === popup.id"
-              class="popup-content bg-slate-700 border-2 border-teal-500 rounded-2xl p-6 shadow-2xl min-w-[300px] relative animate-fadeIn"
+              :class="[
+                'popup-content bg-slate-700 border-2 border-teal-500 rounded-2xl p-6 shadow-2xl min-w-[300px] relative animate-fadeIn',
+                getPopupPosition(popup).class
+              ]"
             >
               <button
                 @click="showingPopupId = null"
@@ -420,6 +423,24 @@ const getSensorStatusColor = (value, min, max) => {
   return colors[Math.max(0, colorIndex)];
 };
 
+const getPopupPosition = (popup) => {
+  const mapContainer = document.querySelector('.map-content');
+  if (!mapContainer) return { class: '' };
+
+  const mapRect = mapContainer.getBoundingClientRect();
+  const centerX = mapRect.width / 2;
+  const centerY = mapRect.height / 2;
+
+  // Determinar en qué cuadrante está el popup respecto al centro
+  const isLeft = popup.x < centerX;
+  const isTop = popup.y < centerY;
+
+  // Retornar la clase correspondiente para la orientación
+  return {
+    class: `popup-${isTop ? 'bottom' : 'top'}-${isLeft ? 'right' : 'left'}`
+  };
+};
+
 const handlePopupClick = (popup) => {
   if (isDeletingPopup.value) {
     deletePopup(popup.id);
@@ -493,6 +514,42 @@ body {
 .custom-popup {
   pointer-events: none;
   z-index: 20;
+}
+
+.popup-content {
+  position: absolute;
+  transform-origin: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(51, 65, 85, 0.95);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(100, 116, 139, 0.5);
+  z-index: 50;
+}
+
+/* Orientaciones del popup */
+.popup-top-left {
+  transform: translate(-100%, -100%) translate(32px, 32px);
+  left: -16px;
+  top: -16px;
+}
+
+.popup-top-right {
+  transform: translate(0%, -100%) translate(-32px, 32px);
+  left: 16px;
+  top: -16px;
+}
+
+.popup-bottom-left {
+  transform: translate(-100%, 0%) translate(32px, -32px);
+  left: -16px;
+  top: 16px;
+}
+
+.popup-bottom-right {
+  transform: translate(0%, 0%) translate(-32px, -32px);
+  left: 16px;
+  top: 16px;
 }
 
 .custom-popup .marker-point,
