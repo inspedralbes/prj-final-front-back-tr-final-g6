@@ -159,8 +159,9 @@ const chartOptions = ref({
 // Socket connection and data handling
 onMounted(() => {
     try {
-        const socketUrl = getBaseUrl();
+        const socketUrl = getBaseUrl() + '/socket.io';
         console.log('Connecting to socket at:', socketUrl);
+
         socket.value = io(socketUrl, {
             transports: ['websocket', 'polling'],
             reconnectionAttempts: 5,
