@@ -751,7 +751,7 @@ app.post('/api/sendMessage', async (req, res) => {
     const configPath = path.join(__dirname, 'sensor', 'config.json');
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
-    console.log('date', config.date);
+    console.log('date', config.date); 
 
     res.status(200).send({ message: 'Missatge enviat correctament', date: config.date });
   } catch (error) {
