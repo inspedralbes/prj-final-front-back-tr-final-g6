@@ -4,7 +4,7 @@
     <!-- Gradient Header Section -->
     <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6 relative">
       <!-- Botón de retroceso -->
-      <NuxtLink to="/aulas" class="absolute right-6 top-1/2 transform -translate-y-1/2">
+      <NuxtLink to="/" class="absolute right-6 top-1/2 transform -translate-y-1/2">
         <button
           class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg shadow-lg transition-all duration-300 flex items-center space-x-2 border border-slate-600"
         >

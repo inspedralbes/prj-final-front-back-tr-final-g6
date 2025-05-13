@@ -412,5 +412,216 @@
                 "description": "Database insertion error"
             }
         }
+    },
+    {
+        "endpoint": "/api/sensors/:id",
+        "method": "DELETE",
+        "description": "Delete a sensor by ID",
+        "request": {
+            "params": {
+                "id": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor eliminado correctamente",
+                "body": {
+                    "message": "Sensor eliminado correctamente"
+                }
+            },
+            "404": {
+                "description": "Sensor no encontrado"
+            },
+            "500": {
+                "description": "Error en la eliminación del sensor"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sensors/:id",
+        "method": "PUT",
+        "description": "Update a sensor by ID",
+        "request": {
+            "params": {
+                "id": "number"
+            },
+            "contentType": "application/json",
+            "body": {
+                "nombre": "string",
+                "ubicacion": "string",
+                "x": "number",
+                "y": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor actualizado correctamente",
+                "body": {
+                    "message": "Sensor actualizado correctamente"
+                }
+            },
+            "404": {
+                "description": "Sensor no encontrado"
+            },
+            "500": {
+                "description": "Error en la actualización del sensor"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors/:id/accept",
+        "method": "PUT",
+        "description": "Accept a new sensor",
+        "request": {
+            "params": {
+                "id": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor acceptat correctament",
+                "body": {
+                    "message": "Sensor acceptat correctament"
+                }
+            },
+            "500": {
+                "description": "Error en la consulta a la base de dades"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors/:id/reject",
+        "method": "PUT",
+        "description": "Reject a new sensor",
+        "request": {
+            "params": {
+                "id": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor rebutjat correctament",
+                "body": {
+                    "message": "Sensor rebutjat correctament"
+                }
+            },
+            "500": {
+                "description": "Error en la consulta a la base de dades"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors/:id/status",
+        "method": "PUT",
+        "description": "Update new sensor status (accept/reject)",
+        "request": {
+            "params": {
+                "id": "number"
+            },
+            "contentType": "application/json",
+            "body": {
+                "status": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor acceptat o rebutjat correctament",
+                "body": {
+                    "message": "string"
+                }
+            },
+            "400": {
+                "description": "El estado debe ser \"accept\" o \"reject\""
+            },
+            "404": {
+                "description": "Sensor no trobat"
+            },
+            "500": {
+                "description": "Error en la consulta a la base de dades"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors/:id/unban",
+        "method": "PUT",
+        "description": "Unban a new sensor",
+        "request": {
+            "params": {
+                "id": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor desbannejat correctament",
+                "body": {
+                    "message": "Sensor desbannejat correctament"
+                }
+            },
+            "404": {
+                "description": "Sensor no trobat"
+            },
+            "500": {
+                "description": "Error en la consulta a la base de dades"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors/banned",
+        "method": "GET",
+        "description": "Get all banned new sensors",
+        "response": {
+            "200": {
+                "description": "List of banned new sensors",
+                "body": "array"
+            },
+            "500": {
+                "description": "Error en la consulta a la base de dades"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sensors/banned",
+        "method": "GET",
+        "description": "Get all banned sensors",
+        "response": {
+            "200": {
+                "description": "List of banned sensors",
+                "body": "array"
+            },
+            "500": {
+                "description": "Error en la consulta a la base de dades"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sendMessage",
+        "method": "POST",
+        "description": "Send a message to RabbitMQ",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "api_key": "string",
+                "volume": "number",
+                "temperature": "number",
+                "humidity": "number",
+                "date": "string",
+                "MAC": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Missatge enviat correctament",
+                "body": {
+                    "message": "Missatge enviat correctament",
+                    "date": "string"
+                }
+            },
+            "400": {
+                "description": "Falten dades necessàries"
+            },
+            "500": {
+                "description": "Error al enviar el missatge"
+            }
+        }
     }
 ]

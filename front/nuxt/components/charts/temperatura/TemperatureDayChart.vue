@@ -15,7 +15,14 @@
                     <div class="current-temperature" :class="temperatureColorClass">
                         {{ currentTemperature !== null ? parseFloat(currentTemperature).toFixed(2) : '--' }}°C
                     </div>
-                    <div class="temperature-label">Current Temperature</div>
+                    <div class="temperature-range">
+                        <span class="min-temperature">{{ minTemperature !== null ? parseFloat(minTemperature).toFixed(2)
+                            : '--' }}°C</span>
+                        <span class="range-separator">-</span>
+                        <span class="max-temperature">{{ maxTemperature !== null ? parseFloat(maxTemperature).toFixed(2)
+                            : '--' }}°C</span>
+                    </div>
+                    <div class="temperature-label">Current Temperature (Avg/Min/Max)</div>
                 </div>
 
                 <div class="time-range-info">
@@ -27,6 +34,22 @@
             <!-- Chart Section -->
             <div class="chart-container">
                 <Bar :key="chartKey" :data="chartData" :options="chartOptions" class="temperature-chart" />
+            </div>
+
+            <!-- Legend Section -->
+            <div class="chart-legend">
+                <div class="legend-item">
+                    <span class="legend-color avg-color"></span>
+                    <span class="legend-label">Average</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color max-color"></span>
+                    <span class="legend-label">Maximum</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color min-color"></span>
+                    <span class="legend-label">Minimum</span>
+                </div>
             </div>
         </div>
     </div>
@@ -53,6 +76,8 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 // Reactive state
 const temperatureData = ref([]);
+const minTemperatureData = ref([]);
+const maxTemperatureData = ref([]);
 const chartKey = ref(0);
 const socket = ref(null);
 const loading = ref(true);
@@ -71,12 +96,26 @@ const chartData = ref({
     labels: [],
     datasets: [
         {
-            label: 'Temperature (°C)',
+            label: 'Average Temperature (°C)',
             data: [],
-            backgroundColor: 'rgba(33, 150, 243, 0.8)',
-            borderColor: '#2196F3',
+            backgroundColor: '#4CAF50',
+            borderColor: '#4CAF50',
             borderWidth: 1,
         },
+        {
+            label: 'Maximum Temperature (°C)',
+            data: [],
+            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+            borderColor: '#EF4444',
+            borderWidth: 1,
+        },
+        {
+            label: 'Minimum Temperature (°C)',
+            data: [],
+            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+            borderColor: '#3B82F6',
+            borderWidth: 1,
+        }
     ],
 });
 
@@ -94,7 +133,10 @@ const chartOptions = ref({
             titleColor: '#E5E7EB',
             bodyColor: '#E5E7EB',
             callbacks: {
-                label: (context) => `Temperature: ${parseFloat(context.raw).toFixed(2)}°C`
+                label: (context) => {
+                    const datasetLabel = context.dataset.label || '';
+                    return `${datasetLabel}: ${parseFloat(context.raw).toFixed(2)}°C`;
+                }
             }
         }
     },
@@ -140,14 +182,24 @@ const chartOptions = ref({
 });
 
 const currentTemperature = computed(() => {
-    // Find the most recent valid temperature value
     const latestValidDataPoint = [...temperatureData.value]
         .reverse()
         .find(dataPoint => dataPoint.value !== null && dataPoint.value !== undefined);
-    
-    return latestValidDataPoint?.value !== undefined 
-        ? latestValidDataPoint.value 
-        : null;
+    return latestValidDataPoint?.value !== undefined ? latestValidDataPoint.value : null;
+});
+
+const minTemperature = computed(() => {
+    const latestValidDataPoint = [...minTemperatureData.value]
+        .reverse()
+        .find(dataPoint => dataPoint.value !== null && dataPoint.value !== undefined);
+    return latestValidDataPoint?.value !== undefined ? latestValidDataPoint.value : null;
+});
+
+const maxTemperature = computed(() => {
+    const latestValidDataPoint = [...maxTemperatureData.value]
+        .reverse()
+        .find(dataPoint => dataPoint.value !== null && dataPoint.value !== undefined);
+    return latestValidDataPoint?.value !== undefined ? latestValidDataPoint.value : null;
 });
 
 const temperatureColorClass = computed(() => {
@@ -166,32 +218,28 @@ const lastUpdateTime = computed(() => {
     return latestData?.day || '--/--';
 });
 
-// Format date to short day format (e.g., "Mon 12")
 const formatDayLabel = (date) => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const dayName = days[date.getDay()];
     const dayNumber = date.getDate();
-    return `${dayName} ${dayNumber}`;
+    return {
+        label: `${dayName} ${dayNumber}`,
+        isWeekend: date.getDay() === 0 || date.getDay() === 6 // 0 = Domingo, 6 = Sábado
+    };
 };
 
 const fetchInitialData = async () => {
     try {
-        // Get the current date
         const now = new Date();
-        
-        // Calculate start date (7 days ago)
         const startDate = new Date(now);
-        startDate.setDate(startDate.getDate() - 6); // 7 days total including today
+        startDate.setDate(startDate.getDate() - 6); // 7 días atrás
         startDate.setHours(0, 0, 0, 0);
-        
-        // End date is today
+
         const endDate = new Date(now);
         endDate.setHours(23, 59, 59, 999);
-        
-        // Get idAula from props or route
+
         const idAula = props.idAula || (route.params.id ? Number(route.params.id) : 1);
-        
-        // Use getDadesGrafic with 'dia' for daily data
+
         const data = await getDadesGrafic(
             'dia',
             'temperatura',
@@ -199,63 +247,128 @@ const fetchInitialData = async () => {
             startDate.toISOString(),
             endDate.toISOString()
         );
-        
-        // Process data from the API
-        const filteredData = data
-            .filter(item => item.average >= 0 && item.average <= 40)
-            .map(item => ({
-                day: formatDayLabel(new Date(item.dataIni)),
-                value: item.average,
-                date: new Date(item.dataIni)
-            }));
 
-        // Create day-by-day labels for the last 7 days
-        const labels = Array.from({ length: 7 }, (_, i) => {
+        // Generar etiquetas y filtrar fines de semana
+        const dayLabels = Array.from({ length: 7 }, (_, i) => {
             const date = new Date(startDate);
             date.setDate(date.getDate() + i);
             return formatDayLabel(date);
         });
 
-        // Fill in missing data points
-        const completeData = labels.map(label => {
-            const existing = filteredData.find(item => item.day === label);
-            return existing || { day: label, value: null, date: new Date(startDate.getTime() + labels.indexOf(label) * 24 * 60 * 60 * 1000) };
+        // Filtrar solo días laborables (no fines de semana)
+        const weekdays = dayLabels.filter(day => !day.isWeekend);
+        const weekdayDates = dayLabels
+            .filter(day => !day.isWeekend)
+            .map((_, i) => {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + i);
+                return date;
+            });
+
+        // Procesar datos solo para días laborables
+        const completeAvgData = weekdays.map((dayObj, index) => {
+            const date = weekdayDates[index];
+            const found = data.find(item => {
+                const itemDate = new Date(item.dataIni);
+                return itemDate.getDate() === date.getDate() &&
+                    itemDate.getMonth() === date.getMonth() &&
+                    itemDate.getFullYear() === date.getFullYear();
+            });
+
+            return found ? {
+                day: dayObj.label,
+                value: found.average,
+                date: date
+            } : {
+                day: dayObj.label,
+                value: null,
+                date: date
+            };
         });
 
-        temperatureData.value = completeData;
-        updateChartData(temperatureData.value);
+        const completeMinData = weekdays.map((dayObj, index) => {
+            const date = weekdayDates[index];
+            const found = data.find(item => {
+                const itemDate = new Date(item.dataIni);
+                return itemDate.getDate() === date.getDate() &&
+                    itemDate.getMonth() === date.getMonth() &&
+                    itemDate.getFullYear() === date.getFullYear();
+            });
+
+            return found ? {
+                day: dayObj.label,
+                value: found.min,
+                date: date
+            } : {
+                day: dayObj.label,
+                value: null,
+                date: date
+            };
+        });
+
+        const completeMaxData = weekdays.map((dayObj, index) => {
+            const date = weekdayDates[index];
+            const found = data.find(item => {
+                const itemDate = new Date(item.dataIni);
+                return itemDate.getDate() === date.getDate() &&
+                    itemDate.getMonth() === date.getMonth() &&
+                    itemDate.getFullYear() === date.getFullYear();
+            });
+
+            return found ? {
+                day: dayObj.label,
+                value: found.max,
+                date: date
+            } : {
+                day: dayObj.label,
+                value: null,
+                date: date
+            };
+        });
+
+        temperatureData.value = completeAvgData;
+        minTemperatureData.value = completeMinData;
+        maxTemperatureData.value = completeMaxData;
+        updateChartData(temperatureData.value, minTemperatureData.value, maxTemperatureData.value);
+
         loading.value = false;
-    } catch (error) {
-        console.error('Error fetching initial data:', error);
-        error.value = 'Failed to load initial data';
+    } catch (err) {
+        console.error('Error fetching initial data:', err);
+        error.value = err.message || 'Failed to load initial data';
         loading.value = false;
     }
 };
 
-// Update chart data
-const updateChartData = (data) => {
-    const labels = data.map(item => item.day);
-    const values = data.map(item => item.value);
+const updateChartData = (avgData, minData, maxData) => {
+    const labels = avgData.map(item => item.day);
+    const avgValues = avgData.map(item => item.value);
+    const minValues = minData.map(item => item.value);
+    const maxValues = maxData.map(item => item.value);
 
     chartData.value.labels = labels;
-    chartData.value.datasets[0].data = values;
+    chartData.value.datasets[0].data = avgValues;
+    chartData.value.datasets[1].data = maxValues;
+    chartData.value.datasets[2].data = minValues;
     chartKey.value++;
 };
 
-// Handle new aggregated data from the socket
 const handleNewAggregatedData = (data) => {
-    if (!data || !data.sensors) return;
+    if (!data || !data.sensors || data.timeSpan !== 'dia') return;
 
     const now = new Date();
     const todayLabel = formatDayLabel(now);
 
-    // Calculate average temperature across all sensors
+    // Calculate average, min, and max temperature across all sensors
     let totalTemp = 0;
+    let minTemp = Infinity;
+    let maxTemp = -Infinity;
     let sensorCount = 0;
 
     Object.values(data.sensors).forEach(sensor => {
         if (sensor.temperature && typeof sensor.temperature.avg === 'number') {
             totalTemp += sensor.temperature.avg;
+            if (sensor.temperature.min < minTemp) minTemp = sensor.temperature.min;
+            if (sensor.temperature.max > maxTemp) maxTemp = sensor.temperature.max;
             sensorCount++;
         }
     });
@@ -265,16 +378,20 @@ const handleNewAggregatedData = (data) => {
 
         if (avgTemp >= 0 && avgTemp <= 40) {
             // Find today in our data
-            const dayIndex = temperatureData.value.findIndex(item => item.day === todayLabel);
-            
+            const dayIndex = temperatureData.value.findIndex(item => item.day === todayLabel.label);
+
             if (dayIndex !== -1) {
-                // Update the temperature for today
+                // Update all three datasets
                 temperatureData.value[dayIndex].value = avgTemp;
-                
+                minTemperatureData.value[dayIndex].value = minTemp;
+                maxTemperatureData.value[dayIndex].value = maxTemp;
+
                 // Trigger reactivity
                 temperatureData.value = [...temperatureData.value];
-                
-                updateChartData(temperatureData.value);
+                minTemperatureData.value = [...minTemperatureData.value];
+                maxTemperatureData.value = [...maxTemperatureData.value];
+
+                updateChartData(temperatureData.value, minTemperatureData.value, maxTemperatureData.value);
             }
         }
     }
@@ -379,6 +496,27 @@ onBeforeUnmount(() => {
     line-height: 1;
 }
 
+.temperature-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.min-temperature {
+    color: #3B82F6;
+    font-weight: 500;
+}
+
+.max-temperature {
+    color: #EF4444;
+    font-weight: 500;
+}
+
+.range-separator {
+    color: #a1a1aa;
+}
+
 .temperature-label {
     font-size: 0.9rem;
     color: #a1a1aa;
@@ -415,6 +553,45 @@ onBeforeUnmount(() => {
 .temperature-chart {
     width: 100%;
     height: 100%;
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-color {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.avg-color {
+    background-color: #4CAF50;
+}
+
+.max-color {
+    background-color: #EF4444;
+}
+
+.min-color {
+    background-color: #3B82F6;
+}
+
+.legend-label {
+    font-size: 0.8rem;
+    color: #a1a1aa;
 }
 
 /* Temperature color classes */

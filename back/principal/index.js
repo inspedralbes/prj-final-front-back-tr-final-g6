@@ -18,6 +18,7 @@ import { MongoClient } from 'mongodb';
 import moment from 'moment-timezone';
 import path from 'path'; // Importa el mòdul path 
 import fs from 'fs';
+import multer from 'multer';
 
 app.use(cors({
   origin: ['https://dev.acubox.cat'], // Replace with your production domain
@@ -306,6 +307,8 @@ app.get('/api/mapa', async (req, res) => {
     res.status(500).json({ message: error });
   }
 });
+
+
 
 // Get dades per gràfics
 app.get('/api/aules/:id/grafic', (req, res) => {
@@ -656,6 +659,38 @@ app.post('/api/data/mysql', (req, res) => {
   });
 });
 
+app.get('/api/data/mysql', (req, res) => {
+  var { timeSpan, dataIni, dataFi } = req.query;
+  if (!timeSpan || !dataIni || !dataFi) {
+    return res.status(400).json({ message: 'Es requereix un timeSpan, dataIni i dataFi' });
+  }
+
+  dataIni = dataIni.replace('T', ' ');
+  dataFi = dataFi.replace('T', ' ');
+  
+  if (timeSpan === 'hora') {
+    timeSpan = 'minut';
+  } else if (timeSpan === 'dia') {
+    timeSpan = 'hora';
+  } else if (timeSpan === 'setmana') {
+    timeSpan = 'dia';
+  } else if (timeSpan === 'mes') {
+    timeSpan = 'setmana';
+  } else if (timeSpan === 'any') {
+    timeSpan = 'mes';
+  }
+
+  const query = `SELECT * FROM ${mysql2.escapeId(timeSpan)} WHERE dataIni BETWEEN ? AND ?`;
+  console.log('Query: ', query);
+  connexioBD.query(query, [dataIni, dataFi], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      return res.status(500).json({ message: 'Error en la consulta a la base de dades' });
+    }
+    res.status(200).json(results);
+  });
+});
+
 
 async function verifyAPI(req, res, next) {
   const apiKey = req.headers['x-api-key'];
@@ -724,6 +759,78 @@ app.post('/api/sendMessage', async (req, res) => {
     res.status(500).send({ message: 'Error al enviar el missatge', error: error.message });
   }
 });
+
+app.get('/api/sensor/config', (req, res) => {
+  const configPath = path.join(__dirname, 'sensor', 'config.json');
+  fs.readFile(configPath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error leyendo config.json:', err);
+      return res.status(500).json({ error: 'Error leyendo la configuración' });
+    }
+    try {
+      const config = JSON.parse(data);
+      res.json(config);
+    } catch (parseErr) {
+      console.error('Error parseando config.json:', parseErr);
+      res.status(500).json({ error: 'Error parseando la configuración' });
+    }
+  });
+});
+
+app.put('/api/sensor/config', (req, res) => {
+  const configPath = path.join(__dirname, 'sensor', 'config.json');
+  const newConfig = req.body;
+
+  // Leer el config.json actual
+  fs.readFile(configPath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error leyendo config.json:', err);
+      return res.status(500).json({ error: 'Error leyendo la configuración' });
+    }
+    let currentConfig;
+    try {
+      currentConfig = JSON.parse(data);
+    } catch (parseErr) {
+      console.error('Error parseando config.json:', parseErr);
+      return res.status(500).json({ error: 'Error parseando la configuración' });
+    }
+
+    const mergedConfig = { ...currentConfig, ...newConfig };
+
+    mergedConfig.date = new Date().toISOString();
+
+    fs.writeFile(configPath, JSON.stringify(mergedConfig, null, 2), 'utf8', (err) => {
+      if (err) {
+        console.error('Error escribiendo config.json:', err);
+        return res.status(500).json({ error: 'Error guardando la configuración' });
+      }
+      res.json({ message: 'Configuración guardada correctamente', config: mergedConfig });
+    });
+  });
+});
+
+const imagesDir = path.join(__dirname, 'sensor', 'images');
+if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, imagesDir);
+  },
+  filename: function (req, file, cb) {
+    // El frontend ya fuerza el nombre correcto (logo.jpg, normal.jpg, etc)
+    cb(null, file.originalname);
+  }
+});
+const upload = multer({ storage: storage });
+
+app.post('/api/sensor/images', upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+  // Devuelve la URL accesible desde el frontend
+  const url = `${process.env.PUBLIC_URL || 'https://dev.acubox.cat/back'}/api/fileSensor/images/${req.file.filename}`;
+  res.json({ url });
+});
+
+
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);

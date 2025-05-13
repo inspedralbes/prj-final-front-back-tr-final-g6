@@ -15,7 +15,12 @@
                     <div class="current-temperature" :class="temperatureColorClass">
                         {{ currentTemperature !== null ? parseFloat(currentTemperature).toFixed(2) : '--' }}°C
                     </div>
-                    <div class="temperature-label">Current Temperature</div>
+                    <div class="temperature-range">
+                        <span class="min-temp">{{ minTemperature !== null ? parseFloat(minTemperature).toFixed(2) : '--' }}°C</span>
+                        <span class="range-separator">-</span>
+                        <span class="max-temp">{{ maxTemperature !== null ? parseFloat(maxTemperature).toFixed(2) : '--' }}°C</span>
+                    </div>
+                    <div class="temperature-label">Current Temperature (Avg/Min/Max)</div>
                 </div>
 
                 <div class="time-range-info">
@@ -27,6 +32,22 @@
             <!-- Chart Section -->
             <div class="chart-container">
                 <Line :key="chartKey" :data="chartData" :options="chartOptions" class="temperature-chart" />
+            </div>
+
+            <!-- Legend Section -->
+            <div class="chart-legend">
+                <div class="legend-item">
+                    <span class="legend-color avg-color"></span>
+                    <span class="legend-label">Average</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color max-color"></span>
+                    <span class="legend-label">Maximum</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color min-color"></span>
+                    <span class="legend-label">Minimum</span>
+                </div>
             </div>
         </div>
     </div>
@@ -54,6 +75,8 @@ ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale
 
 // Reactive state
 const temperatureData = ref([]);
+const minTemperatureData = ref([]);
+const maxTemperatureData = ref([]);
 const chartKey = ref(0);
 const socket = ref(null);
 const loading = ref(true);
@@ -71,27 +94,50 @@ const props = defineProps({
 const chartData = ref({
     labels: [],
     datasets: [
-        {
-            label: 'Temperature (°C)',
+    {
+            label: 'Average Temperature (°C)',
             data: [],
             fill: {
                 target: 'origin',
                 above: 'rgba(33, 150, 243, 0.1)',
                 below: 'rgba(33, 150, 243, 0.1)'
             },
-            borderColor: '#2196F3',
-            backgroundColor: 'rgba(33, 150, 243, 0.2)',
-            pointBackgroundColor: '#2196F3',
+            borderColor: '#10B981',
+            backgroundColor: '10B981',
+            pointBackgroundColor: '#10B981',
             pointBorderColor: '#fff',
             pointRadius: 3,
             pointHoverRadius: 5,
             tension: 0.1,
             borderWidth: 2
         },
+        {
+            label: 'Maximum Temperature (°C)',
+            data: [],
+            borderColor: '#EF4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            pointBackgroundColor: '#EF4444',
+            pointBorderColor: '#fff',
+            pointRadius: 2,
+            pointHoverRadius: 4,
+            borderWidth: 1,
+            borderDash: [5, 5]
+        },
+        {
+            label: 'Minimum Temperature (°C)',
+            data: [],
+            borderColor: '#2196F3',
+            backgroundColor: '#2196F3',
+            pointBackgroundColor: '#2196F3',
+            pointBorderColor: '#fff',
+            pointRadius: 2,
+            pointHoverRadius: 4,
+            borderWidth: 1,
+            borderDash: [5, 5]
+        }
     ],
 });
 
-// Chart options
 const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
@@ -105,7 +151,10 @@ const chartOptions = ref({
             titleColor: '#E5E7EB',
             bodyColor: '#E5E7EB',
             callbacks: {
-                label: (context) => `Temperature: ${parseFloat(context.raw).toFixed(2)}°C` // Format to 2 decimals
+                label: (context) => {
+                    const datasetLabel = context.dataset.label || '';
+                    return `${datasetLabel}: ${parseFloat(context.raw).toFixed(2)}°C`;
+                }
             }
         }
     },
@@ -124,18 +173,16 @@ const chartOptions = ref({
                 maxRotation: 45,
                 minRotation: 45,
                 autoSkip: false,
-                callback: function (value, index, values) {
-                    // Mostrar la etiqueta 24:00 al final
-                    const time = this.getLabelForValue(value);
-                    const hour = parseInt(time.split(':')[0], 10);
-                    return hour % 2 === 0 || hour === 24 ? time : '';  // Mostrar solo las horas pares y 24:00
+                callback: function(value, index, values) {
+                    if (index === values.length - 1) return '24:00';
+                    return this.getLabelForValue(value);
                 }
             },
             grid: {
                 color: 'rgba(255, 255, 255, 0.05)'
             },
             min: '00:00',
-            max: '24:00'  // Ajustar para mostrar hasta 24:00
+            max: '24:00'
         },
         y: {
             title: {
@@ -160,21 +207,24 @@ const chartOptions = ref({
 });
 
 const currentTemperature = computed(() => {
-    console.log('Temperature Data:', temperatureData.value); // Log the entire array
-
-    // Find the most recent valid temperature value
     const latestValidDataPoint = [...temperatureData.value]
-        .reverse() // Reverse the array to start from the most recent data
+        .reverse()
         .find(dataPoint => dataPoint.value !== null && dataPoint.value !== undefined);
+    return latestValidDataPoint?.value !== undefined ? latestValidDataPoint.value : null;
+});
 
-    console.log('Latest Valid Data Point:', latestValidDataPoint); // Log the valid data point
+const minTemperature = computed(() => {
+    const latestValidDataPoint = [...minTemperatureData.value]
+        .reverse()
+        .find(dataPoint => dataPoint.value !== null && dataPoint.value !== undefined);
+    return latestValidDataPoint?.value !== undefined ? latestValidDataPoint.value : null;
+});
 
-    const value = latestValidDataPoint?.value !== undefined
-        ? latestValidDataPoint.value // Do not round the value
-        : null;
-
-    console.log(`Current Temperature: ${value}`);
-    return value;
+const maxTemperature = computed(() => {
+    const latestValidDataPoint = [...maxTemperatureData.value]
+        .reverse()
+        .find(dataPoint => dataPoint.value !== null && dataPoint.value !== undefined);
+    return latestValidDataPoint?.value !== undefined ? latestValidDataPoint.value : null;
 });
 
 const temperatureColorClass = computed(() => {
@@ -214,65 +264,154 @@ const fetchInitialData = async () => {
             endOfDay.toISOString()
         );
 
-        // Process data from the API
-        const filteredData = data
-            .filter(item => item.average >= 0 && item.average <= 40)
-            .map(item => ({
-                time: new Date(item.dataIni).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-                value: item.average,
-            }));
+        if (!data || !Array.isArray(data) || data.length === 0) {
+            throw new Error("No se recibieron datos del servidor");
+        }
 
-        // Create hour-by-hour labels for the full day (24 hours)
+        // Generate labels from 00:00 to 24:00
         const labels = Array.from({ length: 25 }, (_, i) => {
-            if (i === 24) {
-                return '24:00';
-            }
+            if (i === 24) return '24:00';
             const time = new Date(startOfDay.getTime() + i * 60 * 60 * 1000);
             return time.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         });
-        // Fill in missing data points, including for the 24:00 hour
-        const completeData = labels.map(label => {
-            const existing = filteredData.find(item => item.time === label);
-            return existing || { time: label, value: null };
+
+        // Map received data to corresponding hours for avg, min, and max
+        const completeAvgData = labels.map(label => {
+            if (label === '24:00') {
+                const midnightData = data.find(item => {
+                    const itemHour = new Date(item.dataIni).getHours();
+                    return itemHour === 23;
+                });
+                return midnightData ? { 
+                    time: '24:00', 
+                    value: midnightData.average 
+                } : { 
+                    time: '24:00', 
+                    value: null 
+                };
+            }
+            
+            const hour = parseInt(label.split(':')[0]);
+            const found = data.find(item => {
+                const itemHour = new Date(item.dataIni).getHours();
+                return itemHour === hour;
+            });
+            
+            return found ? { 
+                time: label, 
+                value: found.average 
+            } : { 
+                time: label, 
+                value: null 
+            };
         });
 
-        temperatureData.value = completeData;
-        updateChartData(temperatureData.value);
+        const completeMinData = labels.map(label => {
+            if (label === '24:00') {
+                const midnightData = data.find(item => {
+                    const itemHour = new Date(item.dataIni).getHours();
+                    return itemHour === 23;
+                });
+                return midnightData ? { 
+                    time: '24:00', 
+                    value: midnightData.min 
+                } : { 
+                    time: '24:00', 
+                    value: null 
+                };
+            }
+            
+            const hour = parseInt(label.split(':')[0]);
+            const found = data.find(item => {
+                const itemHour = new Date(item.dataIni).getHours();
+                return itemHour === hour;
+            });
+            
+            return found ? { 
+                time: label, 
+                value: found.min 
+            } : { 
+                time: label, 
+                value: null 
+            };
+        });
+
+        const completeMaxData = labels.map(label => {
+            if (label === '24:00') {
+                const midnightData = data.find(item => {
+                    const itemHour = new Date(item.dataIni).getHours();
+                    return itemHour === 23;
+                });
+                return midnightData ? { 
+                    time: '24:00', 
+                    value: midnightData.max 
+                } : { 
+                    time: '24:00', 
+                    value: null 
+                };
+            }
+            
+            const hour = parseInt(label.split(':')[0]);
+            const found = data.find(item => {
+                const itemHour = new Date(item.dataIni).getHours();
+                return itemHour === hour;
+            });
+            
+            return found ? { 
+                time: label, 
+                value: found.max 
+            } : { 
+                time: label, 
+                value: null 
+            };
+        });
+
+        temperatureData.value = completeAvgData;
+        minTemperatureData.value = completeMinData;
+        maxTemperatureData.value = completeMaxData;
+        updateChartData(temperatureData.value, minTemperatureData.value, maxTemperatureData.value);
 
         loading.value = false;
-    } catch (error) {
-        console.error('Error fetching initial data:', error);
-        error.value = 'Failed to load initial data';
+    } catch (err) {
+        console.error('Error fetching initial data:', err);
+        error.value = err.message || 'Failed to load initial data';
         loading.value = false;
     }
 };
 
-// Update chart data
-const updateChartData = (data) => {
-    const labels = data.map(item => item.time);
-    const values = data.map(item => item.value);
+const updateChartData = (avgData, minData, maxData) => {
+    const labels = avgData.map((item, index) => 
+        index === avgData.length - 1 ? '24:00' : item.time
+    );
+    
+    const avgValues = avgData.map(item => item.value);
+    const minValues = minData.map(item => item.value);
+    const maxValues = maxData.map(item => item.value);
 
     chartData.value.labels = labels;
-    chartData.value.datasets[0].data = values;
+    chartData.value.datasets[0].data = avgValues;
+    chartData.value.datasets[1].data = maxValues;
+    chartData.value.datasets[2].data = minValues;
     chartKey.value++;
 };
 
 const handleNewAggregatedData = (data) => {
-    if (!data || !data.sensors) return;
-
-    // Only process data if it's hourly aggregated data
-    if (data.timeSpan !== 'hora') return;
+    if (!data || !data.sensors || data.timeSpan !== 'hora') return;
 
     const now = new Date();
     const timeString = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
-    // Calculate average temperature across all sensors
+    // Calculate average, min, and max temperature across all sensors
     let totalTemp = 0;
+    let minTemp = Infinity;
+    let maxTemp = -Infinity;
     let sensorCount = 0;
 
     Object.values(data.sensors).forEach(sensor => {
         if (sensor.temperature && typeof sensor.temperature.avg === 'number') {
             totalTemp += sensor.temperature.avg;
+            if (sensor.temperature.min < minTemp) minTemp = sensor.temperature.min;
+            if (sensor.temperature.max > maxTemp) maxTemp = sensor.temperature.max;
             sensorCount++;
         }
     });
@@ -285,13 +424,17 @@ const handleNewAggregatedData = (data) => {
             const hourIndex = temperatureData.value.findIndex(item => item.time === timeString);
 
             if (hourIndex !== -1) {
-                // Update the temperature for this hour
+                // Update all three datasets
                 temperatureData.value[hourIndex].value = avgTemp;
+                minTemperatureData.value[hourIndex].value = minTemp;
+                maxTemperatureData.value[hourIndex].value = maxTemp;
 
                 // Trigger reactivity
                 temperatureData.value = [...temperatureData.value];
+                minTemperatureData.value = [...minTemperatureData.value];
+                maxTemperatureData.value = [...maxTemperatureData.value];
 
-                updateChartData(temperatureData.value);
+                updateChartData(temperatureData.value, minTemperatureData.value, maxTemperatureData.value);
             }
         }
     }
@@ -396,6 +539,27 @@ onBeforeUnmount(() => {
     line-height: 1;
 }
 
+.temperature-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.min-temp {
+    color: #10B981;
+    font-weight: 500;
+}
+
+.max-temp {
+    color: #EF4444;
+    font-weight: 500;
+}
+
+.range-separator {
+    color: #a1a1aa;
+}
+
 .temperature-label {
     font-size: 0.9rem;
     color: #a1a1aa;
@@ -432,6 +596,45 @@ onBeforeUnmount(() => {
 .temperature-chart {
     width: 100%;
     height: 100%;
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-color {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.avg-color {
+    background-color: #10B981;
+}
+
+.max-color {
+    background-color: #EF4444;
+}
+
+.min-color {
+    background-color: #2196F3;
+}
+
+.legend-label {
+    font-size: 0.8rem;
+    color: #a1a1aa;
 }
 
 /* Temperature color classes */
