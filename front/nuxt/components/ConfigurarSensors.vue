@@ -1,11 +1,124 @@
 <template>
   <div class="min-h-screen bg-slate-800 flex flex-col">
+    <!-- Main Content -->
     <div class="flex-grow w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
       <div class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700">
         <div class="p-6">
           <h2 class="text-2xl font-bold text-white mb-6">Configuració del Sensor</h2>
+
           <form @submit.prevent="saveSensorConfigHandler" class="space-y-6">
-            <!-- ...otros campos de configuración... -->
+
+            <!-- Configuración básica -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Lluminositat inicial (startglow)</label>
+                <input v-model.number="sensorConfig.startglow" type="number" min="0" max="255"
+                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Llindar LDR</label>
+                <input v-model.number="sensorConfig.ldrThreshold" type="number" min="0"
+                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Rotació Display</label>
+                <select v-model.number="sensorConfig.displayRotation"
+                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                  <option :value="0">0° (Normal)</option>
+                  <option :value="90">90°</option>
+                  <option :value="180">180°</option>
+                  <option :value="270">270°</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Retard Fractal (ms)</label>
+                <input v-model.number="sensorConfig.fractalDelay" type="number" min="0"
+                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Retard Logo (ms)</label>
+                <input v-model.number="sensorConfig.logoDelay" type="number" min="0"
+                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">WiFi SSID</label>
+                <input v-model="sensorConfig.wifi_ssid" type="text"
+                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">WiFi Password</label>
+                <input v-model="sensorConfig.wifi_password" type="password"
+                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Vref So (vref_sound)</label>
+                <input v-model.number="sensorConfig.vref_sound" type="number" step="0.01" min="0"
+                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+              </div>
+            </div>
+
+            <!-- Niveles de sonido -->
+            <div class="border-t border-slate-700 pt-6">
+              <h3 class="text-lg font-semibold text-white mb-4">Llindars de So (dB)</h3>
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Bons valors (db_good)</label>
+                  <input v-model.number="sensorConfig.db_good" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Valors normals (db_normal)</label>
+                  <input v-model.number="sensorConfig.db_normal" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Valors alts (db_angry)</label>
+                  <input v-model.number="sensorConfig.db_angry" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Valors molt alts (db_very_angry)</label>
+                  <input v-model.number="sensorConfig.db_very_angry" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+              </div>
+            </div>
+
+            <!-- Niveles de brillo -->
+            <div class="border-t border-slate-700 pt-6">
+              <h3 class="text-lg font-semibold text-white mb-4">Nivells de Brillo (glowlevels)</h3>
+              <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div v-for="(level, index) in sensorConfig.glowlevels" :key="index">
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Nivell {{ index }}</label>
+                  <input v-model.number="sensorConfig.glowlevels[index]" type="number" min="0" max="255"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+              </div>
+            </div>
+
+            <!-- URLs -->
+            <div class="border-t border-slate-700 pt-6">
+              <h3 class="text-lg font-semibold text-white mb-4">URLs de Connexió</h3>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">URL per nous sensors</label>
+                  <input v-model="sensorConfig.url_newsensor" type="url"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">URL per enviar dades</label>
+                  <input v-model="sensorConfig.url_sensor" type="url"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+              </div>
+            </div>
 
             <!-- Imágenes -->
             <div class="border-t border-slate-700 pt-6">
@@ -15,11 +128,11 @@
                   <label class="block text-sm font-medium text-slate-400 mb-2">{{ image.label }}</label>
                   <div class="flex items-center gap-4">
                     <div class="flex-shrink-0">
-                      <img :src="tempImages[index]" :alt="image.label"
+                      <img :src="sensorConfig.images[index]" :alt="image.label"
                         class="h-16 w-16 object-cover rounded-lg border border-slate-600">
                     </div>
                     <div class="flex-grow">
-                      <input v-model="tempImages[index]" type="url" readonly
+                      <input v-model="sensorConfig.images[index]" type="url" readonly
                         class="w-full bg-slate-600 border border-slate-500 rounded-lg px-4 py-2 text-white cursor-not-allowed">
                     </div>
                     <div>
