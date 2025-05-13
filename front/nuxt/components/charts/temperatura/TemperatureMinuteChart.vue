@@ -392,6 +392,7 @@ onMounted(() => {
     try {
         const socketUrl = getBaseUrl();
         socket.value = io(socketUrl, {
+            path: '/back/socket.io',
             transports: ['websocket', 'polling'],
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,

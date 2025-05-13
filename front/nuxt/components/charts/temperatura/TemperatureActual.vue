@@ -161,7 +161,9 @@ onMounted(() => {
     try {
         const socketUrl = getBaseUrl();
         console.log('Connecting to socket at:', socketUrl);
-        socket.value = io(socketUrl, {
+        socket.value = io(socketUrl, 
+        {
+            path: '/back/socket.io',
             transports: ['websocket', 'polling'],
             reconnectionAttempts: 5,
             reconnectionDelay: 1000
