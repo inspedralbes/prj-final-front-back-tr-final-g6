@@ -101,6 +101,64 @@ io.on('connection', (socket) => {
 
 //ENDPOINTS API
 
+// Get medias de temperatura y volumen
+app.get('/api/stats/medias', async (req, res) => {
+  try {
+    // Consulta para obtener la media de temperatura
+    const queryTemp = `
+      SELECT AVG(average) as mediaTemperatura 
+      FROM dia 
+      WHERE tipus = 'temperatura' 
+      AND dataIni >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+    `;
+
+    // Consulta para obtener la media de volumen
+    const queryVol = `
+      SELECT AVG(average) as mediaVolumen 
+      FROM dia 
+      WHERE tipus = 'volum' 
+      AND dataIni >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+    `;
+
+    // Consulta para obtener el total de sensores activos
+    const querySensors = `
+      SELECT COUNT(*) as totalSensors 
+      FROM sensor 
+      WHERE api_key IS NOT NULL
+    `;
+
+    const [tempResults, volResults, sensorResults] = await Promise.all([
+      new Promise((resolve, reject) => {
+        connexioBD.query(queryTemp, (err, results) => {
+          if (err) reject(err);
+          resolve(results[0]);
+        });
+      }),
+      new Promise((resolve, reject) => {
+        connexioBD.query(queryVol, (err, results) => {
+          if (err) reject(err);
+          resolve(results[0]);
+        });
+      }),
+      new Promise((resolve, reject) => {
+        connexioBD.query(querySensors, (err, results) => {
+          if (err) reject(err);
+          resolve(results[0]);
+        });
+      })
+    ]);
+
+    res.json({
+      mediaTemperatura: parseFloat(tempResults.mediaTemperatura || 0).toFixed(1),
+      mediaVolumen: parseFloat(volResults.mediaVolumen || 0).toFixed(1),
+      totalSensors: sensorResults.totalSensors
+    });
+  } catch (error) {
+    console.error('Error al obtener medias:', error);
+    res.status(500).json({ message: 'Error al obtener las medias', error: error.message });
+  }
+});
+
 app.post('/api/login', (req, res) => {
   const { correu, contrasenya } = req.body;
 
