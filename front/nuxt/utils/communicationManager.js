@@ -488,3 +488,38 @@ export async function unbanSensor(idSensor) {
         throw new Error(error.message || 'Hubo un error en la solicitud');
     }
 }
+
+export async function getSensorConfig() {
+    const response = await fetch(`${getBaseUrl()}/api/sensor/config`);
+    if (!response.ok) {
+        throw new Error('Error al cargar la configuración');
+    }
+    return await response.json();
+}
+
+export async function saveSensorConfig(config) {
+    const response = await fetch(`${getBaseUrl()}/api/sensor/config`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+    });
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al guardar la configuración');
+    }
+    return await response.json();
+}
+
+export async function uploadSensorImage(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+    const response = await fetch(`${getBaseUrl()}/api/sensor/images`, {
+        method: 'POST',
+        body: formData
+    });
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al pujar la imatge');
+    }
+    return await response.json();
+}
