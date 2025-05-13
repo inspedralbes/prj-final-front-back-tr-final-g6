@@ -1,5 +1,5 @@
 {
-    "date": "2025-05-13T08:01:08.868Z",
+    "date": "2023-10-04T12:00:00",
     "startglow": 50,
     "glowlevels": [
       0,
@@ -12,19 +12,23 @@
     "displayRotation": 0,
     "fractalDelay": 5000,
     "logoDelay": 15000,
+
     "db_good": 0,
     "db_normal": 70,
     "db_angry": 80,
+
     "vref_sound": 0.7,
+
     "url_newsensor": "https://dev.acubox.cat/back/api/newsensors",
     "url_sensor": "https://dev.acubox.cat/back/api/sendMessage",
+
     "images": [
-      "https://dev.acubox.cat/back/api/fileSensor/images/logo.jpg",
-      "https://dev.acubox.cat/back/api/fileSensor/images/normal.jpg",
-      "https://dev.acubox.cat/back/api/fileSensor/images/good.jpg",
-      "https://dev.acubox.cat/back/api/fileSensor/images/angry.jpg",
-      "https://dev.acubox.cat/back/api/fileSensor/images/connected.jpg",
-      "https://dev.acubox.cat/back/api/fileSensor/images/disconnected.jpg",
-      "https://dev.acubox.cat/back/api/fileSensor/images/accesspoint.jpg"
+        "https://dev.acubox.cat/back/api/fileSensor/images/logo.jpg",
+        "https://dev.acubox.cat/back/api/fileSensor/images/normal.jpg",
+        "https://dev.acubox.cat/back/api/fileSensor/images/good.jpg",
+        "https://dev.acubox.cat/back/api/fileSensor/images/angry.jpg",
+        "https://dev.acubox.cat/back/api/fileSensor/images/connected.jpg",
+        "https://dev.acubox.cat/back/api/fileSensor/images/disconnected.jpg",
+        "https://dev.acubox.cat/back/api/fileSensor/images/accesspoint.jpg"
     ]
-  }
+}

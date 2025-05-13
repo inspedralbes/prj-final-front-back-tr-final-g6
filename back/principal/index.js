@@ -17,6 +17,7 @@ import ampq from 'amqplib';
 import { MongoClient } from 'mongodb';
 import moment from 'moment-timezone';
 import path from 'path'; // Importa el mòdul path
+const config = require('./config.json');
 import fs from 'fs';
 
 app.use(cors());
@@ -638,6 +639,38 @@ app.post('/api/data/mysql', (req, res) => {
   });
 });
 
+app.get('/api/data/mysql', (req, res) => {
+  var { timeSpan, dataIni, dataFi } = req.query;
+  if (!timeSpan || !dataIni || !dataFi) {
+    return res.status(400).json({ message: 'Es requereix un timeSpan, dataIni i dataFi' });
+  }
+
+  dataIni = dataIni.replace('T', ' ');
+  dataFi = dataFi.replace('T', ' ');
+  
+  if (timeSpan === 'hora') {
+    timeSpan = 'minut';
+  } else if (timeSpan === 'dia') {
+    timeSpan = 'hora';
+  } else if (timeSpan === 'setmana') {
+    timeSpan = 'dia';
+  } else if (timeSpan === 'mes') {
+    timeSpan = 'setmana';
+  } else if (timeSpan === 'any') {
+    timeSpan = 'mes';
+  }
+
+  const query = `SELECT * FROM ${mysql2.escapeId(timeSpan)} WHERE dataIni BETWEEN ? AND ?`;
+  console.log('Query: ', query);
+  connexioBD.query(query, [dataIni, dataFi], (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      return res.status(500).json({ message: 'Error en la consulta a la base de dades' });
+    }
+    res.status(200).json(results);
+  });
+});
+
 
 async function verifyAPI(req, res, next) {
   const apiKey = req.headers['x-api-key'];
@@ -695,7 +728,7 @@ app.post('/api/sendMessage', async (req, res) => {
       connection.close();
     }, 500);
 
-    res.status(200).send({ message: 'Missatge enviat correctament' });
+    res.status(200).send({ message: 'Missatge enviat correctament', date: config.date });
   } catch (error) {
     console.error('❌ Error al enviar el missatge:', error);
     res.status(500).send({ message: 'Error al enviar el missatge', error: error.message });
