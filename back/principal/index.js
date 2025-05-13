@@ -713,7 +713,7 @@ app.post('/api/sendMessage', async (req, res) => {
       connection.close();
     }, 500);
 
-    const configPath = path.join(__dirname, 'config.json');
+    const configPath = path.join(__dirname, 'sensor', 'config.json');
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
     console.log('date', config.date);
