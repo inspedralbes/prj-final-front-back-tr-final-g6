@@ -184,7 +184,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { getSensorConfig, saveSensorConfig } from '~/utils/communicationManager';
+import { getSensorConfig, saveSensorConfig, uploadSensorImage } from '~/utils/communicationManager';
 
 const sensorConfig = ref({ images: [] });
 const loading = ref(false);
@@ -215,19 +215,6 @@ const currentImageIndex = ref(0);
 const selectedFile = ref(null);
 const fileInput = ref(null);
 
-onMounted(async () => {
-  loading.value = true;
-  try {
-    const data = await getSensorConfig();
-    sensorConfig.value = data;
-  } catch (error) {
-    console.error('Error al cargar la configuración:', error);
-    alert('Error al cargar la configuración: ' + error.message);
-  } finally {
-    loading.value = false;
-  }
-});
-
 const openImageUpload = (index) => {
   currentImageIndex.value = index;
   selectedFile.value = null;
@@ -254,12 +241,10 @@ const handleFileChange = (event) => {
 const uploadImage = async () => {
   if (!selectedFile.value) return;
   try {
-    // Si tienes el endpoint real, descomenta y usa esto:
-    // const response = await uploadSensorImage(selectedFile.value);
-    // const imageUrl = response.url; // Ajusta según la respuesta de tu backend
-
-    // Simulación (como antes)
-    const imageUrl = `https://dev.acubox.cat/back/api/fileSensor/images/${selectedFile.value.name}`;
+    // Subir la imagen al backend
+    const response = await uploadSensorImage(selectedFile.value);
+    // Ajusta esto según la respuesta de tu backend
+    const imageUrl = response.url || `https://dev.acubox.cat/back/api/fileSensor/images/${selectedFile.value.name}`;
     sensorConfig.value.images[currentImageIndex.value] = imageUrl;
     showImageUploadModal.value = false;
     alert('Imatge pujada correctament');
