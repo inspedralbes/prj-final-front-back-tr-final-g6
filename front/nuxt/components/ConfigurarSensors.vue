@@ -6,7 +6,7 @@
         <div class="p-6">
           <h2 class="text-2xl font-bold text-white mb-6">Configuració del Sensor</h2>
 
-          <form @submit.prevent="saveSensorConfig" class="space-y-6">
+          <form @submit.prevent="saveSensorConfigHandler" class="space-y-6">
             <!-- Configuración básica -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -141,10 +141,6 @@
             </div>
 
             <div class="flex justify-end gap-3 pt-6 border-t border-slate-700">
-              <button type="button" @click="resetConfig"
-                class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all">
-                Restaurar
-              </button>
               <button type="submit"
                 class="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-all">
                 Guardar Configuració
@@ -190,33 +186,20 @@
 import { ref, onMounted } from 'vue';
 import { getSensorConfig, saveSensorConfig } from '~/utils/communicationManager';
 
-const defaultConfig = {
-  startglow: 50,
-  glowlevels: [0, 10, 50, 150, 255],
-  ldrThreshold: 1000,
-  displayRotation: 0,
-  fractalDelay: 5000,
-  logoDelay: 15000,
-  wifi_ssid: "winewithcola",
-  wifi_password: "siquetieneswifi",
-  db_good: 30,
-  db_normal: 50,
-  db_angry: 70,
-  db_very_angry: 90,
-  url_newsensor: "https://dev.acubox.cat/back/api/newsensors",
-  url_sensor: "https://dev.acubox.cat/back/api/sendMessage",
-  images: [
-    "https://dev.acubox.cat/back/api/fileSensor/images/normal.jpg",
-    "https://dev.acubox.cat/back/api/fileSensor/images/good.jpg",
-    "https://dev.acubox.cat/back/api/fileSensor/images/angry.jpg",
-    "https://dev.acubox.cat/back/api/fileSensor/images/normal.jpg",
-    "https://dev.acubox.cat/back/api/fileSensor/images/connected.jpg",
-    "https://dev.acubox.cat/back/api/fileSensor/images/disconnected.jpg"
-  ]
-};
-
-const sensorConfig = ref(JSON.parse(JSON.stringify(defaultConfig)));
+const sensorConfig = ref({ images: [] });
 const loading = ref(false);
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    const data = await getSensorConfig();
+    sensorConfig.value = { ...data };
+  } catch (error) {
+    alert('Error al cargar la configuración: ' + error.message);
+  } finally {
+    loading.value = false;
+  }
+});
 
 const imageTypes = ref([
   { label: "Imatge Normal", requiredName: "normal.jpg" },
@@ -240,7 +223,6 @@ onMounted(async () => {
   } catch (error) {
     console.error('Error al cargar la configuración:', error);
     alert('Error al cargar la configuración: ' + error.message);
-    sensorConfig.value = JSON.parse(JSON.stringify(defaultConfig));
   } finally {
     loading.value = false;
   }
@@ -295,13 +277,6 @@ const saveSensorConfigHandler = async () => {
   } catch (error) {
     console.error('Error al guardar la configuració:', error);
     alert('Error al guardar la configuració: ' + error.message);
-  }
-};
-
-const resetConfig = () => {
-  if (confirm('Estàs segur que vols restablir la configuració als valors per defecte?')) {
-    sensorConfig.value = JSON.parse(JSON.stringify(defaultConfig));
-    alert('Configuració restablerta als valors per defecte');
   }
 };
 </script>

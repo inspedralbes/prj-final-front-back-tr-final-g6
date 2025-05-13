@@ -719,16 +719,35 @@ app.get('/api/sensor/config', (req, res) => {
   });
 });
 
-// ENDPOINT: Guardar la configuración del sensor
 app.put('/api/sensor/config', (req, res) => {
   const configPath = path.join(__dirname, 'sensor', 'config.json');
   const newConfig = req.body;
-  fs.writeFile(configPath, JSON.stringify(newConfig, null, 2), 'utf8', (err) => {
+
+  // Leer el config.json actual
+  fs.readFile(configPath, 'utf8', (err, data) => {
     if (err) {
-      console.error('Error escribiendo config.json:', err);
-      return res.status(500).json({ error: 'Error guardando la configuración' });
+      console.error('Error leyendo config.json:', err);
+      return res.status(500).json({ error: 'Error leyendo la configuración' });
     }
-    res.json({ message: 'Configuración guardada correctamente' });
+    let currentConfig;
+    try {
+      currentConfig = JSON.parse(data);
+    } catch (parseErr) {
+      console.error('Error parseando config.json:', parseErr);
+      return res.status(500).json({ error: 'Error parseando la configuración' });
+    }
+
+    const mergedConfig = { ...currentConfig, ...newConfig };
+
+    mergedConfig.date = new Date().toISOString();
+
+    fs.writeFile(configPath, JSON.stringify(mergedConfig, null, 2), 'utf8', (err) => {
+      if (err) {
+        console.error('Error escribiendo config.json:', err);
+        return res.status(500).json({ error: 'Error guardando la configuración' });
+      }
+      res.json({ message: 'Configuración guardada correctamente', config: mergedConfig });
+    });
   });
 });
 
