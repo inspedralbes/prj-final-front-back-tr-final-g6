@@ -20,7 +20,9 @@
         "https://dev.acubox.cat/back/api/fileSensor/images/angry.jpg",
         "https://dev.acubox.cat/back/api/fileSensor/images/normal.jpg",
         "https://dev.acubox.cat/back/api/fileSensor/images/connected.jpg",
-        "https://dev.acubox.cat/back/api/fileSensor/images/disconnected.jpg"
+        "https://dev.acubox.cat/back/api/fileSensor/images/disconnected.jpg",
+        "https://dev.acubox.cat/back/api/fileSensor/images/download.jpg",
+        "https://dev.acubox.cat/back/api/fileSensor/images/download.jpg"
     ]
 
 }  
