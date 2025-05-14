@@ -19,6 +19,7 @@ sensor_results = {}
 for sensor_id, items in grouped_data.items():
     volumes = [item['volume'] for item in items]
     temperatures = [float(item['temperature']) for item in items]
+    humidities = [float(item['humidity']) for item in items] 
     sensor_results[sensor_id] = {
         'volume': {
             'max': max(volumes),
@@ -29,6 +30,11 @@ for sensor_id, items in grouped_data.items():
             'max': max(temperatures),
             'min': min(temperatures),
             'avg': sum(temperatures) / len(temperatures)
+        },
+        'humidity': {  # Afegir resultats per humidity
+            'max': max(humidities),
+            'min': min(humidities),
+            'avg': sum(humidities) / len(humidities)
         }
     }
 

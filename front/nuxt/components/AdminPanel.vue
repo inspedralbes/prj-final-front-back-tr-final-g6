@@ -27,75 +27,6 @@
           </svg>
           Configurar Sensors
         </button>
-
-        <button
-          @click="showCreateAulaForm = !showCreateAulaForm"
-          class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 inline mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-            />
-          </svg>
-          {{ showCreateAulaForm ? "Cancel·lar" : "Crear Aula" }}
-        </button>
-      </div>
-
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Temperature Card -->
-        <div class="bg-gradient-to-br from-orange-500 to-red-600 rounded-xl p-6 shadow-xl">
-          <div class="flex items-center justify-between">
-            <div class="text-white">
-              <p class="text-sm font-medium opacity-80">Temperatura Media</p>
-              <p class="text-3xl font-bold mt-1">{{ stats.mediaTemperatura ? `${stats.mediaTemperatura}°C` : '--' }}</p>
-            </div>
-            <div class="text-white/80">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Volume Card -->
-        <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-6 shadow-xl">
-          <div class="flex items-center justify-between">
-            <div class="text-white">
-              <p class="text-sm font-medium opacity-80">Volumen Medio</p>
-              <p class="text-3xl font-bold mt-1">{{ stats.mediaVolumen ? `${stats.mediaVolumen} dB` : '--' }}</p>
-            </div>
-            <div class="text-white/80">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M4 10v4m6-4v4m6-4v4M10 4h4v4h-4z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sensors Card -->
-        <div class="bg-gradient-to-br from-green-500 to-teal-600 rounded-xl p-6 shadow-xl">
-          <div class="flex items-center justify-between">
-            <div class="text-white">
-              <p class="text-sm font-medium opacity-80">Sensores Activos</p>
-              <p class="text-3xl font-bold mt-1">{{ stats.totalSensors || '--' }}</p>
-            </div>
-            <div class="text-white/80">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-              </svg>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Search and Filter -->
@@ -123,6 +54,27 @@
               />
             </svg>
           </div>
+
+          <button
+            @click="showCreateAulaForm = !showCreateAulaForm"
+            class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 inline mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
+            </svg>
+            {{ showCreateAulaForm ? "Cancel·lar" : "Crear Aula" }}
+          </button>
 
           <div class="relative w-full md:w-48">
             <select
@@ -474,7 +426,7 @@ const showCreateAulaForm = ref(false);
 const stats = ref({
   mediaTemperatura: 0,
   mediaVolumen: 0,
-  totalSensors: 0
+  totalSensors: 0,
 });
 const newAula = ref({
   Curs: "",
@@ -508,12 +460,12 @@ const uniqueClasses = computed(() => {
 
 const fetchStats = async () => {
   try {
-    const response = await fetch('http://localhost:3020/api/stats/medias');
-    if (!response.ok) throw new Error('Error al obtener estadísticas');
+    const response = await fetch("http://localhost:3020/api/stats/medias");
+    if (!response.ok) throw new Error("Error al obtener estadísticas");
     const data = await response.json();
     stats.value = data;
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error:", error);
   }
 };
 
