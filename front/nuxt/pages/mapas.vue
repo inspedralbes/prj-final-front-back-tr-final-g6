@@ -27,7 +27,7 @@
               'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02]',
               plantaSeleccionada === planta
                 ? 'bg-teal-600 border-teal-600 text-white'
-                : 'bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700'
+                : 'bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700',
             ]"
           >
             {{ planta }}
@@ -45,7 +45,7 @@
                 'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2',
                 isAddingPopup
                   ? 'bg-red-600 border-red-600 text-white'
-                  : 'bg-teal-600 border-teal-600 text-white'
+                  : 'bg-teal-600 border-teal-600 text-white',
               ]"
             >
               <i :class="isAddingPopup ? 'fas fa-times' : 'fas fa-microchip'"></i>
@@ -58,17 +58,17 @@
                 'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2',
                 isDeletingPopup
                   ? 'bg-emerald-600 border-emerald-600 text-white'
-                  : 'bg-amber-600 border-amber-600 text-white'
+                  : 'bg-amber-600 border-amber-600 text-white',
               ]"
             >
               <i :class="isDeletingPopup ? 'fas fa-check' : 'fas fa-trash'"></i>
               <span>{{ isDeletingPopup ? "Terminar Borrado" : "Borrar Sensor" }}</span>
             </button>
           </div>
-          
+
           <div class="flex items-center gap-3">
             <label class="text-sm text-teal-400 font-medium">Tipo de Sensor:</label>
-            <select 
+            <select
               v-model="selectedSensorType"
               class="bg-slate-700/50 border border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:outline-none"
             >
@@ -112,7 +112,9 @@
                 'marker-point w-6 h-6 rounded-full absolute -top-3 -left-3 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200',
                 getMarkerColor(popup),
               ]"
-              @click.stop="isDeletingPopup ? deletePopup(popup.id) : (showingPopupId = popup.id)"
+              @click.stop="
+                isDeletingPopup ? deletePopup(popup.id) : (showingPopupId = popup.id)
+              "
             >
               <i class="fas fa-map-marker-alt text-white"></i>
             </div>
@@ -138,7 +140,9 @@
                 <span class="text-sm text-gray-400">ID: {{ popup.id }}</span>
               </div>
               <div class="text-gray-300">
-                <div class="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg">
+                <div
+                  class="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg"
+                >
                   <div class="flex items-center space-x-2">
                     <div
                       :class="['w-3 h-3 rounded-full', getSensorStatusColorByType(popup)]"
@@ -218,6 +222,7 @@ const selectedSensorType = ref("temperature");
 
 // Estado para los pop-ups personalizados
 const activeSensors = ref([]);
+const customPopups = ref([]);
 const showingPopupId = ref(null);
 const isAddingPopup = ref(false);
 const isDeletingPopup = ref(false);
@@ -226,24 +231,23 @@ const isDeletingPopup = ref(false);
 onMounted(async () => {
   try {
     // Aquí deberías hacer la llamada a tu API para obtener los sensores activos
-    const response = await fetch('http://localhost:3000/api/sensors/active');
+    const response = await fetch("http://localhost:3000/api/sensors/active");
     const data = await response.json();
-    activeSensors.value = data.map(sensor => ({
+    activeSensors.value = data.map((sensor) => ({
       id: sensor.idSensor,
       x: sensor.x,
       y: sensor.y,
       nombre: sensor.nombre,
       ubicacion: sensor.ubicacion,
-      mac: sensor.mac
+      mac: sensor.mac,
     }));
   } catch (error) {
-    console.error('Error al cargar los sensores activos:', error);
+    console.error("Error al cargar los sensores activos:", error);
   }
 });
 const showPopupForm = ref(false);
 const newPopupText = ref("");
 const tempPopupPosition = ref(null);
-const showingPopupId = ref(null);
 
 // Cargar pop-ups guardados al iniciar
 onMounted(() => {
@@ -273,6 +277,9 @@ const filteredPopups = computed(() => {
 
 const deletePopup = (id) => {
   activeSensors.value = activeSensors.value.filter((sensor) => sensor.id !== id);
+  customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
+};
+
 // Funciones para gestionar pop-ups
 const togglePopupMode = () => {
   isAddingPopup.value = !isAddingPopup.value;
@@ -298,27 +305,17 @@ const handleMapClick = (event) => {
 
 const confirmNewPopup = () => {
   if (newPopupText.value.trim() && tempPopupPosition.value) {
-    customPopups.value.push({
+    const newSensor = {
       id: Date.now(),
       text: newPopupText.value,
       x: tempPopupPosition.value.x,
       y: tempPopupPosition.value.y,
       planta: plantaSeleccionada.value,
-      temperature: Math.floor(Math.random() * 15) + 15, // 15-30°C
-      co2: Math.floor(Math.random() * 1600) + 400, // 400-2000 ppm
-      volume: Math.floor(Math.random() * 50) + 35, // 35-85 dB
-    });
-  // Crear un nuevo sensor con datos aleatorios
-  const newSensor = {
-    id: Date.now(),
-    x,
-    y,
-    planta: plantaSeleccionada.value,
-    temperature: Math.floor(Math.random() * (25 - 18 + 1)) + 18, // 18-25°C
-    humetat: Math.floor(Math.random() * (70 - 30 + 1)) + 30, // 30-70%
-    volume: Math.floor(Math.random() * (80 - 40 + 1)) + 40, // 40-80 dB
-  };
-
+      temperature: Math.floor(Math.random() * (25 - 18 + 1)) + 18, // 18-25°C
+      humedat: Math.floor(Math.random() * (70 - 30 + 1)) + 30, // 30-70%
+      volume: Math.floor(Math.random() * (80 - 40 + 1)) + 40, // 40-80 dB
+    };
+    customPopups.value.push(newSensor);
     cancelNewPopup();
     isAddingPopup.value = false;
   }
@@ -328,10 +325,6 @@ const cancelNewPopup = () => {
   showPopupForm.value = false;
   newPopupText.value = "";
   tempPopupPosition.value = null;
-};
-
-const deletePopup = (id) => {
-  customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
 };
 
 const getMarkerColor = (popup) => {
@@ -344,25 +337,7 @@ const getMarkerColor = (popup) => {
     return "bg-yellow-500";
   } else {
     return "bg-green-500";
-  const value = getSensorValueNumber(popup);
-  const { min, max } = getSensorRange();
-  const norm = (value - min) / (max - min);
-
-  const colors = [
-    "bg-blue-400", // 0-10%
-    "bg-blue-300", // 10-20%
-    "bg-cyan-400", // 20-30%
-    "bg-teal-400", // 30-40%
-    "bg-green-400", // 40-50%
-    "bg-yellow-400", // 50-60%
-    "bg-orange-400", // 60-70%
-    "bg-orange-500", // 70-80%
-    "bg-red-400", // 80-90%
-    "bg-red-500", // 90-100%
-  ];
-
-  const colorIndex = Math.min(Math.floor(norm * 10), 9);
-  return colors[Math.max(0, colorIndex)];
+  }
 };
 
 const getSensorLabel = () => {
@@ -405,19 +380,6 @@ const getSensorValue = (popup) => {
   }
 };
 
-const getSensorLabel = () => {
-  switch (selectedSensorType.value) {
-    case "temperature":
-      return "Temperatura";
-    case "humetat":
-      return "Humedat";
-    case "volume":
-      return "Volumen";
-    default:
-      return "";
-  }
-};
-
 const getSensorStatusColorByType = (popup) => {
   const value = popup[selectedSensorType.value];
   const range = getSensorRange();
@@ -451,8 +413,8 @@ const getSensorStatusColor = (value, min, max) => {
 };
 
 const getPopupPosition = (popup) => {
-  const mapContainer = document.querySelector('.map-content');
-  if (!mapContainer) return { class: '' };
+  const mapContainer = document.querySelector(".map-content");
+  if (!mapContainer) return { class: "" };
 
   const mapRect = mapContainer.getBoundingClientRect();
   const centerX = mapRect.width / 2;
@@ -464,7 +426,7 @@ const getPopupPosition = (popup) => {
 
   // Retornar la clase correspondiente para la orientación
   return {
-    class: `popup-${isTop ? 'bottom' : 'top'}-${isLeft ? 'right' : 'left'}`
+    class: `popup-${isTop ? "bottom" : "top"}-${isLeft ? "right" : "left"}`,
   };
 };
 
