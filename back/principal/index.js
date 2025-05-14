@@ -724,6 +724,18 @@ app.get('/api/sensors/banned', (req, res) => {
   });
 });
 
+// Endpoint para obtener los sensores activos
+app.get('/api/sensors/active', (req, res) => {
+  const query = 'SELECT * FROM sensor WHERE api_key IS NOT NULL AND banned = 0';
+  connexioBD.execute(query, (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err.stack);
+      return res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
+    }
+    res.status(200).send(results);
+  });
+});
+
 // Endpoint para obtener todos los datos de gráficos
 app.get('/api/grafics/all', (req, res) => {
     const { dataIni, dataFi } = req.query;

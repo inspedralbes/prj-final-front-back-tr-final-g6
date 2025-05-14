@@ -35,37 +35,28 @@
         </button>
       </div>
 
-      <!-- Botones para gestionar pop-ups -->
-      <div class="mb-6 flex flex-wrap gap-4 justify-center">
-        <button
-          @click="togglePopupMode"
-          :class="[
-            'px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg border',
-            isAddingPopup
-              ? 'bg-red-600 hover:bg-red-700 border-red-700 text-white'
-              : 'bg-teal-600 hover:bg-teal-700 border-teal-700 text-white',
-          ]"
-        >
-          <div class="flex items-center space-x-2">
-            <i :class="isAddingPopup ? 'fas fa-times' : 'fas fa-microchip'"></i>
-            <span>{{ isAddingPopup ? "Cancelar" : "Agregar Sensor" }}</span>
-          </div>
-        </button>
-        <button
-          v-if="customPopups.length > 0"
-          @click="toggleDeleteMode"
-          :class="[
-            'px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg border',
-            isDeletingPopup
-              ? 'bg-emerald-600 hover:bg-emerald-700 border-emerald-700 text-white'
-              : 'bg-amber-600 hover:bg-amber-700 border-amber-700 text-white',
-          ]"
-        >
-          <div class="flex items-center space-x-2">
-            <i :class="isDeletingPopup ? 'fas fa-check' : 'fas fa-trash'"></i>
-            <span>{{ isDeletingPopup ? "Terminar Borrado" : "Borrar Sensor" }}</span>
-          </div>
-        </button>
+      <!-- Encabezado y controles de sensores -->
+      <div class="mb-6 text-center">
+        <h2 class="text-2xl font-bold text-white mb-2">Sensores Activos</h2>
+        <p class="text-slate-400 mb-4">Visualización de datos en tiempo real</p>
+        
+        <!-- Botones de control -->
+        <div class="flex justify-center gap-4 mb-4">
+          <button
+            @click="isAddingPopup = !isAddingPopup"
+            class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow transition-all duration-300 flex items-center gap-2"
+          >
+            <i class="fas fa-plus"></i>
+            {{ isAddingPopup ? 'Cancelar' : 'Agregar Sensor' }}
+          </button>
+          <button
+            @click="isDeletingPopup = !isDeletingPopup"
+            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow transition-all duration-300 flex items-center gap-2"
+          >
+            <i class="fas fa-trash"></i>
+            {{ isDeletingPopup ? 'Cancelar' : 'Eliminar Sensor' }}
+          </button>
+        </div>
       </div>
 
       <!-- Componente Mapa -->
@@ -114,9 +105,7 @@
                 'marker-point w-6 h-6 rounded-full absolute -top-3 -left-3 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200',
                 getMarkerColor(popup),
               ]"
-              @click.stop="
-                isDeletingPopup ? deletePopup(popup.id) : (showingPopupId = popup.id)
-              "
+              @click.stop="isDeletingPopup ? deletePopup(popup.id) : (showingPopupId = popup.id)"
             >
               <i class="fas fa-map-marker-alt text-white"></i>
             </div>
@@ -125,7 +114,7 @@
               v-if="showingPopupId === popup.id"
               :class="[
                 'popup-content bg-slate-700 border-2 border-teal-500 rounded-2xl p-6 shadow-2xl min-w-[300px] relative animate-fadeIn',
-                getPopupPosition(popup).class
+                getPopupPosition(popup).class,
               ]"
             >
               <button
@@ -155,45 +144,7 @@
                   >
                 </div>
               </div>
-              <button
-                v-if="isDeletingPopup"
-                @click.stop="deletePopup(popup.id)"
-                class="delete-btn absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
-              >
-                <i class="fas fa-times text-xs"></i>
-              </button>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Formulario para nuevo pop-up -->
-      <div
-        v-if="showPopupForm"
-        class="popup-form fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-      >
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 max-w-md w-full">
-          <div class="form-header text-xl font-bold text-white mb-4">Nuevo Sensor</div>
-          <input
-            v-model="newPopupText"
-            placeholder="Texto del Sensor"
-            class="popup-input w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all mb-4"
-            @keyup.enter="confirmNewPopup"
-            @keyup.esc="cancelNewPopup"
-          />
-          <div class="flex space-x-3 justify-end">
-            <button
-              @click="confirmNewPopup"
-              class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-emerald-700"
-            >
-              <i class="fas fa-check mr-2"></i>Confirmar
-            </button>
-            <button
-              @click="cancelNewPopup"
-              class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-red-700"
-            >
-              <i class="fas fa-times mr-2"></i>Cancelar
-            </button>
           </div>
         </div>
       </div>
@@ -216,130 +167,115 @@ import MapaPlantaSubterranea from "~/components/Plantes/MapaPlantaSubterranea.vu
 const plantas = ["PLANTA BAJA", "PLANTA 1", "PLANTA 2", "PLANTA 3", "PLANTA SUBTERRANEA"];
 const plantaSeleccionada = ref("PLANTA 1");
 const aulaData = ref([]);
-const fetchDataText = ref("");
 const selectedSensorType = ref("temperature"); // Tipo de sensor seleccionado por defecto
 
 // Estado para los pop-ups personalizados
-const customPopups = ref([]);
+const activeSensors = ref([]);
+const showingPopupId = ref(null);
 const isAddingPopup = ref(false);
 const isDeletingPopup = ref(false);
-const showPopupForm = ref(false);
-const newPopupText = ref("");
-const tempPopupPosition = ref(null);
 
-// Cargar pop-ups guardados al iniciar
-onMounted(() => {
-  const savedPopups = localStorage.getItem("customMapPopups");
-  if (savedPopups) {
-    customPopups.value = JSON.parse(savedPopups);
-  } else {
-    customPopups.value = [];
+// Cargar sensores activos al montar el componente
+onMounted(async () => {
+  try {
+    // Aquí deberías hacer la llamada a tu API para obtener los sensores activos
+    const response = await fetch('http://localhost:3000/api/sensors/active');
+    const data = await response.json();
+    activeSensors.value = data.map(sensor => ({
+      id: sensor.idSensor,
+      x: sensor.x,
+      y: sensor.y,
+      nombre: sensor.nombre,
+      ubicacion: sensor.ubicacion,
+      mac: sensor.mac
+    }));
+  } catch (error) {
+    console.error('Error al cargar los sensores activos:', error);
   }
 });
 
-// Guardar pop-ups cuando cambien
-watch(
-  customPopups,
-  (newPopups) => {
-    localStorage.setItem("customMapPopups", JSON.stringify(newPopups));
-  },
-  { deep: true }
-);
-
 // Filtrar pop-ups por planta seleccionada
 const filteredPopups = computed(() => {
-  return customPopups.value.filter((popup) => popup.planta === plantaSeleccionada.value);
+  return activeSensors.value.filter((sensor) => {
+    return sensor.planta === plantaSeleccionada.value;
+  });
 });
 
-// Funciones para gestionar pop-ups
-const showingPopupId = ref(null);
-
-const togglePopupMode = () => {
-  isAddingPopup.value = !isAddingPopup.value;
-  isDeletingPopup.value = false;
-};
-
-const toggleDeleteMode = () => {
-  isDeletingPopup.value = !isDeletingPopup.value;
-  isAddingPopup.value = false;
+const deletePopup = (id) => {
+  activeSensors.value = activeSensors.value.filter((sensor) => sensor.id !== id);
 };
 
 const handleMapClick = (event) => {
   if (!isAddingPopup.value) return;
 
-  const rect = event.currentTarget.getBoundingClientRect();
+  const mapContent = event.currentTarget;
+  const rect = mapContent.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
 
-  tempPopupPosition.value = { x, y };
-  showPopupForm.value = true;
-};
+  // Crear un nuevo sensor con datos aleatorios
+  const newSensor = {
+    id: Date.now(),
+    x,
+    y,
+    planta: plantaSeleccionada.value,
+    temperature: Math.floor(Math.random() * (25 - 18 + 1)) + 18, // 18-25°C
+    humetat: Math.floor(Math.random() * (70 - 30 + 1)) + 30, // 30-70%
+    volume: Math.floor(Math.random() * (80 - 40 + 1)) + 40, // 40-80 dB
+  };
 
-const confirmNewPopup = () => {
-  if (newPopupText.value.trim() && tempPopupPosition.value) {
-    const randomData = {
-      humidity: Math.floor(Math.random() * 30) + 40,
-      temperature: Math.floor(Math.random() * 10) + 20,
-      volume: Math.floor(Math.random() * 50) + 50,
-    };
-
-    customPopups.value.push({
-      id: Date.now(),
-      text: newPopupText.value,
-      x: tempPopupPosition.value.x,
-      y: tempPopupPosition.value.y,
-      planta: plantaSeleccionada.value,
-      temperature: Math.floor(Math.random() * 15) + 15, // 15-30°C
-      co2: Math.floor(Math.random() * 1600) + 400, // 400-2000 ppm
-      volume: Math.floor(Math.random() * 50) + 35, // 35-85 dB
-    });
-
-    cancelNewPopup();
-    isAddingPopup.value = false;
-  }
-};
-
-const cancelNewPopup = () => {
-  showPopupForm.value = false;
-  newPopupText.value = "";
-  tempPopupPosition.value = null;
-};
-
-const deletePopup = (id) => {
-  customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
+  activeSensors.value.push(newSensor);
+  isAddingPopup.value = false;
 };
 
 // Ahora los popups solo se muestran al hacer clic en el marcador
 // y solo uno puede estar abierto a la vez
 const getMarkerColor = (popup) => {
-  const value = getSensorValueNumber(popup);
-  const { min, max } = getSensorRange();
-  const norm = (value - min) / (max - min);
+  const value = popup[selectedSensorType.value];
+  const range = getSensorRange();
 
-  // Usar la misma escala de colores que getSensorStatusColor
-  const colors = [
-    "bg-blue-400", // 0-10%
-    "bg-blue-300", // 10-20%
-    "bg-cyan-400", // 20-30%
-    "bg-teal-400", // 30-40%
-    "bg-green-400", // 40-50%
-    "bg-yellow-400", // 50-60%
-    "bg-orange-400", // 60-70%
-    "bg-orange-500", // 70-80%
-    "bg-red-400", // 80-90%
-    "bg-red-500", // 90-100%
-  ];
+  if (value >= range.high) {
+    return "bg-red-500";
+  } else if (value >= range.medium) {
+    return "bg-yellow-500";
+  } else {
+    return "bg-green-500";
+  }
+};
 
-  const colorIndex = Math.min(Math.floor(norm * 10), 9);
-  return colors[Math.max(0, colorIndex)];
+const getSensorRange = () => {
+  switch (selectedSensorType.value) {
+    case "temperature":
+      return { low: 18, medium: 22, high: 25 };
+    case "humetat":
+      return { low: 30, medium: 50, high: 70 };
+    case "volume":
+      return { low: 40, medium: 60, high: 80 };
+    default:
+      return { low: 0, medium: 50, high: 100 };
+  }
+};
+
+const getSensorValue = (popup) => {
+  const value = popup[selectedSensorType.value];
+  switch (selectedSensorType.value) {
+    case "temperature":
+      return `${value}°C`;
+    case "humetat":
+      return `${value}%`;
+    case "volume":
+      return `${value} dB`;
+    default:
+      return value;
+  }
 };
 
 const getSensorLabel = () => {
   switch (selectedSensorType.value) {
     case "temperature":
       return "Temperatura";
-    case "co2":
-      return "CO2";
+    case "humetat":
+      return "Humedat";
     case "volume":
       return "Volumen";
     default:
@@ -347,50 +283,17 @@ const getSensorLabel = () => {
   }
 };
 
-const getSensorRange = () => {
-  switch (selectedSensorType.value) {
-    case "temperature":
-      return { min: 15, max: 30 };
-    case "co2":
-      return { min: 400, max: 2000 };
-    case "volume":
-      return { min: 35, max: 85 };
-    default:
-      return { min: 0, max: 100 };
-  }
-};
-
-const getSensorValueNumber = (popup) => {
-  switch (selectedSensorType.value) {
-    case "temperature":
-      return popup.temperature;
-    case "co2":
-      return popup.co2;
-    case "volume":
-      return popup.volume;
-    default:
-      return 0;
-  }
-};
-
-const getSensorValue = (popup) => {
-  const value = getSensorValueNumber(popup);
-  switch (selectedSensorType.value) {
-    case "temperature":
-      return `${value}°C`;
-    case "co2":
-      return `${value}ppm`;
-    case "volume":
-      return `${value}dB`;
-    default:
-      return value;
-  }
-};
-
 const getSensorStatusColorByType = (popup) => {
-  const value = getSensorValueNumber(popup);
-  const { min, max } = getSensorRange();
-  return getSensorStatusColor(value, min, max);
+  const value = popup[selectedSensorType.value];
+  const range = getSensorRange();
+
+  if (value >= range.high) {
+    return "bg-red-500";
+  } else if (value >= range.medium) {
+    return "bg-yellow-500";
+  } else {
+    return "bg-green-500";
+  }
 };
 
 const getAlertLevel = (value, normal, warning, critical) => {
@@ -460,12 +363,6 @@ const fetchData = async () => {
 
     const response = await getMapa(bodyRequest);
     aulaData.value = response;
-
-    fetchDataText.value = response
-      .map((aula) => {
-        return `Aula: ${aula.idAula}, Volumen: ${aula.average}`;
-      })
-      .join("\n");
 
     console.log("Datos recibidos:", aulaData.value);
   } catch (error) {
