@@ -830,7 +830,41 @@ app.post('/api/sensor/images', upload.single('image'), (req, res) => {
   res.json({ url });
 });
 
+app.get('/api/aules/:id/ultimsensors', (req, res) => {
+  const idAula = req.params.id;
+  const tipusList = ['temperatura', 'humitat', 'volum'];
+  const taula = 'hora';
 
+  const promises = tipusList.map(tipus => {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT average, max, min, dataIni, dataFi
+        FROM ${taula}
+        WHERE idAula = ? AND tipus = ?
+        ORDER BY dataFi DESC
+        LIMIT 1
+      `;
+      connexioBD.execute(query, [idAula, tipus], (err, results) => {
+        if (err) return reject(err);
+        resolve({ tipus, ...results[0] });
+      });
+    });
+  });
+
+  Promise.all(promises)
+    .then(results => {
+      // results: [{tipus: 'temperatura', ...}, ...]
+      const data = {};
+      results.forEach(r => {
+        if (r) data[r.tipus] = r;
+      });
+      res.json(data);
+    })
+    .catch(err => {
+      console.error('Error obtenint últims sensors:', err);
+      res.status(500).json({ message: 'Error obtenint últims sensors' });
+    });
+});
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
