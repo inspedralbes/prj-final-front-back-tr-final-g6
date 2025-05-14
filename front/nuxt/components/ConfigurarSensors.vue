@@ -79,6 +79,49 @@
               </div>
             </div>
 
+            <div class="border-t border-slate-700 pt-6">
+              <h3 class="text-lg font-semibold text-white mb-4">Llindars de Temperatura (°C)</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Bona (temperature_good)</label>
+                  <input v-model.number="sensorConfig.temperature_good" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Normal (temperature_normal)</label>
+                  <input v-model.number="sensorConfig.temperature_normal" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Alta (temperature_angry)</label>
+                  <input v-model.number="sensorConfig.temperature_angry" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+              </div>
+            </div>
+
+            <!-- Llindars d'Humitat -->
+            <div class="border-t border-slate-700 pt-6">
+              <h3 class="text-lg font-semibold text-white mb-4">Llindars d'Humitat (%)</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Bona (humidity_good)</label>
+                  <input v-model.number="sensorConfig.humidity_good" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Normal (humidity_normal)</label>
+                  <input v-model.number="sensorConfig.humidity_normal" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Alta (humidity_angry)</label>
+                  <input v-model.number="sensorConfig.humidity_angry" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+              </div>
+            </div>
+
             <!-- Niveles de brillo -->
             <div class="border-t border-slate-700 pt-6">
               <h3 class="text-lg font-semibold text-white mb-4">Nivells de Brillo (glowlevels)</h3>
