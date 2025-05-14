@@ -17,11 +17,6 @@ function getHumidityInPercentage() {
     return Math.floor(Math.random() * (100 - 0 + 1)) + 0; // Simula humitat entre 0 i 100%
 }
 
-// Funció per seleccionar un id d'un sensor a l'atzar
-function getRandomAulaId() {
-    return Math.floor(Math.random() * 3) + 1; // Genera un id entre 1 i 3
-}
-
 const MAC = "MAMAMAM";
 const api_key = "c8nlsy4955ju75tq5w3f"; 
 

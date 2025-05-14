@@ -696,29 +696,6 @@ app.get('/api/data/mysql', (req, res) => {
   });
 });
 
-
-async function verifyAPI(req, res, next) {
-  const apiKey = req.headers['x-api-key'];
-
-  if (!apiKey) {
-    return res.status(401).json({ message: 'API key es requerida' });
-  }
-
-  const query = 'SELECT * FROM sensor WHERE api_key = ?';
-  connexioBD.execute(query, [apiKey], (err, results) => {
-    if (err) {
-      console.error('Error en la consulta a la base de datos:', err);
-      return res.status(500).json({ message: 'Error en la consulta a la base de datos' });
-    }
-
-    if (results.length === 0) {
-      return res.status(403).json({ message: 'API key no válida' });
-    }
-
-    next();
-  });
-}
-
 app.get('/api/sensors/banned', (req, res) => {
   const query = 'SELECT * FROM sensor WHERE banned = 1'; // Ensure the correct table and column names
   connexioBD.execute(query, (err, results) => {

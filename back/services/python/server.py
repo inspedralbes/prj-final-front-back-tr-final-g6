@@ -1,8 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 import subprocess
 import os
 import requests
-import schedule
 import time
 from threading import Thread
 from datetime import datetime, timedelta

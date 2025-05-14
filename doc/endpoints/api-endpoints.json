@@ -623,5 +623,75 @@
                 "description": "Error al enviar el missatge"
             }
         }
+    },
+    {
+        "endpoint": "/api/sensor/config",
+        "method": "GET",
+        "description": "Obté la configuració del sensor (config.json)",
+        "response": {
+            "200": {
+                "description": "Configuració retornada correctament",
+                "body": "object"
+            },
+            "500": {
+                "description": "Error llegint o parsejant la configuració"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sensor/config",
+        "method": "PUT",
+        "description": "Actualitza la configuració del sensor (config.json)",
+        "request": {
+            "contentType": "application/json",
+            "body": "object"
+        },
+        "response": {
+            "200": {
+                "description": "Configuració guardada correctament",
+                "body": {
+                    "message": "Configuració guardada correctament",
+                    "config": "object"
+                }
+            },
+            "500": {
+                "description": "Error llegint, parsejant o guardant la configuració"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sensor/images",
+        "method": "POST",
+        "description": "Puja una imatge per al sensor",
+        "request": {
+            "contentType": "multipart/form-data",
+            "body": {
+                "image": "file"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Imatge pujada correctament",
+                "body": {
+                    "url": "string"
+                }
+            },
+            "400": {
+                "description": "No s'ha pujat cap fitxer"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/fileSensor/*",
+        "method": "GET",
+        "description": "Serveix fitxers estàtics de la carpeta 'sensor' (imatges, config, etc.)",
+        "response": {
+            "200": {
+                "description": "Fitxer servit correctament"
+            },
+            "404": {
+                "description": "Fitxer no trobat"
+            }
+        }
     }
 ]
