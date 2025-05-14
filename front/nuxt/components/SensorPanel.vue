@@ -91,7 +91,7 @@
                     <p class="text-slate-400 mb-6">
                         Estàs segur que vols eliminar el sensor
                         <span class="text-white font-bold">{{ sensorToDelete?.nombre || `Sensor ${sensorToDelete?.mac}`
-                        }}</span>?
+                            }}</span>?
                     </p>
                     <div class="flex justify-end gap-3">
                         <button @click="showDeleteModal = false"
@@ -156,10 +156,7 @@
                                 </h2>
                                 <div class="flex items-center mt-1">
                                     <span class="text-sm text-teal-400">{{ sensor.ubicacion || 'Ubicació no definida'
-                                    }}</span>
-                                    <span v-if="sensor.idAula" class="mx-2 text-slate-400">•</span>
-                                    <span v-if="sensor.idAula" class="text-sm text-slate-300">{{
-                                        getAulaName(sensor.idAula) }}</span>
+                                        }}</span>
                                 </div>
                             </div>
                             <div class="flex items-center">
@@ -226,7 +223,7 @@
                                 </h2>
                                 <div class="flex items-center mt-1">
                                     <span class="text-sm text-teal-400">{{ sensor.ubicacion || 'Ubicació no definida'
-                                        }}</span>
+                                    }}</span>
                                     <span v-if="sensor.idAula" class="mx-2 text-slate-400">•</span>
                                     <span v-if="sensor.idAula" class="text-sm text-slate-300">{{
                                         getAulaName(sensor.idAula) }}</span>
@@ -300,7 +297,7 @@
                                 </h2>
                                 <div class="flex items-center mt-1">
                                     <span class="text-sm text-teal-400">{{ sensor.ubicacion || 'Ubicació no definida'
-                                    }}</span>
+                                        }}</span>
                                 </div>
                             </div>
                             <div class="flex items-center">
