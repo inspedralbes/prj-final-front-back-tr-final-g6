@@ -35,7 +35,7 @@
         </div>
       </div>
 
-      <div v-if="userStore.isAdmin" class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg">
+      <div v-if="userStore.user?.admin === 1" class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div class="flex flex-wrap gap-3">
             <button
@@ -311,10 +311,11 @@ const confirmNewPopup = () => {
       y: tempPopupPosition.value.y,
       planta: plantaSeleccionada.value,
       temperature: Math.floor(Math.random() * 15) + 15, // 15-30°C
-      Humitat: Math.floor(Math.random() * 1600) + 400, // 400-2000 ppm
+      humetat: Math.floor(Math.random() * 1600) + 400, // 400-2000 ppm
       volume: Math.floor(Math.random() * 50) + 35, // 35-85 dB
-    });
-
+    };
+    
+    customPopups.value.push(newSensor);
     cancelNewPopup();
     isAddingPopup.value = false;
   }
