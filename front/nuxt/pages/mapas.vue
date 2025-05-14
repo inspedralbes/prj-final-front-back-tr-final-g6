@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-slate-900 flex flex-col">
     <Header />
     <!-- Gradient Header Section -->
-    <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6 relative">
+    <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6">
       <div class="max-w-7xl mx-auto flex flex-col items-center">
         <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">
           Mapes
@@ -27,7 +27,7 @@
               'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02]',
               plantaSeleccionada === planta
                 ? 'bg-teal-600 border-teal-600 text-white'
-                : 'bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700',
+                : 'bg-slate-700 border-slate-600 text-white',
             ]"
           >
             {{ planta }}
@@ -35,8 +35,7 @@
         </div>
       </div>
 
-      <!-- Sensor Controls -->
-      <div class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg">
+      <div v-if="userStore.isAdmin" class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div class="flex flex-wrap gap-3">
             <button
@@ -65,18 +64,15 @@
               <span>{{ isDeletingPopup ? "Terminar Borrado" : "Borrar Sensor" }}</span>
             </button>
           </div>
-
-          <div class="flex items-center gap-3">
-            <label class="text-sm text-teal-400 font-medium">Tipo de Sensor:</label>
-            <select
-              v-model="selectedSensorType"
-              class="bg-slate-700/50 border border-slate-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:outline-none"
-            >
-              <option value="temperature">Temperatura</option>
-              <option value="co2">CO2</option>
-              <option value="volume">Volumen</option>
-            </select>
-          </div>
+          <Dropdown
+            v-model="selectedSensorType"
+            :options="sensorTypes"
+            optionLabel="label"
+            optionValue="value"
+            class="w-48 [&>div]:bg-slate-700 [&>div]:border-slate-600 [&>div]:text-white"
+            panelClass="bg-slate-700 border border-slate-600 text-white"
+            placeholder="Tipus de Sensor"
+          />
         </div>
       </div>
 
@@ -121,10 +117,6 @@
             <!-- Contenido del popup -->
             <div
               v-if="showingPopupId === popup.id"
-              :class="[
-                'popup-content bg-slate-700 border-2 border-teal-500 rounded-2xl p-6 shadow-2xl min-w-[300px] relative animate-fadeIn',
-                getPopupPosition(popup).class,
-              ]"
               class="popup-content bg-slate-700 border-2 border-teal-500 rounded-xl p-6 shadow-2xl min-w-[300px] relative animate-fadeIn"
             >
               <button
@@ -207,6 +199,7 @@ import Header from "../components/header.vue";
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "~/stores/userStore";
+import Dropdown from 'primevue/dropdown';
 
 import Mapaplanta1 from "~/components/Plantes/MapaPlanta-1.vue";
 import Mapaplanta2 from "~/components/Plantes/MapaPlanta-2.vue";
@@ -219,6 +212,12 @@ const plantaSeleccionada = ref("PLANTA 1");
 const aulaData = ref([]);
 const fetchDataText = ref("");
 const selectedSensorType = ref("temperature");
+
+const sensorTypes = [
+  { label: 'Temperatura', value: 'temperature' },
+  { label: 'Humitat', value: 'humetat' },
+  { label: 'Volum', value: 'volume' }
+];
 
 // Estado para los pop-ups personalizados
 const activeSensors = ref([]);
@@ -311,11 +310,11 @@ const confirmNewPopup = () => {
       x: tempPopupPosition.value.x,
       y: tempPopupPosition.value.y,
       planta: plantaSeleccionada.value,
-      temperature: Math.floor(Math.random() * (25 - 18 + 1)) + 18, // 18-25°C
-      humedat: Math.floor(Math.random() * (70 - 30 + 1)) + 30, // 30-70%
-      volume: Math.floor(Math.random() * (80 - 40 + 1)) + 40, // 40-80 dB
-    };
-    customPopups.value.push(newSensor);
+      temperature: Math.floor(Math.random() * 15) + 15, // 15-30°C
+      Humitat: Math.floor(Math.random() * 1600) + 400, // 400-2000 ppm
+      volume: Math.floor(Math.random() * 50) + 35, // 35-85 dB
+    });
+
     cancelNewPopup();
     isAddingPopup.value = false;
   }
@@ -344,8 +343,8 @@ const getSensorLabel = () => {
   switch (selectedSensorType.value) {
     case "temperature":
       return "Temperatura";
-    case "co2":
-      return "CO2";
+    case "humetat":
+      return "Humitat";
     case "volume":
       return "Volumen";
     default:
@@ -356,13 +355,26 @@ const getSensorLabel = () => {
 const getSensorRange = () => {
   switch (selectedSensorType.value) {
     case "temperature":
-      return { low: 18, medium: 22, high: 25 };
+      return { min: 15, max: 30 };
     case "humetat":
-      return { low: 30, medium: 50, high: 70 };
+      return { min: 400, max: 2000 };
     case "volume":
       return { low: 40, medium: 60, high: 80 };
     default:
-      return { low: 0, medium: 50, high: 100 };
+      return { min: 0, max: 100 };
+  }
+};
+
+const getSensorValueNumber = (popup) => {
+  switch (selectedSensorType.value) {
+    case "temperature":
+      return popup.temperature;
+    case "humetat":
+      return popup.Humitat;
+    case "volume":
+      return popup.volume;
+    default:
+      return 0;
   }
 };
 
@@ -372,7 +384,7 @@ const getSensorValue = (popup) => {
     case "temperature":
       return `${value}°C`;
     case "humetat":
-      return `${value}%`;
+      return `${value}ppm`;
     case "volume":
       return `${value} dB`;
     default:
@@ -562,9 +574,11 @@ onMounted(async () => {
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -580,6 +594,7 @@ h1 {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -595,5 +610,44 @@ button {
 button:hover {
   transform: scale(1.02);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Estilos para el dropdown de PrimeVue */
+:deep(.p-dropdown) {
+  background: rgb(51, 65, 85);
+  border: 1px solid rgb(71, 85, 105);
+  transition: all 0.3s ease;
+}
+
+:deep(.p-dropdown:not(.p-disabled).p-focus) {
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2);
+  border-color: rgb(45, 212, 191);
+}
+
+:deep(.p-dropdown .p-dropdown-label) {
+  color: white;
+  padding: 0.5rem;
+}
+
+:deep(.p-dropdown .p-dropdown-trigger) {
+  color: rgb(148, 163, 184);
+  width: 2.5rem;
+}
+
+:deep(.p-dropdown-panel .p-dropdown-items .p-dropdown-item) {
+  color: white;
+  padding: 0.75rem 1rem;
+}
+
+:deep(.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight) {
+  background: rgba(45, 212, 191, 0.1);
+  color: rgb(45, 212, 191);
+}
+
+:deep(.p-dropdown-panel
+    .p-dropdown-items
+    .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover) {
+  background: rgb(51, 65, 85);
+  color: white;
 }
 </style>
