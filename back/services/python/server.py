@@ -108,10 +108,11 @@ def execute_scheduled_script(timeSpan):
     else:
         app.logger.error(f"Interval de temps no reconegut: {timeSpan}")
         return
+    send_agregated_data(output, timeSpan)
 
-    send_agregated_data(output)
-
-def send_agregated_data(data):
+def send_agregated_data(data, timeSpan):
+    app.logger.info("Enviant dades agregades a l'API per %s...", timeSpan)
+    app.logger.info("Dades a enviar: %s", data)
     try:
         # Assegura't que `data` sigui un JSON vàlid
         if isinstance(data, str):
@@ -135,6 +136,7 @@ def run_scheduler_minute():
     while True:
         now = datetime.now(BARCELONA_TZ)
         seconds_to_next_minute = 60 - now.second
+        app.logger.info("Esperant %d segons per executar el script de minut...", seconds_to_next_minute)
         time.sleep(seconds_to_next_minute)
         execute_scheduled_script("minut")
 
@@ -142,6 +144,7 @@ def run_scheduler_hour():
     while True:
         now = datetime.now(BARCELONA_TZ)
         seconds_to_next_hour = (60 - now.second) + (60 * (60 - now.minute))
+        app.logger.info("Esperant %d segons per executar el script d'hora...", seconds_to_next_hour)
         time.sleep(seconds_to_next_hour)
         execute_scheduled_script("hora")
 
@@ -149,6 +152,7 @@ def run_scheduler_day():
     while True:
         now = datetime.now(BARCELONA_TZ)
         seconds_to_next_day = (60 - now.second) + (60 * (60 - now.minute)) + (24 * 60 * (24 - now.hour))
+        app.logger.info("Esperant %d segons per executar el script de dia...", seconds_to_next_day)
         time.sleep(seconds_to_next_day)
         execute_scheduled_script("dia")
 
@@ -157,6 +161,7 @@ def run_scheduler_week():
         now = datetime.now(BARCELONA_TZ)
         days_to_next_week = (7 - now.weekday()) % 7
         seconds_to_next_week = (60 - now.second) + (60 * (60 - now.minute)) + (24 * 60 * (24 * days_to_next_week - now.hour))
+        app.logger.info("Esperant %d segons per executar el script de setmana...", seconds_to_next_week)
         time.sleep(seconds_to_next_week)
         execute_scheduled_script("setmana")
 
@@ -165,6 +170,7 @@ def run_scheduler_month():
         now = datetime.now(BARCELONA_TZ)
         days_to_next_month = (30 - now.day) % 30
         seconds_to_next_month = (60 - now.second) + (60 * (60 - now.minute)) + (24 * 60 * (24 * days_to_next_month - now.hour))
+        app.logger.info("Esperant %d segons per executar el script de mes...", seconds_to_next_month)
         time.sleep(seconds_to_next_month)
         execute_scheduled_script("mes")
 
