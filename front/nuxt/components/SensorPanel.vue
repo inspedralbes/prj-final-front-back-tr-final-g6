@@ -4,7 +4,8 @@
         <Header />
 
         <!-- Confirmation Popup -->
-        <div v-if="showConfirmationPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div v-if="showConfirmationPopup"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-md border border-slate-700">
                 <div class="p-6">
                     <h2 class="text-2xl font-bold text-white mb-4">Confirmació</h2>
@@ -42,12 +43,6 @@
                                 class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-slate-400 mb-1">Ubicació</label>
-                            <input v-model="editForm.ubicacion" type="text"
-                                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
-                        </div>
-
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-slate-400 mb-1">Coordenada X</label>
@@ -62,12 +57,12 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-slate-400 mb-1">Aula</label>
+                            <label class="block text-sm font-medium text-slate-400 mb-1">Ubicació</label>
                             <select v-model="editForm.idAula"
                                 class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
                                 <option :value="null">No assignada</option>
                                 <option v-for="aula in aulas" :key="aula.id" :value="aula.id">
-                                    {{ aula.id }} - {{ aula.Curs }}
+                                    {{ aula.Curs }}
                                 </option>
                             </select>
                         </div>
@@ -162,9 +157,6 @@
                                 <div class="flex items-center mt-1">
                                     <span class="text-sm text-teal-400">{{ sensor.ubicacion || 'Ubicació no definida'
                                         }}</span>
-                                    <span v-if="sensor.idAula" class="mx-2 text-slate-400">•</span>
-                                    <span v-if="sensor.idAula" class="text-sm text-slate-300">{{
-                                        getAulaName(sensor.idAula) }}</span>
                                 </div>
                             </div>
                             <div class="flex items-center">
@@ -203,10 +195,6 @@
                                 <div>
                                     <p class="text-sm text-slate-400">Coordenada Y:</p>
                                     <p class="text-lg text-white">{{ sensor.y }}</p>
-                                </div>
-                                <div v-if="sensor.idAula">
-                                    <p class="text-sm text-slate-400">Aula assignada:</p>
-                                    <p class="text-lg text-white">{{ getAulaName(sensor.idAula) }}</p>
                                 </div>
                             </div>
                             <div class="flex flex-wrap gap-3 pt-4">
@@ -407,16 +395,31 @@ const currentEditingSensor = ref(null);
 
 const handleEditSensor = (sensor) => {
     currentEditingSensor.value = sensor;
+    // Buscar el aula cuyo nombre (Curs) coincida con la ubicación del sensor
+    let aulaId = null;
+    if (sensor.ubicacion) {
+        const aula = aulas.value.find(a => a.Curs === sensor.ubicacion);
+        if (aula) aulaId = aula.id;
+    }
     editForm.value = {
         idSensor: sensor.idSensor,
         nombre: sensor.nombre || '',
         ubicacion: sensor.ubicacion || '',
         x: sensor.x || 0,
         y: sensor.y || 0,
-        idAula: sensor.idAula || null
+        idAula: aulaId
     };
     showEditModal.value = true;
 };
+
+watch(() => editForm.value.idAula, (newId) => {
+    if (newId) {
+        const aula = aulas.value.find(a => a.id === newId);
+        editForm.value.ubicacion = aula ? aula.Curs : '';
+    } else {
+        editForm.value.ubicacion = '';
+    }
+});
 
 const submitEditForm = async () => {
     try {

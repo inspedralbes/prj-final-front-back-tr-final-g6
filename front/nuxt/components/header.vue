@@ -52,7 +52,7 @@
                   <span>Administració</span>
                 </router-link>
 
-                <router-link v-if="isAdmin" to="/mapas" 
+                <router-link to="/mapas" 
                   class="flex items-center px-4 py-3 text-slate-200 hover:bg-slate-700 transition-colors"
                   @click="isMenuVisible = false">
                   <i class="pi pi-map mr-3"></i>

@@ -125,9 +125,9 @@ app.post('/api/login', (req, res) => {
       if (user.contrasenya === contrasenya) {
         // Eliminamos la contraseña antes de enviar los datos del usuario
         const { contrasenya, ...userWithoutPassword } = user;
-        res.status(200).send({ 
-          message: 'Login successful', 
-          user: userWithoutPassword 
+        res.status(200).send({
+          message: 'Login successful',
+          user: userWithoutPassword
         });
       } else {
         res.status(401).send({ message: 'Credencials incorrectes' });
@@ -332,13 +332,13 @@ app.get('/api/aules/:id/grafic', (req, res) => {
 app.get('/api/sensors', (req, res) => {
   const query = 'SELECT * FROM sensor';
   connexioBD.execute(query, (err, results) => {
-      if (err) {
-          console.error('Error en la consulta a la base de dades: ' + err.stack);
-          res.status(500).send('Error en la consulta a la base de dades');
-          return;
-      }
-      console.log('Resultados obtenidos:', results); // Log para depuración
-      res.status(200).send(results);
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+    console.log('Resultados obtenidos:', results); // Log para depuración
+    res.status(200).send(results);
   });
 });
 
@@ -409,11 +409,11 @@ app.put('/api/newsensors/:id/accept', (req, res) => {
   const { id } = req.params;
   const query = 'UPDATE newsensor SET accepted = 1 WHERE id = ?';
   connexioBD.execute(query, [id], (err, results) => {
-      if (err) {
-          console.error('Error en la consulta a la base de dades:', err);
-          return res.status(500).send('Error en la consulta a la base de dades');
-      }
-      res.status(200).send({ message: 'Sensor acceptat correctament' });
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err);
+      return res.status(500).send('Error en la consulta a la base de dades');
+    }
+    res.status(200).send({ message: 'Sensor acceptat correctament' });
   });
 });
 
@@ -421,45 +421,70 @@ app.put('/api/newsensors/:id/reject', (req, res) => {
   const { id } = req.params;
   const query = 'UPDATE newsensor SET accepted = 0, banned = 1 WHERE id = ?';
   connexioBD.execute(query, [id], (err, results) => {
-      if (err) {
-          console.error('Error en la consulta a la base de dades:', err);
-          return res.status(500).send('Error en la consulta a la base de dades');
-      }
-      res.status(200).send({ message: 'Sensor rebutjat correctament' });
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err);
+      return res.status(500).send('Error en la consulta a la base de dades');
+    }
+    res.status(200).send({ message: 'Sensor rebutjat correctament' });
   });
 });
 
 app.put('/api/newsensors/:id/status', (req, res) => {
   const { id } = req.params;
-  const { status } = req.body; // status should be 'accept' or 'reject'
+  const { status } = req.body;
 
   if (!['accept', 'reject'].includes(status)) {
     return res.status(400).send({ message: 'El estado debe ser "accept" o "reject"' });
   }
 
-  const query =
-    status === 'accept'
-      ? 'UPDATE newsensor SET accepted = 1, banned = 0 WHERE idSensor = ?'
-      : 'UPDATE newsensor SET accepted = 0, banned = 1 WHERE idSensor = ?';
-
-  console.log('Executing query:', query, 'with idSensor:', id); // Debugging log
-
-  connexioBD.execute(query, [id], (err, results) => {
-    if (err) {
-      console.error('Error en la consulta a la base de dades:', err); // Log the error
-      return res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
-    }
-
-    if (results.affectedRows > 0) {
-      const message =
-        status === 'accept'
-          ? 'Sensor acceptat correctament'
-          : 'Sensor rebutjat correctament';
-      res.status(200).send({ message });
-    } else {
-      res.status(404).send({ message: 'Sensor no trobat' });
-    }
-  });
+  if (status === 'accept') {
+    // Obtener datos del newsensor
+    const selectQuery = 'SELECT * FROM newsensor WHERE idSensor = ?';
+    connexioBD.execute(selectQuery, [id], (err, results) => {
+      if (err || results.length === 0) {
+        return res.status(500).send({ message: 'Error obteniendo el sensor pendiente' });
+      }
+      const newsensor = results[0];
+      // Generar api_key
+      const apiKey = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      // Insertar en sensor
+      const insertQuery = 'INSERT INTO sensor (mac, api_key, nombre, ubicacion, x, y, idAula) VALUES (?, ?, ?, ?, ?, ?, ?)';
+      connexioBD.execute(
+        insertQuery,
+        [
+          newsensor.mac,
+          apiKey,
+          `Sensor ${newsensor.mac}`,
+          'Ubicación no definida',
+          0,
+          0,
+          null
+        ],
+        (err2) => {
+          if (err2) {
+            return res.status(500).send({ message: 'Error insertando en sensor' });
+          }
+          // Actualizar newsensor
+          const updateQuery = 'UPDATE newsensor SET accepted = 1, banned = 0 WHERE idSensor = ?';
+          connexioBD.execute(updateQuery, [id], (err3) => {
+            if (err3) {
+              return res.status(500).send({ message: 'Error actualizando newsensor' });
+            }
+            res.status(200).send({ message: 'Sensor aceptado y guardado correctamente' });
+          });
+        }
+      );
+    });
+  } else {
+    // Rechazar: solo actualizar newsensor
+    const query = 'UPDATE newsensor SET accepted = 0, banned = 1 WHERE idSensor = ?';
+    connexioBD.execute(query, [id], (err, results) => {
+      if (err) {
+        return res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
+      }
+      res.status(200).send({ message: 'Sensor rechazado correctamente' });
+    });
+  }
 });
 
 app.put('/api/newsensors/:id/unban', (req, res) => {
@@ -615,8 +640,8 @@ app.post('/api/data/mysql', (req, res) => {
 
 
   const currentDate = moment.tz('Europe/Madrid');
-  const dataIni = currentDate.format('YYYY-MM-DD HH:mm:ss'); 
-  const dataFi = currentDate.add(1, 'minute').format('YYYY-MM-DD HH:mm:ss'); 
+  const dataIni = currentDate.format('YYYY-MM-DD HH:mm:ss');
+  const dataFi = currentDate.add(1, 'minute').format('YYYY-MM-DD HH:mm:ss');
 
   const values = Object.entries(sensors).flatMap(([idSensor, { volume, temperature, humidity }]) => [
     [1, idSensor, 'volum', volume.max, volume.min, volume.avg, dataIni, dataFi],
@@ -647,7 +672,7 @@ app.get('/api/data/mysql', (req, res) => {
 
   dataIni = dataIni.replace('T', ' ');
   dataFi = dataFi.replace('T', ' ');
-  
+
   if (timeSpan === 'hora') {
     timeSpan = 'minut';
   } else if (timeSpan === 'dia') {
@@ -689,7 +714,7 @@ async function verifyAPI(req, res, next) {
     if (results.length === 0) {
       return res.status(403).json({ message: 'API key no válida' });
     }
-    
+
     next();
   });
 }
