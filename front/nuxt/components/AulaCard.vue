@@ -87,7 +87,10 @@
               <!-- Indicadores de sensores -->
               <div class="grid grid-cols-3 gap-3 mb-6">
                 <!-- Temperatura -->
-                <div class="flex flex-col items-center p-2 rounded-lg bg-slate-700/50 border border-slate-600">
+                <div
+                  class="flex flex-col items-center p-2 rounded-lg border"
+                  :style="getTempStyle(sensorValues[aula.id]?.temperatura)"
+                >
                   <i class="fas fa-temperature-high text-amber-400 mb-1"></i>
                   <span class="text-xs text-slate-300">Temp.</span>
                   <span class="text-sm font-medium text-white">
@@ -97,7 +100,10 @@
                   </span>
                 </div>
                 <!-- Humetat -->
-                <div class="flex flex-col items-center p-2 rounded-lg bg-slate-700/50 border border-slate-600">
+                <div
+                  class="flex flex-col items-center p-2 rounded-lg border"
+                  :style="getHumitatStyle(sensorValues[aula.id]?.humitat)"
+                >
                   <i class="fas fa-tint text-emerald-400 mb-1"></i>
                   <span class="text-xs text-slate-300">Humetat</span>
                   <span class="text-sm font-medium text-white">
@@ -107,7 +113,10 @@
                   </span>
                 </div>
                 <!-- Volumen -->
-                <div class="flex flex-col items-center p-2 rounded-lg bg-slate-700/50 border border-slate-600">
+                <div
+                  class="flex flex-col items-center p-2 rounded-lg border"
+                  :style="getVolumStyle(sensorValues[aula.id]?.volum)"
+                >
                   <i class="fas fa-volume-up text-blue-400 mb-1"></i>
                   <span class="text-xs text-slate-300">Vol.</span>
                   <span class="text-sm font-medium text-white">
@@ -230,6 +239,49 @@ const clearFilters = () => {
   searchQuery.value = "";
   selectedEtapa.value = null;
 };
+
+// --- COLORES DINÁMICOS PARA LOS INDICADORES ---
+
+const tempColorRanges = [
+  { max: 20, border: '#60a5fa', background: 'rgba(96, 165, 250, 0.5)' }, // azul
+  { max: 30, border: '#34d399', background: 'rgba(52, 211, 153, 0.5)' }, // verde
+  { max: Infinity, border: '#f87171', background: 'rgba(248, 113, 113, 0.5)' } // rojo
+];
+
+const volumColorRanges = [
+  { max: 70, border: '#2ecc71', background: 'rgba(46, 204, 113, 0.5)' }, // verde
+  { max: 80, border: '#f1c40f', background: 'rgba(241, 196, 15, 0.5)' }, // amarillo
+  { max: Infinity, border: '#e73c3c', background: 'rgba(231, 60, 60, 0.5)' } // rojo
+];
+
+function getTempStyle(temp) {
+  if (temp == null) return {};
+  const range = tempColorRanges.find(r => temp <= r.max);
+  return {
+    borderColor: range.border,
+    background: range.background
+  };
+}
+
+function getVolumStyle(volum) {
+  if (volum == null) return {};
+  const range = volumColorRanges.find(r => volum <= r.max);
+  return {
+    borderColor: range.border,
+    background: range.background
+  };
+}
+
+function getHumitatStyle(humitat) {
+  if (humitat == null) return {};
+  if (humitat < 30) {
+    return { borderColor: '#60a5fa', background: 'rgba(96, 165, 250, 0.5)' }; // azul
+  }
+  if (humitat < 60) {
+    return { borderColor: '#34d399', background: 'rgba(52, 211, 153, 0.5)' }; // verde
+  }
+  return { borderColor: '#f87171', background: 'rgba(248, 113, 113, 0.5)' }; // rojo
+}
 </script>
 
 <style scoped>
