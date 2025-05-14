@@ -772,7 +772,7 @@ app.put('/api/sensor/config', (req, res) => {
 
     const mergedConfig = { ...currentConfig, ...newConfig };
 
-    mergedConfig.date = new Date().toISOString();
+    mergedConfig.date = moment.tz('Europe/Madrid').format();
 
     fs.writeFile(configPath, JSON.stringify(mergedConfig, null, 2), 'utf8', (err) => {
       if (err) {
