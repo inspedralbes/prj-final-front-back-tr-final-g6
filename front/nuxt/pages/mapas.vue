@@ -131,7 +131,7 @@
             <!-- Punto indicador -->
             <div
               :class="[
-                'marker-point w-8 h-8 rounded-full absolute -top-4 -left-4 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200',
+                'marker-point w-8 h-8 rounded-full absolute -top-4 -left-4 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200 bg-gradient-to-r',
                 getMarkerColor(popup),
               ]"
               @click.stop="
@@ -667,6 +667,64 @@ onMounted(async () => {
 .marker-point {
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.marker-point i {
+  position: relative;
+  z-index: 2;
+}
+
+.bg-red-500 {
+  background: linear-gradient(45deg, #ef4444, #dc2626);
+  animation: markerGradientHot 4s infinite;
+}
+
+.bg-yellow-500 {
+  background: linear-gradient(45deg, #eab308, #f59e0b);
+  animation: markerGradientWarm 4s infinite;
+}
+
+.bg-green-500 {
+  background: linear-gradient(45deg, #22c55e, #15803d);
+  animation: markerGradientCool 4s infinite;
+}
+
+@keyframes markerGradientHot {
+  0% {
+    background: linear-gradient(0deg, #ef4444, #dc2626);
+  }
+  50% {
+    background: linear-gradient(180deg, #b91c1c, #ef4444);
+  }
+  100% {
+    background: linear-gradient(360deg, #ef4444, #dc2626);
+  }
+}
+
+@keyframes markerGradientWarm {
+  0% {
+    background: linear-gradient(0deg, #eab308, #f59e0b);
+  }
+  50% {
+    background: linear-gradient(180deg, #d97706, #eab308);
+  }
+  100% {
+    background: linear-gradient(360deg, #eab308, #f59e0b);
+  }
+}
+
+@keyframes markerGradientCool {
+  0% {
+    background: linear-gradient(0deg, #22c55e, #15803d);
+  }
+  50% {
+    background: linear-gradient(180deg, #16a34a, #22c55e);
+  }
+  100% {
+    background: linear-gradient(360deg, #22c55e, #15803d);
+  }
 }
 
 .marker-point::before {
