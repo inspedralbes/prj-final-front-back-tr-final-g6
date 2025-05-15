@@ -46,18 +46,6 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-slate-400 mb-1">WiFi SSID</label>
-                <input v-model="sensorConfig.wifi_ssid" type="text"
-                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-slate-400 mb-1">WiFi Password</label>
-                <input v-model="sensorConfig.wifi_password" type="password"
-                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
-              </div>
-
-              <div>
                 <label class="block text-sm font-medium text-slate-400 mb-1">Vref So (vref_sound)</label>
                 <input v-model.number="sensorConfig.vref_sound" type="number" step="0.01" min="0"
                   class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
