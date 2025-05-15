@@ -678,53 +678,59 @@ onMounted(async () => {
 
 .bg-red-500 {
   background: linear-gradient(45deg, #ef4444, #dc2626);
-  animation: markerGradientHot 4s infinite;
+  animation: markerGradientHot 2s infinite linear;
 }
 
 .bg-yellow-500 {
   background: linear-gradient(45deg, #eab308, #f59e0b);
-  animation: markerGradientWarm 4s infinite;
+  animation: markerGradientWarm 2s infinite linear;
 }
 
 .bg-green-500 {
   background: linear-gradient(45deg, #22c55e, #15803d);
-  animation: markerGradientCool 4s infinite;
+  animation: markerGradientCool 2s infinite linear;
 }
 
 @keyframes markerGradientHot {
-  0% {
-    background: linear-gradient(0deg, #ef4444, #dc2626);
-  }
-  50% {
-    background: linear-gradient(180deg, #b91c1c, #ef4444);
-  }
-  100% {
-    background: linear-gradient(360deg, #ef4444, #dc2626);
-  }
+  0% { background: linear-gradient(0deg, #ef4444, #dc2626); }
+  10% { background: linear-gradient(36deg, #ef4444, #b91c1c); }
+  20% { background: linear-gradient(72deg, #dc2626, #ef4444); }
+  30% { background: linear-gradient(108deg, #b91c1c, #dc2626); }
+  40% { background: linear-gradient(144deg, #ef4444, #b91c1c); }
+  50% { background: linear-gradient(180deg, #dc2626, #ef4444); }
+  60% { background: linear-gradient(216deg, #b91c1c, #dc2626); }
+  70% { background: linear-gradient(252deg, #ef4444, #b91c1c); }
+  80% { background: linear-gradient(288deg, #dc2626, #ef4444); }
+  90% { background: linear-gradient(324deg, #b91c1c, #dc2626); }
+  100% { background: linear-gradient(360deg, #ef4444, #dc2626); }
 }
 
 @keyframes markerGradientWarm {
-  0% {
-    background: linear-gradient(0deg, #eab308, #f59e0b);
-  }
-  50% {
-    background: linear-gradient(180deg, #d97706, #eab308);
-  }
-  100% {
-    background: linear-gradient(360deg, #eab308, #f59e0b);
-  }
+  0% { background: linear-gradient(0deg, #eab308, #f59e0b); }
+  10% { background: linear-gradient(36deg, #f59e0b, #d97706); }
+  20% { background: linear-gradient(72deg, #d97706, #eab308); }
+  30% { background: linear-gradient(108deg, #eab308, #f59e0b); }
+  40% { background: linear-gradient(144deg, #f59e0b, #d97706); }
+  50% { background: linear-gradient(180deg, #d97706, #eab308); }
+  60% { background: linear-gradient(216deg, #eab308, #f59e0b); }
+  70% { background: linear-gradient(252deg, #f59e0b, #d97706); }
+  80% { background: linear-gradient(288deg, #d97706, #eab308); }
+  90% { background: linear-gradient(324deg, #eab308, #f59e0b); }
+  100% { background: linear-gradient(360deg, #f59e0b, #d97706); }
 }
 
 @keyframes markerGradientCool {
-  0% {
-    background: linear-gradient(0deg, #22c55e, #15803d);
-  }
-  50% {
-    background: linear-gradient(180deg, #16a34a, #22c55e);
-  }
-  100% {
-    background: linear-gradient(360deg, #22c55e, #15803d);
-  }
+  0% { background: linear-gradient(0deg, #22c55e, #15803d); }
+  10% { background: linear-gradient(36deg, #15803d, #16a34a); }
+  20% { background: linear-gradient(72deg, #16a34a, #22c55e); }
+  30% { background: linear-gradient(108deg, #22c55e, #15803d); }
+  40% { background: linear-gradient(144deg, #15803d, #16a34a); }
+  50% { background: linear-gradient(180deg, #16a34a, #22c55e); }
+  60% { background: linear-gradient(216deg, #22c55e, #15803d); }
+  70% { background: linear-gradient(252deg, #15803d, #16a34a); }
+  80% { background: linear-gradient(288deg, #16a34a, #22c55e); }
+  90% { background: linear-gradient(324deg, #22c55e, #15803d); }
+  100% { background: linear-gradient(360deg, #15803d, #16a34a); }
 }
 
 .marker-point::before {
