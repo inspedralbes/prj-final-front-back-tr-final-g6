@@ -221,6 +221,28 @@ export async function getMapa(bodyRequest) {
     }
 }
 
+export async function getAllGraficData(dataIni, dataFi) {
+    if (!dataIni || !dataFi) {
+        throw new Error("dataIni i dataFi són necessaris");
+    }
+
+    try {
+        const queryParams = new URLSearchParams({ dataIni, dataFi }).toString();
+        const response = await fetch(`${getBaseUrl()}/api/grafics/all?${queryParams}`);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al obtener los datos de los gráficos');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error al obtener los datos de los gráficos:', error);
+        throw error;
+    }
+}
+
 export async function getDadesGrafic(taula, tipus, idAula, dataIni, dataFi) {
     if (!taula || !tipus || !idAula || !dataIni || !dataFi) {
         throw new Error("taula, tipus, idAula, dataIni i dataFi són necessaris");

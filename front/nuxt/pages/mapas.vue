@@ -16,93 +16,151 @@
     <!-- Main Content -->
     <div class="w-full max-w-7xl mx-auto px-4 py-6 flex-grow">
       <!-- Plantas Selection -->
-      <div class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg">
+      <div class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg text-center">
         <h2 class="text-xl font-semibold text-white mb-4">Selecciona una Planta</h2>
-        <div class="flex flex-wrap gap-3">
-          <button v-for="planta in plantas" :key="planta" @click="seleccionarPlanta(planta)" :class="[
-            'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02]',
-            plantaSeleccionada === planta
-              ? 'bg-teal-600 border-teal-600 text-white'
-              : 'bg-slate-700 border-slate-600 text-white'
-          ]">
+        <div class="flex flex-wrap gap-3 justify-center">
+          <button
+            v-for="planta in plantas"
+            :key="planta"
+            @click="seleccionarPlanta(planta)"
+            :class="[
+              'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02]',
+              plantaSeleccionada === planta
+                ? 'bg-teal-600 border-teal-600 text-white'
+                : 'bg-slate-700 border-slate-600 text-white',
+            ]"
+          >
             {{ planta }}
           </button>
         </div>
       </div>
 
-      <div v-if="userStore.isAdmin" class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg">
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div class="flex flex-wrap gap-3">
-            <button @click="togglePopupMode" :class="[
-              'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2',
-              isAddingPopup
-                ? 'bg-red-600 border-red-600 text-white'
-                : 'bg-teal-600 border-teal-600 text-white'
-            ]">
+      <div
+        v-if="userStore.user?.admin === 1"
+        class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg"
+      >
+        <div class="flex flex-col items-center gap-4">
+          <div class="flex flex-wrap gap-3 justify-center">
+            <button
+              @click="togglePopupMode"
+              :class="[
+                'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2',
+                isAddingPopup
+                  ? 'bg-red-600 border-red-600 text-white'
+                  : 'bg-teal-600 border-teal-600 text-white',
+              ]"
+            >
               <i :class="isAddingPopup ? 'fas fa-times' : 'fas fa-microchip'"></i>
-              <span>{{ isAddingPopup ? "Cancelar" : "Agregar Sensor" }}</span>
+              <span>{{ isAddingPopup ? 'Cancelar' : 'Agregar Sensor' }}</span>
             </button>
-            <button v-if="customPopups.length > 0" @click="toggleDeleteMode" :class="[
-              'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2',
-              isDeletingPopup
-                ? 'bg-emerald-600 border-emerald-600 text-white'
-                : 'bg-amber-600 border-amber-600 text-white'
-            ]">
+            <button
+              v-if="customPopups.length > 0"
+              @click="toggleDeleteMode"
+              :class="[
+                'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2',
+                isDeletingPopup
+                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  : 'bg-amber-600 border-amber-600 text-white',
+              ]"
+            >
               <i :class="isDeletingPopup ? 'fas fa-check' : 'fas fa-trash'"></i>
               <span>{{ isDeletingPopup ? "Terminar Borrado" : "Borrar Sensor" }}</span>
             </button>
           </div>
-          <Dropdown v-model="selectedSensorType" :options="sensorTypes" optionLabel="label" optionValue="value"
-            class="w-48 [&>div]:bg-slate-700 [&>div]:border-slate-600 [&>div]:text-white"
-            panelClass="bg-slate-700 border border-slate-600 text-white" placeholder="Tipus de Sensor" />
         </div>
       </div>
 
       <!-- Map Container -->
       <div class="bg-slate-800 rounded-lg p-2 shadow-lg mb-6">
-        <div class="relative w-full h-[65vh] min-h-[600px] rounded-xl overflow-hidden border-2 border-slate-700"
-          @click="handleMapClick" :style="{ cursor: isAddingPopup ? 'crosshair' : 'default' }">
-          <Mapaplanta1 v-if="plantaSeleccionada === 'PLANTA 1'" :aulaData="aulaData" />
-          <Mapaplanta2 v-if="plantaSeleccionada === 'PLANTA 2'" :aulaData="aulaData" />
-          <Mapaplanta3 v-if="plantaSeleccionada === 'PLANTA 3'" :aulaData="aulaData" />
-          <MapaPlantaBaixa v-if="plantaSeleccionada === 'PLANTA BAJA'" :aulaData="aulaData" />
-          <MapaPlantaSubterranea v-if="plantaSeleccionada === 'PLANTA SUBTERRANEA'" :aulaData="aulaData" />
+        <div
+          class="relative w-full h-[65vh] min-h-[600px] rounded-xl overflow-hidden border-2 border-slate-700"
+          @click="handleMapClick"
+          :style="{ cursor: isAddingPopup ? 'crosshair' : 'default' }"
+        >
+          <Mapaplanta1 
+            v-if="plantaSeleccionada === 'PLANTA 1'" 
+            :aulaData="aulaData"
+            imageUrl="/planos/planta1.png"
+          />
+          <Mapaplanta2 
+            v-if="plantaSeleccionada === 'PLANTA 2'" 
+            :aulaData="aulaData"
+            imageUrl="/planos/planta2.png"
+          />
+          <Mapaplanta3 
+            v-if="plantaSeleccionada === 'PLANTA 3'" 
+            :aulaData="aulaData"
+            imageUrl="/planos/planta3.png"
+          />
+          <MapaPlantaBaixa
+            v-if="plantaSeleccionada === 'PLANTA BAJA'"
+            :aulaData="aulaData"
+            imageUrl="/planos/plantabaja.png"
+          />
+          <MapaPlantaSubterranea
+            v-if="plantaSeleccionada === 'PLANTA SUBTERRANEA'"
+            :aulaData="aulaData"
+            imageUrl="/planos/plantasubterranea.png"
+          />
 
           <!-- Pop-ups personalizados -->
-          <div v-for="popup in filteredPopups" :key="popup.id" :style="{ left: popup.x + 'px', top: popup.y + 'px' }"
-            class="custom-popup absolute">
+          <div
+            v-for="popup in filteredPopups"
+            :key="popup.id"
+            :style="{ left: popup.x + 'px', top: popup.y + 'px' }"
+            class="custom-popup absolute"
+          >
             <!-- Punto indicador -->
-            <div :class="[
-              'marker-point w-6 h-6 rounded-full absolute -top-3 -left-3 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200',
-              getMarkerColor(popup),
-            ]" @click.stop="
+            <div
+              :class="[
+                'marker-point w-6 h-6 rounded-full absolute -top-3 -left-3 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200',
+                getMarkerColor(popup),
+              ]"
+              @click.stop="
                 isDeletingPopup ? deletePopup(popup.id) : (showingPopupId = popup.id)
-                ">
+              "
+            >
               <i class="fas fa-map-marker-alt text-white"></i>
             </div>
             <!-- Contenido del popup -->
-            <div v-if="showingPopupId === popup.id"
-              class="popup-content bg-slate-700 border-2 border-teal-500 rounded-xl p-6 shadow-2xl min-w-[300px] relative animate-fadeIn">
-              <button @click="showingPopupId = null"
-                class="delete-btn absolute -top-4 -right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-lg hover:bg-red-700 transition-all">
+            <div
+              v-if="showingPopupId === popup.id"
+              class="popup-content bg-slate-700 border-2 border-teal-500 rounded-xl p-6 shadow-2xl min-w-[300px] relative animate-fadeIn"
+            >
+              <button
+                @click="showingPopupId = null"
+                class="delete-btn absolute -top-4 -right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-lg hover:bg-red-700 transition-all"
+              >
                 <i class="fas fa-times"></i>
               </button>
-              <div class="text-white text-lg font-semibold mb-2 flex items-center justify-between">
+              <div
+                class="text-white text-lg font-semibold mb-2 flex items-center justify-between"
+              >
                 <span>{{ popup.text }}</span>
                 <span class="text-sm text-gray-400">ID: {{ popup.id }}</span>
               </div>
               <div class="text-gray-300">
-                <div class="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg">
+                <div
+                  class="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg"
+                >
                   <div class="flex items-center space-x-2">
-                    <div :class="['w-3 h-3 rounded-full', getSensorStatusColorByType(popup)]"></div>
+                    <div
+                      :class="['w-3 h-3 rounded-full', getSensorStatusColorByType(popup)]"
+                    ></div>
                     <span class="text-sm">{{ getSensorLabel() }}</span>
                   </div>
-                  <span :class="[getSensorStatusColorByType(popup).replace('bg-', 'text-')]"
-                    class="text-lg font-bold">{{ getSensorValue(popup) }}</span>
+                  <span
+                    :class="[getSensorStatusColorByType(popup).replace('bg-', 'text-')]"
+                    class="text-lg font-bold"
+                    >{{ getSensorValue(popup) }}</span
+                  >
                 </div>
               </div>
-              <button v-if="isDeletingPopup" @click.stop="deletePopup(popup.id)"
-                class="delete-btn absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600">
+              <button
+                v-if="isDeletingPopup"
+                @click.stop="deletePopup(popup.id)"
+                class="delete-btn absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+              >
                 <i class="fas fa-times text-xs"></i>
               </button>
             </div>
@@ -111,21 +169,39 @@
       </div>
     </div>
 
-    <!-- Formulario para nuevo pop-up -->
-    <div v-if="showPopupForm"
-      class="popup-form fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <!-- Selector de sensores activos -->
+    <div
+      v-if="showPopupForm"
+      class="popup-form fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+    >
       <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 max-w-md w-full">
-        <div class="form-header text-xl font-bold text-white mb-4">Nuevo Sensor</div>
-        <input v-model="newPopupText" placeholder="Texto del Sensor"
-          class="popup-input w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all mb-4"
-          @keyup.enter="confirmNewPopup" @keyup.esc="cancelNewPopup" />
-        <div class="flex space-x-3 justify-end">
-          <button @click="confirmNewPopup"
-            class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-emerald-700 hover:scale-[1.02]">
-            <i class="fas fa-check mr-2"></i>Confirmar
-          </button>
-          <button @click="cancelNewPopup"
-            class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-red-700 hover:scale-[1.02]">
+        <div class="form-header text-xl font-bold text-white mb-4">Seleccionar Sensor</div>
+        
+        <!-- Lista de sensores activos -->
+        <div class="space-y-2 max-h-[400px] overflow-y-auto mb-4">
+          <div
+            v-for="sensor in availableSensors"
+            :key="sensor.idSensor"
+            @click="selectSensor(sensor)"
+            class="p-4 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors"
+          >
+            <div class="flex justify-between items-center text-white">
+              <div>
+                <div class="font-semibold">{{ sensor.nombre }}</div>
+                <div class="text-sm text-gray-400">MAC: {{ sensor.mac }}</div>
+                <div class="text-sm text-gray-400">Ubicación: {{ sensor.ubicacion }}</div>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón para cancelar -->
+        <div class="flex justify-end">
+          <button
+            @click="cancelNewPopup"
+            class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-red-700 hover:scale-[1.02]"
+          >
             <i class="fas fa-times mr-2"></i>Cancelar
           </button>
         </div>
@@ -135,11 +211,12 @@
 </template>
 
 <script setup>
+import { getMapa, getAllSensors } from '~/utils/communicationManager';
 import Header from "../components/header.vue";
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "~/stores/userStore";
-import Dropdown from 'primevue/dropdown';
+import Dropdown from "primevue/dropdown";
 
 import Mapaplanta1 from "~/components/Plantes/MapaPlanta-1.vue";
 import Mapaplanta2 from "~/components/Plantes/MapaPlanta-2.vue";
@@ -151,22 +228,38 @@ const plantas = ["PLANTA BAJA", "PLANTA 1", "PLANTA 2", "PLANTA 3", "PLANTA SUBT
 const plantaSeleccionada = ref("PLANTA 1");
 const aulaData = ref([]);
 const fetchDataText = ref("");
-const selectedSensorType = ref("temperature");
-
-const sensorTypes = [
-  { label: 'Temperatura', value: 'temperature' },
-  { label: 'Humitat', value: 'humetat' },
-  { label: 'Volum', value: 'volume' }
-];
+// Eliminado el filtro de tipos de sensor que no se usa
 
 // Estado para los pop-ups personalizados
+const activeSensors = ref([]);
 const customPopups = ref([]);
+const showingPopupId = ref(null);
 const isAddingPopup = ref(false);
 const isDeletingPopup = ref(false);
+
+// Cargar sensores activos al montar el componente
+onMounted(async () => {
+  try {
+    console.log('Cargando sensores activos...');
+    const data = await getAllSensors();
+    console.log('Datos de sensores recibidos:', data);
+    
+    // Filtrar solo los sensores que ya tienen ubicación asignada
+    activeSensors.value = data.filter(sensor => 
+      sensor.mac && 
+      sensor.ubicacion && 
+      sensor.ubicacion !== null
+    );
+    
+    console.log('Sensores activos filtrados:', activeSensors.value);
+  } catch (error) {
+    console.error("Error al cargar los sensores activos:", error);
+    activeSensors.value = [];
+  }
+});
 const showPopupForm = ref(false);
 const newPopupText = ref("");
 const tempPopupPosition = ref(null);
-const showingPopupId = ref(null);
 
 // Cargar pop-ups guardados al iniciar
 onMounted(() => {
@@ -189,8 +282,15 @@ watch(
 
 // Filtrar pop-ups por planta seleccionada
 const filteredPopups = computed(() => {
-  return customPopups.value.filter((popup) => popup.planta === plantaSeleccionada.value);
+  return activeSensors.value.filter((sensor) => {
+    return sensor.planta === plantaSeleccionada.value;
+  });
 });
+
+const deletePopup = (id) => {
+  activeSensors.value = activeSensors.value.filter((sensor) => sensor.id !== id);
+  customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
+};
 
 // Funciones para gestionar pop-ups
 const togglePopupMode = () => {
@@ -203,33 +303,56 @@ const toggleDeleteMode = () => {
   isAddingPopup.value = false;
 };
 
-const handleMapClick = (event) => {
+const handleMapClick = async (event) => {
   if (!isAddingPopup.value) return;
 
-  const rect = event.currentTarget.getBoundingClientRect();
+  const mapContent = event.currentTarget;
+  const rect = mapContent.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
 
   tempPopupPosition.value = { x, y };
+  await loadAvailableSensors(); // Recargar sensores disponibles
   showPopupForm.value = true;
 };
 
-const confirmNewPopup = () => {
-  if (newPopupText.value.trim() && tempPopupPosition.value) {
-    customPopups.value.push({
-      id: Date.now(),
-      text: newPopupText.value,
-      x: tempPopupPosition.value.x,
-      y: tempPopupPosition.value.y,
-      planta: plantaSeleccionada.value,
-      temperature: Math.floor(Math.random() * 15) + 15, // 15-30°C
-      Humitat: Math.floor(Math.random() * 1600) + 400, // 400-2000 ppm
-      volume: Math.floor(Math.random() * 50) + 35, // 35-85 dB
-    });
+const availableSensors = ref([]);
 
-    cancelNewPopup();
-    isAddingPopup.value = false;
+// Cargar sensores disponibles
+const loadAvailableSensors = async () => {
+  try {
+    console.log('Cargando sensores...');
+    const data = await getAllSensors();
+    console.log('Datos recibidos:', data);
+    
+    // Filtrar solo los sensores que tienen MAC y no están asignados
+    availableSensors.value = data.filter(sensor => 
+      sensor.mac && 
+      (!sensor.ubicacion || sensor.ubicacion === null)
+    );
+    
+    console.log('Sensores filtrados:', availableSensors.value);
+  } catch (error) {
+    console.error('Error al cargar sensores:', error);
+    availableSensors.value = [];
   }
+};
+
+// Seleccionar un sensor de la lista
+const selectSensor = (sensor) => {
+  if (!tempPopupPosition.value) return;
+
+  const newSensor = {
+    ...sensor,
+    x: tempPopupPosition.value.x,
+    y: tempPopupPosition.value.y,
+    planta: plantaSeleccionada.value
+  };
+
+  activeSensors.value.push(newSensor);
+  cancelNewPopup();
+  isAddingPopup.value = false;
+  showingPopupId.value = sensor.idSensor;
 };
 
 const cancelNewPopup = () => {
@@ -238,30 +361,17 @@ const cancelNewPopup = () => {
   tempPopupPosition.value = null;
 };
 
-const deletePopup = (id) => {
-  customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
-};
-
 const getMarkerColor = (popup) => {
-  const value = getSensorValueNumber(popup);
-  const { min, max } = getSensorRange();
-  const norm = (value - min) / (max - min);
+  const value = popup[selectedSensorType.value];
+  const range = getSensorRange();
 
-  const colors = [
-    "bg-blue-400", // 0-10%
-    "bg-blue-300", // 10-20%
-    "bg-cyan-400", // 20-30%
-    "bg-teal-400", // 30-40%
-    "bg-green-400", // 40-50%
-    "bg-yellow-400", // 50-60%
-    "bg-orange-400", // 60-70%
-    "bg-orange-500", // 70-80%
-    "bg-red-400", // 80-90%
-    "bg-red-500", // 90-100%
-  ];
-
-  const colorIndex = Math.min(Math.floor(norm * 10), 9);
-  return colors[Math.max(0, colorIndex)];
+  if (value >= range.high) {
+    return "bg-red-500";
+  } else if (value >= range.medium) {
+    return "bg-yellow-500";
+  } else {
+    return "bg-green-500";
+  }
 };
 
 const getSensorLabel = () => {
@@ -284,7 +394,7 @@ const getSensorRange = () => {
     case "humetat":
       return { min: 400, max: 2000 };
     case "volume":
-      return { min: 35, max: 85 };
+      return { low: 40, medium: 60, high: 80 };
     default:
       return { min: 0, max: 100 };
   }
@@ -295,7 +405,7 @@ const getSensorValueNumber = (popup) => {
     case "temperature":
       return popup.temperature;
     case "humetat":
-      return popup.Humitat;
+      return popup.Humetat;
     case "volume":
       return popup.volume;
     default:
@@ -304,23 +414,30 @@ const getSensorValueNumber = (popup) => {
 };
 
 const getSensorValue = (popup) => {
-  const value = getSensorValueNumber(popup);
+  const value = popup[selectedSensorType.value];
   switch (selectedSensorType.value) {
     case "temperature":
       return `${value}°C`;
     case "humetat":
       return `${value}ppm`;
     case "volume":
-      return `${value}dB`;
+      return `${value} dB`;
     default:
       return value;
   }
 };
 
 const getSensorStatusColorByType = (popup) => {
-  const value = getSensorValueNumber(popup);
-  const { min, max } = getSensorRange();
-  return getSensorStatusColor(value, min, max);
+  const value = popup[selectedSensorType.value];
+  const range = getSensorRange();
+
+  if (value >= range.high) {
+    return "bg-red-500";
+  } else if (value >= range.medium) {
+    return "bg-yellow-500";
+  } else {
+    return "bg-green-500";
+  }
 };
 
 const getSensorStatusColor = (value, min, max) => {
@@ -342,6 +459,24 @@ const getSensorStatusColor = (value, min, max) => {
   return colors[Math.max(0, colorIndex)];
 };
 
+const getPopupPosition = (popup) => {
+  const mapContainer = document.querySelector(".map-content");
+  if (!mapContainer) return { class: "" };
+
+  const mapRect = mapContainer.getBoundingClientRect();
+  const centerX = mapRect.width / 2;
+  const centerY = mapRect.height / 2;
+
+  // Determinar en qué cuadrante está el popup respecto al centro
+  const isLeft = popup.x < centerX;
+  const isTop = popup.y < centerY;
+
+  // Retornar la clase correspondiente para la orientación
+  return {
+    class: `popup-${isTop ? "bottom" : "top"}-${isLeft ? "right" : "left"}`,
+  };
+};
+
 const handlePopupClick = (popup) => {
   if (isDeletingPopup.value) {
     deletePopup(popup.id);
@@ -360,12 +495,6 @@ const fetchData = async () => {
 
     const response = await getMapa(bodyRequest);
     aulaData.value = response;
-
-    fetchDataText.value = response
-      .map((aula) => {
-        return `Aula: ${aula.idAula}, Volumen: ${aula.average}`;
-      })
-      .join("\n");
 
     console.log("Datos recibidos:", aulaData.value);
   } catch (error) {
@@ -398,6 +527,42 @@ onMounted(async () => {
 .custom-popup {
   pointer-events: none;
   z-index: 20;
+}
+
+.popup-content {
+  position: absolute;
+  transform-origin: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(51, 65, 85, 0.95);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(100, 116, 139, 0.5);
+  z-index: 50;
+}
+
+/* Orientaciones del popup */
+.popup-top-left {
+  transform: translate(-100%, -100%) translate(32px, 32px);
+  left: -16px;
+  top: -16px;
+}
+
+.popup-top-right {
+  transform: translate(0%, -100%) translate(-32px, 32px);
+  left: 16px;
+  top: -16px;
+}
+
+.popup-bottom-left {
+  transform: translate(-100%, 0%) translate(32px, -32px);
+  left: -16px;
+  top: 16px;
+}
+
+.popup-bottom-right {
+  transform: translate(0%, 0%) translate(-32px, -32px);
+  left: 16px;
+  top: 16px;
 }
 
 .custom-popup .marker-point,
@@ -514,7 +679,9 @@ button:hover {
   color: rgb(45, 212, 191);
 }
 
-:deep(.p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover) {
+:deep(.p-dropdown-panel
+    .p-dropdown-items
+    .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover) {
   background: rgb(51, 65, 85);
   color: white;
 }

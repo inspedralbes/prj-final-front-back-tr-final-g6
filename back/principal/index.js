@@ -103,6 +103,64 @@ io.on('connection', (socket) => {
 
 //ENDPOINTS API
 
+// Get medias de temperatura y volumen
+app.get('/api/stats/medias', async (req, res) => {
+  try {
+    // Consulta para obtener la media de temperatura
+    const queryTemp = `
+      SELECT AVG(average) as mediaTemperatura 
+      FROM dia 
+      WHERE tipus = 'temperatura' 
+      AND dataIni >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+    `;
+
+    // Consulta para obtener la media de volumen
+    const queryVol = `
+      SELECT AVG(average) as mediaVolumen 
+      FROM dia 
+      WHERE tipus = 'volum' 
+      AND dataIni >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+    `;
+
+    // Consulta para obtener el total de sensores activos
+    const querySensors = `
+      SELECT COUNT(*) as totalSensors 
+      FROM sensor 
+      WHERE api_key IS NOT NULL
+    `;
+
+    const [tempResults, volResults, sensorResults] = await Promise.all([
+      new Promise((resolve, reject) => {
+        connexioBD.query(queryTemp, (err, results) => {
+          if (err) reject(err);
+          resolve(results[0]);
+        });
+      }),
+      new Promise((resolve, reject) => {
+        connexioBD.query(queryVol, (err, results) => {
+          if (err) reject(err);
+          resolve(results[0]);
+        });
+      }),
+      new Promise((resolve, reject) => {
+        connexioBD.query(querySensors, (err, results) => {
+          if (err) reject(err);
+          resolve(results[0]);
+        });
+      })
+    ]);
+
+    res.json({
+      mediaTemperatura: parseFloat(tempResults.mediaTemperatura || 0).toFixed(1),
+      mediaVolumen: parseFloat(volResults.mediaVolumen || 0).toFixed(1),
+      totalSensors: sensorResults.totalSensors
+    });
+  } catch (error) {
+    console.error('Error al obtener medias:', error);
+    res.status(500).json({ message: 'Error al obtener las medias', error: error.message });
+  }
+});
+
 app.post('/api/login', (req, res) => {
   const { correu, contrasenya } = req.body;
 
@@ -705,6 +763,72 @@ app.get('/api/sensors/banned', (req, res) => {
     }
     res.status(200).send(results);
   });
+});
+
+// Endpoint para obtener los sensores activos
+app.get('/api/sensors/active', (req, res) => {
+  const query = 'SELECT * FROM sensor WHERE api_key IS NOT NULL AND banned = 0';
+  connexioBD.execute(query, (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err.stack);
+      return res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
+    }
+    res.status(200).send(results);
+  });
+});
+
+// Endpoint para obtener todos los datos de gráficos
+app.get('/api/grafics/all', (req, res) => {
+    const { dataIni, dataFi } = req.query;
+
+    if (!dataIni || !dataFi) {
+        return res.status(400).json({ message: 'dataIni i dataFi són necessaris' });
+    }
+
+    // Consulta para temperatura
+    const queryTemp = `
+        SELECT s.idSensor, s.nombre, s.ubicacion, a.id as aulaId, a.Curs, 
+               t.temperatura, t.data_lectura
+        FROM sensor s
+        LEFT JOIN aula a ON s.idAula = a.id
+        JOIN temperatura t ON s.idSensor = t.idSensor
+        WHERE t.data_lectura BETWEEN ? AND ?
+        ORDER BY t.data_lectura ASC`;
+
+    // Consulta para volumen
+    const queryVol = `
+        SELECT s.idSensor, s.nombre, s.ubicacion, a.id as aulaId, a.Curs, 
+               v.volumen, v.data_lectura
+        FROM sensor s
+        LEFT JOIN aula a ON s.idAula = a.id
+        JOIN volumen v ON s.idSensor = v.idSensor
+        WHERE v.data_lectura BETWEEN ? AND ?
+        ORDER BY v.data_lectura ASC`;
+
+    Promise.all([
+        new Promise((resolve, reject) => {
+            connexioBD.query(queryTemp, [dataIni, dataFi], (err, tempResults) => {
+                if (err) reject(err);
+                resolve(tempResults);
+            });
+        }),
+        new Promise((resolve, reject) => {
+            connexioBD.query(queryVol, [dataIni, dataFi], (err, volResults) => {
+                if (err) reject(err);
+                resolve(volResults);
+            });
+        })
+    ])
+    .then(([temperaturas, volumenes]) => {
+        res.json({
+            temperaturas,
+            volumenes
+        });
+    })
+    .catch(err => {
+        console.error('Error al obtener datos:', err);
+        res.status(500).json({ message: 'Error al obtener los datos', error: err.message });
+    });
 });
 
 // Endpoint per enviar missatges a RabbitMQ
