@@ -80,9 +80,9 @@
               v-model="selectedSensorType"
               class="bg-slate-800 border-2 border-slate-600 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-base hover:border-slate-500 transition-colors"
             >
-              <option value="temperature">Temperatura</option>
-              <option value="humetat">Humitat</option>
-              <option value="volume">Volum</option>
+              <option value="temperatura">Temperatura</option>
+              <option value="humitat">Humitat</option>
+              <option value="volum">Volum</option>
             </select>
           </div>
         </div>
@@ -161,53 +161,16 @@
               <div v-if="lastSensorValues[popup.idAula || popup.id]">
                 <div
                   v-if="!lastSensorValues[popup.idAula || popup.id].error"
-                  class="mt-4 space-y-2"
+                  class="mt-4"
                 >
                   <div
-                    class="flex items-center justify-between p-2 bg-slate-800/70 rounded-lg"
+                    class="flex items-center justify-between p-4 bg-slate-800/70 rounded-lg"
                   >
-                    <span class="text-sm text-white">Última Temperatura</span>
-                    <span class="text-lg font-bold text-white">
+                    <span class="text-sm text-white">{{ getSensorLabel() }}</span>
+                    <span class="text-2xl font-bold text-white">
                       {{
-                        lastSensorValues[popup.idAula || popup.id].temperatura
-                          ?.average !== undefined
-                          ? Number(
-                              lastSensorValues[popup.idAula || popup.id].temperatura
-                                .average
-                            ).toFixed(2)
-                          : "N/A"
-                      }}°C
-                    </span>
-                  </div>
-                  <div
-                    class="flex items-center justify-between p-2 bg-slate-800/70 rounded-lg"
-                  >
-                    <span class="text-sm text-white">Última Humitat</span>
-                    <span class="text-lg font-bold text-white">
-                      {{
-                        lastSensorValues[popup.idAula || popup.id].humitat?.average !==
-                        undefined
-                          ? Number(
-                              lastSensorValues[popup.idAula || popup.id].humitat.average
-                            ).toFixed(2)
-                          : "N/A"
-                      }}ppm
-                    </span>
-                  </div>
-                  <div
-                    class="flex items-center justify-between p-2 bg-slate-800/70 rounded-lg"
-                  >
-                    <span class="text-sm text-white">Últim Volum</span>
-                    <span class="text-lg font-bold text-white">
-                      {{
-                        lastSensorValues[popup.idAula || popup.id].volum?.average !==
-                        undefined
-                          ? Number(
-                              lastSensorValues[popup.idAula || popup.id].volum.average
-                            ).toFixed(2)
-                          : "N/A"
+                        getSensorValue(lastSensorValues[popup.idAula || popup.id])
                       }}
-                      dB
                     </span>
                   </div>
                 </div>
@@ -289,7 +252,40 @@ const plantas = ["PLANTA BAJA", "PLANTA 1", "PLANTA 2", "PLANTA 3", "PLANTA SUBT
 const plantaSeleccionada = ref("PLANTA 1");
 const aulaData = ref([]);
 const fetchDataText = ref("");
-const selectedSensorType = ref("temperature");
+const selectedSensorType = ref("temperatura");
+
+const getSensorLabel = () => {
+  switch (selectedSensorType.value) {
+    case 'temperatura':
+      return 'Temperatura';
+    case 'humitat':
+      return 'Humitat';
+    case 'volum':
+      return 'Volum';
+    default:
+      return '';
+  }
+};
+
+const getSensorValue = (sensorData) => {
+  if (!sensorData) return 'N/A';
+  
+  const value = sensorData[selectedSensorType.value]?.average;
+  if (value === undefined) return 'N/A';
+  
+  const formattedValue = Number(value).toFixed(2);
+  switch (selectedSensorType.value) {
+    case 'temperatura':
+      return `${formattedValue}°C`;
+    case 'humitat':
+      return `${formattedValue}ppm`;
+    case 'volum':
+      return `${formattedValue}dB`;
+    default:
+      return formattedValue;
+  }
+};
+
 const lastSensorValues = ref({}); // Guarda los últimos valores por sensor
 
 // Estado para los pop-ups personalizados
@@ -315,9 +311,9 @@ onMounted(async () => {
         .filter((sensor) => sensor.mac && sensor.ubicacion && sensor.ubicacion !== null)
         .map((sensor) => ({
           ...sensor,
-          temperature: sensor.temperature || 0,
-          humetat: sensor.humetat || 0,
-          volume: sensor.volume || 0,
+          temperatura: sensor.temperatura || 0,
+          humitat: sensor.humatat || 0,
+          volum: sensor.volum || 0,
         }));
     } catch (error) {
       activeSensors.value = [];
@@ -396,9 +392,9 @@ const loadAvailableSensors = async () => {
       .filter((sensor) => sensor.mac && !placedIds.includes(sensor.idSensor || sensor.id))
       .map((sensor) => ({
         ...sensor,
-        temperature: sensor.temperature || 0,
-        humetat: sensor.humetat || 0,
-        volume: sensor.volume || 0,
+        temperatura: sensor.temperatura || 0,
+        humitat: sensor.humatat || 0,
+        volum: sensor.volum || 0,
       }));
   } catch (error) {
     availableSensors.value = [];
@@ -413,9 +409,9 @@ const selectSensor = (sensor) => {
     x: tempPopupPosition.value.x,
     y: tempPopupPosition.value.y,
     planta: plantaSeleccionada.value,
-    temperature: sensor.temperature || 0,
-    humetat: sensor.humetat || 0,
-    volume: sensor.volume || 0,
+    temperatura: sensor.temperatura || 0,
+    humitat: sensor.humatat || 0,
+    volum: sensor.volum || 0,
   };
 
   activeSensors.value.push(newSensor);
@@ -431,28 +427,38 @@ const cancelNewPopup = () => {
 };
 
 const getMarkerColor = (popup) => {
-  const value = popup[selectedSensorType.value];
-  const range = getSensorRange(selectedSensorType.value);
-
-  if (value >= range.high) {
-    return "bg-red-500";
-  } else if (value >= range.medium) {
-    return "bg-yellow-500";
-  } else {
-    return "bg-green-500";
+  if (!lastSensorValues.value[popup.idAula || popup.id]) {
+    return "bg-gray-500";
   }
-};
 
-const getSensorLabel = () => {
+  const sensorData = lastSensorValues.value[popup.idAula || popup.id];
+  if (sensorData.error) {
+    return "bg-gray-500";
+  }
+
+  const value = sensorData[selectedSensorType.value]?.average;
+  if (value === undefined) {
+    return "bg-gray-500";
+  }
+
   switch (selectedSensorType.value) {
-    case "temperature":
-      return "Temperatura";
-    case "humetat":
-      return "Humitat";
-    case "volume":
-      return "Volumen";
+    case 'temperatura':
+      if (value > 25) return "bg-red-500";
+      if (value > 20) return "bg-yellow-500";
+      return "bg-green-500";
+    
+    case 'humitat':
+      if (value > 800) return "bg-red-500";
+      if (value > 600) return "bg-yellow-500";
+      return "bg-green-500";
+    
+    case 'volum':
+      if (value > 80) return "bg-red-500";
+      if (value > 60) return "bg-yellow-500";
+      return "bg-green-500";
+    
     default:
-      return "";
+      return "bg-gray-500";
   }
 };
 
@@ -478,20 +484,6 @@ const getSensorStatusColorByValue = (value, type) => {
     return "bg-yellow-500";
   } else {
     return "bg-green-500";
-  }
-};
-
-const getSensorValue = (popup) => {
-  const value = popup[selectedSensorType.value];
-  switch (selectedSensorType.value) {
-    case "temperature":
-      return `${value}°C`;
-    case "humetat":
-      return `${value}ppm`;
-    case "volume":
-      return `${value} dB`;
-    default:
-      return value;
   }
 };
 
@@ -678,17 +670,17 @@ onMounted(async () => {
 
 .bg-red-500 {
   background: linear-gradient(45deg, #ef4444, #dc2626);
-  animation: markerGradientHot 2s infinite linear;
+  animation: markerGradientHot 4s infinite linear;
 }
 
 .bg-yellow-500 {
   background: linear-gradient(45deg, #eab308, #f59e0b);
-  animation: markerGradientWarm 2s infinite linear;
+  animation: markerGradientWarm 4s infinite linear;
 }
 
 .bg-green-500 {
   background: linear-gradient(45deg, #22c55e, #15803d);
-  animation: markerGradientCool 2s infinite linear;
+  animation: markerGradientCool 4s infinite linear;
 }
 
 @keyframes markerGradientHot {
