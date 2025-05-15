@@ -29,7 +29,7 @@ const getInterpolatedColor = (value, min, max) => {
 onMounted(async () => {
   await nextTick();
 
-  const image = "./SUBTERRANEO.png";
+  const image = props.imageUrl;
   const imageObj = new Image();
 
   imageObj.onload = function () {

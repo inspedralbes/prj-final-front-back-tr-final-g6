@@ -63,7 +63,7 @@ onMounted(async () => {
     return;
   }
 
-  const image = "./PLANTA 2.png"; // Ruta de la imagen de la planta 1
+  const image = props.imageUrl;
   const imageObj = new Image();
 
   imageObj.onload = function () {

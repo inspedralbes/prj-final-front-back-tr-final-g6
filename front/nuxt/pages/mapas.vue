@@ -78,8 +78,12 @@
       <div class="bg-slate-800 rounded-lg p-2 shadow-lg mb-6">
         <div class="relative w-full h-[65vh] min-h-[600px] rounded-xl overflow-hidden border-2 border-slate-700"
           @click="handleMapClick" :style="{ cursor: isAddingPopup ? 'crosshair' : 'default' }">
-          
-          <!-- Heatmap Overlay -->
+
+          <!-- Mapa primero -->
+          <component :is="getMapComponent(plantaSeleccionada)" :aulaData="aulaData"
+            :imageUrl="getMapImageUrl(plantaSeleccionada)" class="w-full h-full" />
+
+          <!-- Heatmap overlay encima del mapa -->
           <HeatmapOverlay 
             v-if="showHeatmap" 
             :data-points="heatmapDataPoints" 
@@ -87,20 +91,13 @@
             :min="heatmapMin"
             :radius="heatmapRadius"
             :gradient="heatmapGradient"
+            class="absolute inset-0"
           />
-          
-          <!-- Map Components -->
-          <Mapaplanta1 v-if="plantaSeleccionada === 'PLANTA 1'" :aulaData="aulaData" imageUrl="/planos/planta1.png" />
-          <Mapaplanta2 v-if="plantaSeleccionada === 'PLANTA 2'" :aulaData="aulaData" imageUrl="/planos/planta2.png" />
-          <Mapaplanta3 v-if="plantaSeleccionada === 'PLANTA 3'" :aulaData="aulaData" imageUrl="/planos/planta3.png" />
-          <MapaPlantaBaixa v-if="plantaSeleccionada === 'PLANTA BAJA'" :aulaData="aulaData"
-            imageUrl="/planos/plantabaja.png" />
-          <MapaPlantaSubterranea v-if="plantaSeleccionada === 'PLANTA SUBTERRANEA'" :aulaData="aulaData"
-            imageUrl="/planos/plantasubterranea.png" />
 
-          <!-- Pop-ups personalizados -->
-          <div v-for="popup in filteredPopups" :key="popup.id" :style="{ left: popup.x + 'px', top: popup.y + 'px' }"
-            class="custom-popup absolute">
+          <!-- Popups encima de todo -->
+          <div v-for="popup in filteredPopups" :key="popup.id" 
+            :style="{ left: popup.x + 'px', top: popup.y + 'px' }"
+            class="custom-popup absolute z-20">
             <!-- Punto indicador -->
             <div :class="[
               'marker-point w-6 h-6 rounded-full absolute -top-3 -left-3 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200',
@@ -130,7 +127,7 @@
                       {{
                         lastSensorValues[popup.idAula || popup.id].temperatura?.average !== undefined
                           ? Number(lastSensorValues[popup.idAula || popup.id].temperatura.average).toFixed(2)
-                      : 'N/A'
+                          : 'N/A'
                       }}°C
                     </span>
                   </div>
@@ -140,7 +137,7 @@
                       {{
                         lastSensorValues[popup.idAula || popup.id].humitat?.average !== undefined
                           ? Number(lastSensorValues[popup.idAula || popup.id].humitat.average).toFixed(2)
-                      : 'N/A'
+                          : 'N/A'
                       }}ppm
                     </span>
                   </div>
@@ -150,7 +147,7 @@
                       {{
                         lastSensorValues[popup.idAula || popup.id].volum?.average !== undefined
                           ? Number(lastSensorValues[popup.idAula || popup.id].volum.average).toFixed(2)
-                      : 'N/A'
+                          : 'N/A'
                       }} dB
                     </span>
                   </div>
@@ -215,7 +212,6 @@ import Mapaplanta2 from "~/components/Plantes/MapaPlanta-2.vue";
 import Mapaplanta3 from "~/components/Plantes/MapaPlanta-3.vue";
 import MapaPlantaBaixa from "~/components/Plantes/MapaPlantaBaixa.vue";
 import MapaPlantaSubterranea from "~/components/Plantes/MapaPlantaSubterranea.vue";
-import HeatmapOverlay from "~/components/HeatmapOverlay.vue";
 
 const plantas = ["PLANTA BAJA", "PLANTA 1", "PLANTA 2", "PLANTA 3", "PLANTA SUBTERRANEA"];
 const plantaSeleccionada = ref("PLANTA 1");
@@ -243,6 +239,28 @@ const showingPopupId = ref(null);
 const isAddingPopup = ref(false);
 const isDeletingPopup = ref(false);
 
+// Métodos para obtener el componente y la imagen de la planta seleccionada
+const getMapComponent = (planta) => {
+  switch (planta) {
+    case "PLANTA 1": return Mapaplanta1;
+    case "PLANTA 2": return Mapaplanta2;
+    case "PLANTA 3": return Mapaplanta3;
+    case "PLANTA BAJA": return MapaPlantaBaixa;
+    case "PLANTA SUBTERRANEA": return MapaPlantaSubterranea;
+    default: return Mapaplanta1;
+  }
+};
+const getMapImageUrl = (planta) => {
+  switch (planta) {
+    case "PLANTA 1": return "/planos/PLANTA 1.png";
+    case "PLANTA 2": return "/planos/PLANTA 2.png";
+    case "PLANTA 3": return "/planos/PLANTA 3.png";
+    case "PLANTA BAJA": return "/planos/PB.png";
+    case "PLANTA SUBTERRANEA": return "/planos/SUBTERRANEO.png";
+    default: return "/planos/PLANTA 1.png";
+  }
+};
+
 // Cargar sensores activos al montar el componente
 onMounted(async () => {
   const savedSensors = localStorage.getItem("activeSensors");
@@ -269,7 +287,7 @@ onMounted(async () => {
       activeSensors.value = [];
     }
   }
-  
+
   // Cargar datos iniciales para el heatmap
   updateHeatmapData();
 });
@@ -304,53 +322,63 @@ const filteredPopups = computed(() => {
   });
 });
 
-// Métodos para el heatmap
-const toggleHeatmap = () => {
+const toggleHeatmap = async () => {
   showHeatmap.value = !showHeatmap.value;
   if (showHeatmap.value) {
+    await updateAllLastSensorValues();
+    await nextTick(); // Espera a que el DOM se actualice
     updateHeatmapData();
   }
 };
 
 const updateHeatmapData = () => {
+  if (!showHeatmap.value) return;
+  
   const points = [];
   let max = -Infinity;
   let min = Infinity;
-  
-  // Procesar sensores activos para la planta actual
+  const defaultRanges = getSensorRange(selectedSensorType.value);
+
   filteredPopups.value.forEach(sensor => {
+    const sensorKey = sensor.idAula || sensor.id;
+    const sensorData = lastSensorValues.value[sensorKey] || {};
+    
     let value = 0;
-    
-    // Obtener valor basado en el tipo de sensor seleccionado
     if (selectedSensorType.value === 'temperature') {
-      value = lastSensorValues.value[sensor.idAula || sensor.id]?.temperatura?.average || 0;
+      value = sensorData.temperatura?.average ?? sensor.temperature ?? defaultRanges.low;
     } else if (selectedSensorType.value === 'humetat') {
-      value = lastSensorValues.value[sensor.idAula || sensor.id]?.humitat?.average || 0;
+      value = sensorData.humitat?.average ?? sensor.humetat ?? defaultRanges.low;
     } else if (selectedSensorType.value === 'volume') {
-      value = lastSensorValues.value[sensor.idAula || sensor.id]?.volum?.average || 0;
+      value = sensorData.volum?.average ?? sensor.volume ?? defaultRanges.low;
     }
-    
-    // Actualizar min/max
-    if (value > max) max = value;
-    if (value < min) min = value;
-    
-    points.push({
-      x: sensor.x,
-      y: sensor.y,
-      value: value
-    });
+
+    // Solo añadir puntos con coordenadas válidas
+    if (typeof sensor.x === 'number' && typeof sensor.y === 'number') {
+      points.push({
+        x: Math.round(sensor.x),
+        y: Math.round(sensor.y),
+        value: value
+      });
+      
+      // Actualizar min/max
+      max = Math.max(max, value);
+      min = Math.min(min, value);
+    }
   });
-  
-  // Establecer valores por defecto si no hay datos
-  if (max === -Infinity) max = getSensorRange(selectedSensorType.value).high;
-  if (min === Infinity) min = getSensorRange(selectedSensorType.value).low;
-  
+
+  // Si no hay puntos, usar valores por defecto
+  if (points.length === 0) {
+    max = defaultRanges.high;
+    min = defaultRanges.low;
+  }
+
   heatmapDataPoints.value = points;
   heatmapMax.value = max;
   heatmapMin.value = min;
-  
-  // Ajustar radio basado en la densidad de datos
   heatmapRadius.value = Math.max(15, Math.min(50, 500 / (points.length || 1)));
+
+  console.log('Heatmap points:', points);
+  console.log('Heatmap min/max:', min, max);
 };
 
 // Watchers para actualizar el heatmap
@@ -417,6 +445,25 @@ const loadAvailableSensors = async () => {
   }
 };
 
+const updateAllLastSensorValues = async () => {
+  const promises = filteredPopups.value.map(async (sensor) => {
+    const key = sensor.idAula || sensor.id;
+    try {
+      const data = await getUltimsSensorsAula(key);
+      lastSensorValues.value[key] = data;
+    } catch (e) {
+      // Si falla, usar valores por defecto del sensor
+      lastSensorValues.value[key] = {
+        temperatura: { average: sensor.temperature || 0 },
+        humitat: { average: sensor.humetat || 0 },
+        volum: { average: sensor.volume || 0 }
+      };
+    }
+  });
+  await Promise.all(promises);
+  updateHeatmapData(); // Actualizar heatmap después de cargar
+};
+
 const selectSensor = (sensor) => {
   if (!tempPopupPosition.value) return;
 
@@ -431,11 +478,18 @@ const selectSensor = (sensor) => {
   };
 
   activeSensors.value.push(newSensor);
+
+  // AÑADE ESTO para que el heatmap tenga datos válidos inmediatamente
+  lastSensorValues.value[newSensor.idAula || newSensor.id] = {
+    temperatura: { average: newSensor.temperature },
+    humitat: { average: newSensor.humetat },
+    volum: { average: newSensor.volume }
+  };
+
   cancelNewPopup();
   isAddingPopup.value = false;
   showingPopupId.value = sensor.idSensor || sensor.id;
-  
-  // Actualizar heatmap si está activo
+
   if (showHeatmap.value) {
     updateHeatmapData();
   }
@@ -516,6 +570,7 @@ const isAdmin = computed(() => userStore.user?.admin === 1);
 
 onMounted(async () => {
   await fetchData();
+  await updateAllLastSensorValues(); // Cargar datos iniciales
 });
 </script>
 

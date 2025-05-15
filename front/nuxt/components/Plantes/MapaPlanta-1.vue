@@ -59,7 +59,7 @@ onMounted(async () => {
     return;
   }
 
-  const image = "./PLANTA 1.png";
+  const image = props.imageUrl;
   const imageObj = new Image();
 
   imageObj.onload = function () {
@@ -146,13 +146,8 @@ onMounted(async () => {
 
 <template>
   <div ref="stageRef" class="canvas-container">
-    <InfoCard
-      v-for="(popup, index) in popups"
-      :key="index"
-      :info="`Aula: ${popup.Curs} - Volum: ${popup.volumen}`"
-      :position="popup.position"
-      @close="closePopup(index)"
-    />
+    <InfoCard v-for="(popup, index) in popups" :key="index" :info="`Aula: ${popup.Curs} - Volum: ${popup.volumen}`"
+      :position="popup.position" @close="closePopup(index)" />
 
     <div class="info-text">
       <h3>Información de Aulas</h3>

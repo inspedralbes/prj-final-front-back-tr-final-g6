@@ -30,7 +30,7 @@ const getInterpolatedColor = (value, min, max) => {
 onMounted(async () => {
   await nextTick(); // Asegurarse que todo esté montado
 
-  const image = "./PLANTA 3.png";
+  const image = props.imageUrl;
   const imageObj = new Image();
 
   imageObj.onload = function () {
