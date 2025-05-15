@@ -545,3 +545,17 @@ export async function uploadSensorImage(file) {
     }
     return await response.json();
 }
+
+export async function getUltimsSensorsAula(idAula) {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/aules/${idAula}/ultimsensors`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al obtener los últimos sensores');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
