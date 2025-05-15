@@ -221,12 +221,13 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getSensorConfig, saveSensorConfig, uploadSensorImage } from '~/utils/communicationManager';
 
 const sensorConfig = ref({ images: [] });
-const tempImages = ref([]); // Array temporal para URLs de imágenes subidas
+const tempImages = ref([]);
 const loading = ref(false);
 
 onMounted(async () => {
@@ -234,7 +235,7 @@ onMounted(async () => {
   try {
     const data = await getSensorConfig();
     sensorConfig.value = { ...data };
-    tempImages.value = [...(data.images || [])]; // Inicializa con las imágenes actuales
+    tempImages.value = [...(data.images || [])];
   } catch (error) {
     alert('Error al cargar la configuración: ' + error.message);
   } finally {
@@ -268,26 +269,46 @@ const openImageUpload = (index) => {
 
 const handleFileChange = (event) => {
   const file = event.target.files[0];
-  if (file) {
-    const requiredName = imageTypes.value[currentImageIndex.value].requiredName;
-    if (!file.name.toLowerCase().endsWith(requiredName.toLowerCase())) {
-      alert(`El nom de l'arxiu ha de ser: ${requiredName}`);
-      event.target.value = '';
-      selectedFile.value = null;
-      return;
-    }
-    selectedFile.value = file;
+  if (!file) return;
+
+  // Validar tipo de archivo
+  if (!file.type.match('image/jpeg') && !file.type.match('image/jpg')) {
+    alert('El archivo debe ser una imagen JPG');
+    event.target.value = '';
+    return;
   }
+
+  // Validar dimensiones
+  const img = new Image();
+  img.onload = () => {
+    if (img.width !== 64 || img.height !== 64) {
+      alert('La imagen debe tener exactamente 64x64 píxeles');
+      event.target.value = '';
+    } else {
+      selectedFile.value = file;
+    }
+  };
+  img.src = URL.createObjectURL(file);
 };
 
 const uploadImage = async () => {
   if (!selectedFile.value) return;
+  
   try {
-    const response = await uploadSensorImage(selectedFile.value);
-    const imageUrl = response.url || `https://dev.acubox.cat/back/api/fileSensor/images/${selectedFile.value.name}`;
-    tempImages.value[currentImageIndex.value] = imageUrl; // Solo actualiza el array temporal
+    // Crear un nuevo Blob con el nombre requerido
+    const requiredName = imageTypes.value[currentImageIndex.value].requiredName;
+    const renamedFile = new File([selectedFile.value], requiredName, {
+      type: 'image/jpeg',
+      lastModified: selectedFile.value.lastModified
+    });
+
+    const response = await uploadSensorImage(renamedFile);
+    const imageUrl = response.url || `https://dev.acubox.cat/back/api/fileSensor/images/${requiredName}`;
+    
+    tempImages.value[currentImageIndex.value] = imageUrl;
     showImageUploadModal.value = false;
-    alert('Imatge pujada correctament. Recorda guardar la configuració per aplicar els canvis.');
+    
+    // Eliminado el alert de confirmación aquí
   } catch (error) {
     console.error('Error al pujar la imatge:', error);
     alert('Error al pujar la imatge: ' + error.message);
@@ -296,10 +317,10 @@ const uploadImage = async () => {
 
 const saveSensorConfigHandler = async () => {
   try {
-    sensorConfig.value.images = [...tempImages.value]; // Copia las URLs temporales a la config real
+    sensorConfig.value.images = [...tempImages.value];
     await saveSensorConfig(sensorConfig.value);
     alert('Configuració guardada correctament');
-    window.location.reload(); // Recarga la página para mostrar las nuevas imágenes
+    window.location.reload();
   } catch (error) {
     console.error('Error al guardar la configuració:', error);
     alert('Error al guardar la configuració: ' + error.message);
