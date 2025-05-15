@@ -124,7 +124,7 @@
           variant="outlined"
         >
           <v-icon start icon="pi pi-sync" class="animate-spin-slow mr-2" />
-          Última actualització: {{ new Date().toLocaleTimeString() }}
+          Última actualització: {{ lastUpdate.toLocaleTimeString() }}
         </v-chip>
       </div>
     </div>
@@ -190,35 +190,37 @@ const getHumidityColor = (humidity) => {
   return "info";
 };
 
-onMounted(async () => {
+const lastUpdate = ref(new Date());
+
+const updateRankings = async () => {
   try {
-    // Datos de ejemplo
-    rankingSo.value = [
-      { id: 1, nom: "Aula 3", volum: 32 },
-      { id: 2, nom: "Aula 5", volum: 35 },
-      { id: 3, nom: "Aula 1", volum: 38 },
-      { id: 4, nom: "Aula 4", volum: 42 },
-      { id: 5, nom: "Aula 2", volum: 45 },
-    ].sort((a, b) => a.volum - b.volum);
+    const response = await fetch('http://localhost:3000/api/v1/aules/sensors');
+    const data = await response.json();
 
-    rankingTemperatura.value = [
-      { id: 1, nom: "Aula 1", temperatura: 21.5 },
-      { id: 2, nom: "Aula 2", temperatura: 22.8 },
-      { id: 3, nom: "Aula 3", temperatura: 23.1 },
-      { id: 4, nom: "Aula 4", temperatura: 23.4 },
-      { id: 5, nom: "Aula 5", temperatura: 24.7 },
-    ].sort((a, b) => a.temperatura - b.temperatura);
+    // Procesar datos para cada ranking
+    const processedData = data.map(aula => ({
+      id: aula.id,
+      nom: aula.nom,
+      volum: aula.volum?.average || 0,
+      temperatura: aula.temperatura?.average || 0,
+      humitat: aula.humitat?.average || 0
+    }));
 
-    rankingHumitat.value = [
-      { id: 1, nom: "Aula 3", humitat: 35 },
-      { id: 2, nom: "Aula 1", humitat: 48 },
-      { id: 3, nom: "Aula 5", humitat: 50 },
-      { id: 4, nom: "Aula 2", humitat: 52 },
-      { id: 5, nom: "Aula 4", humitat: 65 },
-    ].sort((a, b) => a.humitat - b.humitat);
+    // Actualizar rankings
+    rankingSo.value = [...processedData].sort((a, b) => b.volum - a.volum);
+    rankingTemperatura.value = [...processedData].sort((a, b) => b.temperatura - a.temperatura);
+    rankingHumitat.value = [...processedData].sort((a, b) => b.humitat - a.humitat);
+
+    lastUpdate.value = new Date();
   } catch (error) {
     console.error("Error al cargar los datos del ranking:", error);
   }
+};
+
+onMounted(async () => {
+  await updateRankings();
+  // Actualizar cada 30 segundos
+  setInterval(updateRankings, 30000);
 });
 </script>
 

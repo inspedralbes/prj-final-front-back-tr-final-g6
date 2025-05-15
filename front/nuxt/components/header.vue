@@ -87,6 +87,15 @@
                   <span>Mapas</span>
                 </router-link>
 
+                <router-link
+                  to="/ranking"
+                  class="flex items-center px-4 py-3 text-slate-200 hover:bg-slate-700 transition-colors"
+                  @click="isMenuVisible = false"
+                >
+                  <i class="pi pi-chart-bar mr-3"></i>
+                  <span>Ranking</span>
+                </router-link>
+
                 <button
                   v-if="userStore.isLoggedIn"
                   @click="logout"
