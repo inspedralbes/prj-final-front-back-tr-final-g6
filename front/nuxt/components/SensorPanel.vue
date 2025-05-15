@@ -504,15 +504,7 @@ const editForm = ref({
   x: 0,
   y: 0,
   idAula: null,
-  sensorReal: null,
 });
-
-// Lista temporal de sensores reales (esto vendrá del backend más tarde)
-const sensoresReales = ref([
-  { id: 1, mac: "00:11:22:33:44:55", tipo: "Temperatura" },
-  { id: 2, mac: "66:77:88:99:AA:BB", tipo: "Humedad" },
-  { id: 3, mac: "CC:DD:EE:FF:00:11", tipo: "CO2" },
-]);
 const currentEditingSensor = ref(null);
 
 const handleEditSensor = (sensor) => {
@@ -548,18 +540,12 @@ watch(
 
 const submitEditForm = async () => {
   try {
-    if (!editForm.value.sensorReal) {
-      alert("Debes seleccionar un sensor real");
-      return;
-    }
-
     await updateSensorById(editForm.value.idSensor, {
       nombre: editForm.value.nombre,
       ubicacion: editForm.value.ubicacion,
       x: editForm.value.x,
       y: editForm.value.y,
       idAula: editForm.value.idAula,
-      sensorReal: editForm.value.sensorReal,
     });
 
     // Actualizar el sensor en la lista correspondiente
@@ -791,6 +777,47 @@ const handleDeletePendingSensor = async (id) => {
       console.error("Error deleting sensor:", error);
       alert("Error al eliminar el sensor: " + error.message);
     }
+  }
+};
+
+const handleImageUpload = async (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    // Validar formato JPG/JPEG
+    if (!file.type.match('image/jpeg')) {
+      alert('Solo se permiten imágenes en formato JPG/JPEG');
+      event.target.value = ''; // Limpiar input
+      return;
+    }
+
+    // Validar dimensiones 64x64
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    
+    img.onload = async () => {
+      if (img.width !== 64 || img.height !== 64) {
+        alert('La imagen debe ser exactamente de 64x64 píxeles');
+        event.target.value = ''; // Limpiar input
+        URL.revokeObjectURL(img.src);
+        return;
+      }
+      
+      try {
+        const response = await uploadSensorImage(file);
+        editForm.value.image = response.imageUrl;
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        alert('Error al subir la imagen: ' + error.message);
+      } finally {
+        URL.revokeObjectURL(img.src);
+      }
+    };
+
+    img.onerror = () => {
+      alert('Error al cargar la imagen');
+      event.target.value = ''; // Limpiar input
+      URL.revokeObjectURL(img.src);
+    };
   }
 };
 

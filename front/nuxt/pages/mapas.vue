@@ -16,9 +16,9 @@
     <!-- Main Content -->
     <div class="w-full max-w-7xl mx-auto px-4 py-6 flex-grow">
       <!-- Plantas Selection -->
-      <div class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg">
+      <div class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg text-center">
         <h2 class="text-xl font-semibold text-white mb-4">Selecciona una Planta</h2>
-        <div class="flex flex-wrap gap-3">
+        <div class="flex flex-wrap gap-3 justify-center">
           <button
             v-for="planta in plantas"
             :key="planta"
@@ -35,9 +35,12 @@
         </div>
       </div>
 
-      <div v-if="userStore.user?.admin === 1" class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg">
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div class="flex flex-wrap gap-3">
+      <div
+        v-if="userStore.user?.admin === 1"
+        class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg"
+      >
+        <div class="flex flex-col items-center gap-4">
+          <div class="flex flex-wrap gap-3 justify-center">
             <button
               @click="togglePopupMode"
               :class="[
@@ -48,7 +51,7 @@
               ]"
             >
               <i :class="isAddingPopup ? 'fas fa-times' : 'fas fa-microchip'"></i>
-              <span>{{ isAddingPopup ? "Cancelar" : "Agregar Sensor" }}</span>
+              <span>{{ isAddingPopup ? 'Cancelar' : 'Agregar Sensor' }}</span>
             </button>
             <button
               v-if="customPopups.length > 0"
@@ -64,15 +67,6 @@
               <span>{{ isDeletingPopup ? "Terminar Borrado" : "Borrar Sensor" }}</span>
             </button>
           </div>
-          <Dropdown
-            v-model="selectedSensorType"
-            :options="sensorTypes"
-            optionLabel="label"
-            optionValue="value"
-            class="w-48 [&>div]:bg-slate-700 [&>div]:border-slate-600 [&>div]:text-white"
-            panelClass="bg-slate-700 border border-slate-600 text-white"
-            placeholder="Tipus de Sensor"
-          />
         </div>
       </div>
 
@@ -83,16 +77,30 @@
           @click="handleMapClick"
           :style="{ cursor: isAddingPopup ? 'crosshair' : 'default' }"
         >
-          <Mapaplanta1 v-if="plantaSeleccionada === 'PLANTA 1'" :aulaData="aulaData" />
-          <Mapaplanta2 v-if="plantaSeleccionada === 'PLANTA 2'" :aulaData="aulaData" />
-          <Mapaplanta3 v-if="plantaSeleccionada === 'PLANTA 3'" :aulaData="aulaData" />
+          <Mapaplanta1 
+            v-if="plantaSeleccionada === 'PLANTA 1'" 
+            :aulaData="aulaData"
+            imageUrl="/planos/planta1.png"
+          />
+          <Mapaplanta2 
+            v-if="plantaSeleccionada === 'PLANTA 2'" 
+            :aulaData="aulaData"
+            imageUrl="/planos/planta2.png"
+          />
+          <Mapaplanta3 
+            v-if="plantaSeleccionada === 'PLANTA 3'" 
+            :aulaData="aulaData"
+            imageUrl="/planos/planta3.png"
+          />
           <MapaPlantaBaixa
             v-if="plantaSeleccionada === 'PLANTA BAJA'"
             :aulaData="aulaData"
+            imageUrl="/planos/plantabaja.png"
           />
           <MapaPlantaSubterranea
             v-if="plantaSeleccionada === 'PLANTA SUBTERRANEA'"
             :aulaData="aulaData"
+            imageUrl="/planos/plantasubterranea.png"
           />
 
           <!-- Pop-ups personalizados -->
@@ -161,27 +169,35 @@
       </div>
     </div>
 
-    <!-- Formulario para nuevo pop-up -->
+    <!-- Selector de sensores activos -->
     <div
       v-if="showPopupForm"
       class="popup-form fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
     >
       <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 max-w-md w-full">
-        <div class="form-header text-xl font-bold text-white mb-4">Nuevo Sensor</div>
-        <input
-          v-model="newPopupText"
-          placeholder="Texto del Sensor"
-          class="popup-input w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all mb-4"
-          @keyup.enter="confirmNewPopup"
-          @keyup.esc="cancelNewPopup"
-        />
-        <div class="flex space-x-3 justify-end">
-          <button
-            @click="confirmNewPopup"
-            class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-emerald-700 hover:scale-[1.02]"
+        <div class="form-header text-xl font-bold text-white mb-4">Seleccionar Sensor</div>
+        
+        <!-- Lista de sensores activos -->
+        <div class="space-y-2 max-h-[400px] overflow-y-auto mb-4">
+          <div
+            v-for="sensor in availableSensors"
+            :key="sensor.idSensor"
+            @click="selectSensor(sensor)"
+            class="p-4 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors"
           >
-            <i class="fas fa-check mr-2"></i>Confirmar
-          </button>
+            <div class="flex justify-between items-center text-white">
+              <div>
+                <div class="font-semibold">{{ sensor.nombre }}</div>
+                <div class="text-sm text-gray-400">MAC: {{ sensor.mac }}</div>
+                <div class="text-sm text-gray-400">Ubicación: {{ sensor.ubicacion }}</div>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón para cancelar -->
+        <div class="flex justify-end">
           <button
             @click="cancelNewPopup"
             class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-red-700 hover:scale-[1.02]"
@@ -195,11 +211,12 @@
 </template>
 
 <script setup>
+import { getMapa, getAllSensors } from '~/utils/communicationManager';
 import Header from "../components/header.vue";
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "~/stores/userStore";
-import Dropdown from 'primevue/dropdown';
+import Dropdown from "primevue/dropdown";
 
 import Mapaplanta1 from "~/components/Plantes/MapaPlanta-1.vue";
 import Mapaplanta2 from "~/components/Plantes/MapaPlanta-2.vue";
@@ -211,13 +228,7 @@ const plantas = ["PLANTA BAJA", "PLANTA 1", "PLANTA 2", "PLANTA 3", "PLANTA SUBT
 const plantaSeleccionada = ref("PLANTA 1");
 const aulaData = ref([]);
 const fetchDataText = ref("");
-const selectedSensorType = ref("temperature");
-
-const sensorTypes = [
-  { label: 'Temperatura', value: 'temperature' },
-  { label: 'Humitat', value: 'humetat' },
-  { label: 'Volum', value: 'volume' }
-];
+// Eliminado el filtro de tipos de sensor que no se usa
 
 // Estado para los pop-ups personalizados
 const activeSensors = ref([]);
@@ -229,19 +240,21 @@ const isDeletingPopup = ref(false);
 // Cargar sensores activos al montar el componente
 onMounted(async () => {
   try {
-    // Aquí deberías hacer la llamada a tu API para obtener los sensores activos
-    const response = await fetch("http://localhost:3000/api/sensors/active");
-    const data = await response.json();
-    activeSensors.value = data.map((sensor) => ({
-      id: sensor.idSensor,
-      x: sensor.x,
-      y: sensor.y,
-      nombre: sensor.nombre,
-      ubicacion: sensor.ubicacion,
-      mac: sensor.mac,
-    }));
+    console.log('Cargando sensores activos...');
+    const data = await getAllSensors();
+    console.log('Datos de sensores recibidos:', data);
+    
+    // Filtrar solo los sensores que ya tienen ubicación asignada
+    activeSensors.value = data.filter(sensor => 
+      sensor.mac && 
+      sensor.ubicacion && 
+      sensor.ubicacion !== null
+    );
+    
+    console.log('Sensores activos filtrados:', activeSensors.value);
   } catch (error) {
     console.error("Error al cargar los sensores activos:", error);
+    activeSensors.value = [];
   }
 });
 const showPopupForm = ref(false);
@@ -290,7 +303,7 @@ const toggleDeleteMode = () => {
   isAddingPopup.value = false;
 };
 
-const handleMapClick = (event) => {
+const handleMapClick = async (event) => {
   if (!isAddingPopup.value) return;
 
   const mapContent = event.currentTarget;
@@ -299,26 +312,47 @@ const handleMapClick = (event) => {
   const y = event.clientY - rect.top;
 
   tempPopupPosition.value = { x, y };
+  await loadAvailableSensors(); // Recargar sensores disponibles
   showPopupForm.value = true;
 };
 
-const confirmNewPopup = () => {
-  if (newPopupText.value.trim() && tempPopupPosition.value) {
-    const newSensor = {
-      id: Date.now(),
-      text: newPopupText.value,
-      x: tempPopupPosition.value.x,
-      y: tempPopupPosition.value.y,
-      planta: plantaSeleccionada.value,
-      temperature: Math.floor(Math.random() * 15) + 15, // 15-30°C
-      humetat: Math.floor(Math.random() * 1600) + 400, // 400-2000 ppm
-      volume: Math.floor(Math.random() * 50) + 35, // 35-85 dB
-    };
+const availableSensors = ref([]);
+
+// Cargar sensores disponibles
+const loadAvailableSensors = async () => {
+  try {
+    console.log('Cargando sensores...');
+    const data = await getAllSensors();
+    console.log('Datos recibidos:', data);
     
-    customPopups.value.push(newSensor);
-    cancelNewPopup();
-    isAddingPopup.value = false;
+    // Filtrar solo los sensores que tienen MAC y no están asignados
+    availableSensors.value = data.filter(sensor => 
+      sensor.mac && 
+      (!sensor.ubicacion || sensor.ubicacion === null)
+    );
+    
+    console.log('Sensores filtrados:', availableSensors.value);
+  } catch (error) {
+    console.error('Error al cargar sensores:', error);
+    availableSensors.value = [];
   }
+};
+
+// Seleccionar un sensor de la lista
+const selectSensor = (sensor) => {
+  if (!tempPopupPosition.value) return;
+
+  const newSensor = {
+    ...sensor,
+    x: tempPopupPosition.value.x,
+    y: tempPopupPosition.value.y,
+    planta: plantaSeleccionada.value
+  };
+
+  activeSensors.value.push(newSensor);
+  cancelNewPopup();
+  isAddingPopup.value = false;
+  showingPopupId.value = sensor.idSensor;
 };
 
 const cancelNewPopup = () => {
@@ -371,7 +405,7 @@ const getSensorValueNumber = (popup) => {
     case "temperature":
       return popup.temperature;
     case "humetat":
-      return popup.Humitat;
+      return popup.Humetat;
     case "volume":
       return popup.volume;
     default:
