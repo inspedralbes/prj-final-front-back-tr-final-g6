@@ -228,6 +228,7 @@ const plantas = ["PLANTA BAJA", "PLANTA 1", "PLANTA 2", "PLANTA 3", "PLANTA SUBT
 const plantaSeleccionada = ref("PLANTA 1");
 const aulaData = ref([]);
 const fetchDataText = ref("");
+const selectedSensorType = ref("temperature");
 // Eliminado el filtro de tipos de sensor que no se usa
 
 // Estado para los pop-ups personalizados
