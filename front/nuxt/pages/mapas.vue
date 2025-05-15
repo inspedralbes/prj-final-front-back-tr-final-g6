@@ -52,6 +52,14 @@
               <i :class="isDeletingPopup ? 'fas fa-check' : 'fas fa-trash'"></i>
               <span>{{ isDeletingPopup ? 'Terminar Borrado' : 'Borrar Sensor' }}</span>
             </button>
+            <!-- Botón para toggle heatmap -->
+            <button @click="toggleHeatmap" :class="[
+              'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2 shadow-md',
+              showHeatmap ? 'bg-purple-600 border-purple-600 text-white hover:shadow-purple-500/20' : 'bg-slate-700 border-slate-600 text-white'
+            ]">
+              <i :class="showHeatmap ? 'fas fa-eye-slash' : 'fas fa-fire'"></i>
+              <span>{{ showHeatmap ? 'Ocultar Heatmap' : 'Mostrar Heatmap' }}</span>
+            </button>
           </div>
 
           <div class="flex items-center gap-4 rounded-lg px-5 py-3 w-full md:w-auto">
@@ -70,6 +78,18 @@
       <div class="bg-slate-800 rounded-lg p-2 shadow-lg mb-6">
         <div class="relative w-full h-[65vh] min-h-[600px] rounded-xl overflow-hidden border-2 border-slate-700"
           @click="handleMapClick" :style="{ cursor: isAddingPopup ? 'crosshair' : 'default' }">
+          
+          <!-- Heatmap Overlay -->
+          <HeatmapOverlay 
+            v-if="showHeatmap" 
+            :data-points="heatmapDataPoints" 
+            :max="heatmapMax" 
+            :min="heatmapMin"
+            :radius="heatmapRadius"
+            :gradient="heatmapGradient"
+          />
+          
+          <!-- Map Components -->
           <Mapaplanta1 v-if="plantaSeleccionada === 'PLANTA 1'" :aulaData="aulaData" imageUrl="/planos/planta1.png" />
           <Mapaplanta2 v-if="plantaSeleccionada === 'PLANTA 2'" :aulaData="aulaData" imageUrl="/planos/planta2.png" />
           <Mapaplanta3 v-if="plantaSeleccionada === 'PLANTA 3'" :aulaData="aulaData" imageUrl="/planos/planta3.png" />
@@ -195,13 +215,26 @@ import Mapaplanta2 from "~/components/Plantes/MapaPlanta-2.vue";
 import Mapaplanta3 from "~/components/Plantes/MapaPlanta-3.vue";
 import MapaPlantaBaixa from "~/components/Plantes/MapaPlantaBaixa.vue";
 import MapaPlantaSubterranea from "~/components/Plantes/MapaPlantaSubterranea.vue";
+import HeatmapOverlay from "~/components/HeatmapOverlay.vue";
 
 const plantas = ["PLANTA BAJA", "PLANTA 1", "PLANTA 2", "PLANTA 3", "PLANTA SUBTERRANEA"];
 const plantaSeleccionada = ref("PLANTA 1");
 const aulaData = ref([]);
 const fetchDataText = ref("");
 const selectedSensorType = ref("temperature");
-const lastSensorValues = ref({}); // Guarda los últimos valores por sensor
+const lastSensorValues = ref({});
+
+// Heatmap state
+const showHeatmap = ref(false);
+const heatmapDataPoints = ref([]);
+const heatmapMax = ref(0);
+const heatmapMin = ref(0);
+const heatmapRadius = ref(25);
+const heatmapGradient = ref({
+  '0.1': 'blue',
+  '0.5': 'yellow',
+  '0.95': 'red'
+});
 
 // Estado para los pop-ups personalizados
 const activeSensors = ref([]);
@@ -210,7 +243,7 @@ const showingPopupId = ref(null);
 const isAddingPopup = ref(false);
 const isDeletingPopup = ref(false);
 
-// Cargar sensores activos al montar el componente (persistencia local)
+// Cargar sensores activos al montar el componente
 onMounted(async () => {
   const savedSensors = localStorage.getItem("activeSensors");
   if (savedSensors) {
@@ -236,13 +269,16 @@ onMounted(async () => {
       activeSensors.value = [];
     }
   }
+  
+  // Cargar datos iniciales para el heatmap
+  updateHeatmapData();
 });
 
 const showPopupForm = ref(false);
 const newPopupText = ref("");
 const tempPopupPosition = ref(null);
 
-// Cargar pop-ups guardados al iniciar (si usas customPopups)
+// Cargar pop-ups guardados al iniciar
 onMounted(() => {
   const savedPopups = localStorage.getItem("customMapPopups");
   if (savedPopups) {
@@ -268,6 +304,71 @@ const filteredPopups = computed(() => {
   });
 });
 
+// Métodos para el heatmap
+const toggleHeatmap = () => {
+  showHeatmap.value = !showHeatmap.value;
+  if (showHeatmap.value) {
+    updateHeatmapData();
+  }
+};
+
+const updateHeatmapData = () => {
+  const points = [];
+  let max = -Infinity;
+  let min = Infinity;
+  
+  // Procesar sensores activos para la planta actual
+  filteredPopups.value.forEach(sensor => {
+    let value = 0;
+    
+    // Obtener valor basado en el tipo de sensor seleccionado
+    if (selectedSensorType.value === 'temperature') {
+      value = lastSensorValues.value[sensor.idAula || sensor.id]?.temperatura?.average || 0;
+    } else if (selectedSensorType.value === 'humetat') {
+      value = lastSensorValues.value[sensor.idAula || sensor.id]?.humitat?.average || 0;
+    } else if (selectedSensorType.value === 'volume') {
+      value = lastSensorValues.value[sensor.idAula || sensor.id]?.volum?.average || 0;
+    }
+    
+    // Actualizar min/max
+    if (value > max) max = value;
+    if (value < min) min = value;
+    
+    points.push({
+      x: sensor.x,
+      y: sensor.y,
+      value: value
+    });
+  });
+  
+  // Establecer valores por defecto si no hay datos
+  if (max === -Infinity) max = getSensorRange(selectedSensorType.value).high;
+  if (min === Infinity) min = getSensorRange(selectedSensorType.value).low;
+  
+  heatmapDataPoints.value = points;
+  heatmapMax.value = max;
+  heatmapMin.value = min;
+  
+  // Ajustar radio basado en la densidad de datos
+  heatmapRadius.value = Math.max(15, Math.min(50, 500 / (points.length || 1)));
+};
+
+// Watchers para actualizar el heatmap
+watch(selectedSensorType, () => {
+  if (showHeatmap.value) {
+    updateHeatmapData();
+  }
+});
+
+watch(lastSensorValues, updateHeatmapData, { deep: true });
+
+watch(plantaSeleccionada, () => {
+  if (showHeatmap.value) {
+    updateHeatmapData();
+  }
+});
+
+// Resto de tus métodos existentes...
 const deletePopup = (id) => {
   activeSensors.value = activeSensors.value.filter((sensor) => sensor.id !== id && sensor.idSensor !== id);
   customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
@@ -316,7 +417,6 @@ const loadAvailableSensors = async () => {
   }
 };
 
-
 const selectSensor = (sensor) => {
   if (!tempPopupPosition.value) return;
 
@@ -334,6 +434,11 @@ const selectSensor = (sensor) => {
   cancelNewPopup();
   isAddingPopup.value = false;
   showingPopupId.value = sensor.idSensor || sensor.id;
+  
+  // Actualizar heatmap si está activo
+  if (showHeatmap.value) {
+    updateHeatmapData();
+  }
 };
 
 const cancelNewPopup = () => {
@@ -355,19 +460,6 @@ const getMarkerColor = (popup) => {
   }
 };
 
-const getSensorLabel = () => {
-  switch (selectedSensorType.value) {
-    case "temperature":
-      return "Temperatura";
-    case "humetat":
-      return "Humitat";
-    case "volume":
-      return "Volumen";
-    default:
-      return "";
-  }
-};
-
 const getSensorRange = (type) => {
   switch (type) {
     case "temperature":
@@ -381,53 +473,6 @@ const getSensorRange = (type) => {
   }
 };
 
-const getSensorStatusColorByValue = (value, type) => {
-  const range = getSensorRange(type);
-
-  if (value >= range.high) {
-    return "bg-red-500";
-  } else if (value >= range.medium) {
-    return "bg-yellow-500";
-  } else {
-    return "bg-green-500";
-  }
-};
-
-const getSensorValue = (popup) => {
-  const value = popup[selectedSensorType.value];
-  switch (selectedSensorType.value) {
-    case "temperature":
-      return `${value}°C`;
-    case "humetat":
-      return `${value}ppm`;
-    case "volume":
-      return `${value} dB`;
-    default:
-      return value;
-  }
-};
-
-const getSensorStatusColorByType = (popup) => {
-  const value = popup[selectedSensorType.value];
-  return getSensorStatusColorByValue(value, selectedSensorType.value);
-};
-
-const getPopupPosition = (popup) => {
-  const mapContainer = document.querySelector(".map-content");
-  if (!mapContainer) return { class: "" };
-
-  const mapRect = mapContainer.getBoundingClientRect();
-  const centerX = mapRect.width / 2;
-  const centerY = mapRect.height / 2;
-
-  const isLeft = popup.x < centerX;
-  const isTop = popup.y < centerY;
-
-  return {
-    class: `popup-${isTop ? "bottom" : "top"}-${isLeft ? "right" : "left"}`,
-  };
-};
-
 const handlePopupClick = async (popup) => {
   if (isDeletingPopup.value) {
     deletePopup(popup.id);
@@ -436,7 +481,6 @@ const handlePopupClick = async (popup) => {
     // Cargar últimos valores solo si no están ya cargados
     if (!lastSensorValues.value[popup.idAula || popup.id]) {
       try {
-        // popup.idAula o popup.id según tu estructura
         const data = await getUltimsSensorsAula(popup.idAula || popup.id);
         lastSensorValues.value[popup.idAula || popup.id] = data;
       } catch (e) {
@@ -445,6 +489,7 @@ const handlePopupClick = async (popup) => {
     }
   }
 };
+
 const fetchData = async () => {
   try {
     const bodyRequest = {
