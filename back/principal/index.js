@@ -685,6 +685,18 @@ app.post('/api/data/mongodb', async (req, res) => {
   });
 });
 
+
+app.delete('/api/data/mongodb', async (req, res) => {
+  try {
+    const result = await collection.deleteMany({});
+    res.status(200).json({ message: 'Totes les dades han estat esborrades', deletedCount: result.deletedCount });
+  } catch (error) {
+    console.error('Error esborrant les dades de MongoDB:', error);
+    res.status(500).json({ message: 'Error esborrant les dades de MongoDB', error: error.message });
+  }
+});
+
+
 app.post('/api/data/mysql', (req, res) => {
   const { timeSpan, sensors } = req.body;
 

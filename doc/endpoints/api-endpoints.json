@@ -693,5 +693,26 @@
                 "description": "Fitxer no trobat"
             }
         }
+    },
+    {
+        "endpoint": "/api/mongodb/dades",
+        "method": "DELETE",
+        "description": "Esborra totes les dades de la col·lecció 'dades' de MongoDB",
+        "response": {
+            "200": {
+                "description": "Totes les dades han estat esborrades",
+                "body": {
+                    "message": "Totes les dades han estat esborrades",
+                    "deletedCount": "number"
+                }
+            },
+            "500": {
+                "description": "Error esborrant les dades de MongoDB",
+                "body": {
+                    "message": "Error esborrant les dades de MongoDB",
+                    "error": "string"
+                }
+            }
+        }
     }
 ]

@@ -46,6 +46,16 @@ def run_script(script_name, data, timeSpan):
     result = subprocess.run(command, capture_output=True, text=True)
     return result.stdout
 
+def delete_all_mongo_data():
+    try:
+        response = requests.delete('http://prfg6-back:3020/api/data/mongodb')
+        if response.status_code == 200:
+            app.logger.info("Dades de MongoDB esborrades correctament després de l'agregació d'hora.")
+        else:
+            app.logger.error("Error esborrant les dades de MongoDB: %s", response.text)
+    except Exception as e:
+        app.logger.error("Excepció esborrant les dades de MongoDB: %s", str(e))
+
 def execute_scheduled_script(timeSpan):
     app.logger.info(f"Executant script programat per {timeSpan}...")
 
@@ -74,6 +84,9 @@ def execute_scheduled_script(timeSpan):
 
         output = run_script('agregationSql.py', data, timeSpan)
         app.logger.info("Script d'agregació executat amb èxit: %s", output)
+
+        # Esborra les dades de MongoDB després de l'agregació d'hora
+        delete_all_mongo_data()
 
     elif timeSpan == "dia":
         end_date = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
