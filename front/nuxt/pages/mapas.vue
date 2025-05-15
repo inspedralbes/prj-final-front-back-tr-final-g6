@@ -318,19 +318,15 @@ const handleMapClick = async (event) => {
 
 const availableSensors = ref([]);
 
-// Cargar sensores disponibles
 const loadAvailableSensors = async () => {
   try {
     console.log('Cargando sensores...');
     const data = await getAllSensors();
     console.log('Datos recibidos:', data);
-    
-    // Filtrar solo los sensores que tienen MAC y no están asignados
-    availableSensors.value = data.filter(sensor => 
-      sensor.mac && 
-      (!sensor.ubicacion || sensor.ubicacion === null)
-    );
-    
+
+    // Mostrar todos los sensores con MAC
+    availableSensors.value = data.filter(sensor => sensor.mac);
+
     console.log('Sensores filtrados:', availableSensors.value);
   } catch (error) {
     console.error('Error al cargar sensores:', error);
