@@ -221,29 +221,31 @@ const showingPopupId = ref(null);
 const isAddingPopup = ref(false);
 const isDeletingPopup = ref(false);
 
-// Cargar sensores activos al montar el componente
+// Cargar sensores activos al montar el componente (persistencia local)
 onMounted(async () => {
-  try {
-    console.log('Cargando sensores activos...');
-    const data = await getAllSensors();
-    console.log('Datos de sensores recibidos:', data);
-
-    // Asegurarse de que cada sensor tenga los tres tipos de datos
-    activeSensors.value = data.filter(sensor =>
-      sensor.mac &&
-      sensor.ubicacion &&
-      sensor.ubicacion !== null
-    ).map(sensor => ({
-      ...sensor,
-      temperature: sensor.temperature || 0,
-      humetat: sensor.humetat || 0,
-      volume: sensor.volume || 0
-    }));
-
-    console.log('Sensores activos filtrados:', activeSensors.value);
-  } catch (error) {
-    console.error("Error al cargar los sensores activos:", error);
-    activeSensors.value = [];
+  const savedSensors = localStorage.getItem("activeSensors");
+  if (savedSensors) {
+    try {
+      activeSensors.value = JSON.parse(savedSensors);
+    } catch (e) {
+      activeSensors.value = [];
+    }
+  } else {
+    try {
+      const data = await getAllSensors();
+      activeSensors.value = data.filter(sensor =>
+        sensor.mac &&
+        sensor.ubicacion &&
+        sensor.ubicacion !== null
+      ).map(sensor => ({
+        ...sensor,
+        temperature: sensor.temperature || 0,
+        humetat: sensor.humetat || 0,
+        volume: sensor.volume || 0
+      }));
+    } catch (error) {
+      activeSensors.value = [];
+    }
   }
 });
 
@@ -251,7 +253,7 @@ const showPopupForm = ref(false);
 const newPopupText = ref("");
 const tempPopupPosition = ref(null);
 
-// Cargar pop-ups guardados al iniciar
+// Cargar pop-ups guardados al iniciar (si usas customPopups)
 onMounted(() => {
   const savedPopups = localStorage.getItem("customMapPopups");
   if (savedPopups) {
@@ -261,11 +263,11 @@ onMounted(() => {
   }
 });
 
-// Guardar pop-ups cuando cambien
+// Guardar sensores activos en localStorage cuando cambien
 watch(
-  customPopups,
-  (newPopups) => {
-    localStorage.setItem("customMapPopups", JSON.stringify(newPopups));
+  activeSensors,
+  (newSensors) => {
+    localStorage.setItem("activeSensors", JSON.stringify(newSensors));
   },
   { deep: true }
 );
@@ -278,11 +280,10 @@ const filteredPopups = computed(() => {
 });
 
 const deletePopup = (id) => {
-  activeSensors.value = activeSensors.value.filter((sensor) => sensor.id !== id);
+  activeSensors.value = activeSensors.value.filter((sensor) => sensor.id !== id && sensor.idSensor !== id);
   customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
 };
 
-// Funciones para gestionar pop-ups
 const togglePopupMode = () => {
   isAddingPopup.value = !isAddingPopup.value;
   isDeletingPopup.value = false;
@@ -310,23 +311,22 @@ const availableSensors = ref([]);
 
 const loadAvailableSensors = async () => {
   try {
-    console.log('Cargando sensores...');
     const data = await getAllSensors();
-    console.log('Datos recibidos:', data);
-
-    availableSensors.value = data.filter(sensor => sensor.mac).map(sensor => ({
-      ...sensor,
-      temperature: sensor.temperature || 0,
-      humetat: sensor.humetat || 0,
-      volume: sensor.volume || 0
-    }));
-
-    console.log('Sensores filtrados:', availableSensors.value);
+    // Filtra los sensores que ya están colocados en cualquier planta
+    const placedIds = activeSensors.value.map(s => s.idSensor || s.id);
+    availableSensors.value = data
+      .filter(sensor => sensor.mac && !placedIds.includes(sensor.idSensor || sensor.id))
+      .map(sensor => ({
+        ...sensor,
+        temperature: sensor.temperature || 0,
+        humetat: sensor.humetat || 0,
+        volume: sensor.volume || 0
+      }));
   } catch (error) {
-    console.error('Error al cargar sensores:', error);
     availableSensors.value = [];
   }
 };
+
 
 const selectSensor = (sensor) => {
   if (!tempPopupPosition.value) return;
@@ -336,7 +336,6 @@ const selectSensor = (sensor) => {
     x: tempPopupPosition.value.x,
     y: tempPopupPosition.value.y,
     planta: plantaSeleccionada.value,
-    // Asegurar que tenemos los tres tipos de datos
     temperature: sensor.temperature || 0,
     humetat: sensor.humetat || 0,
     volume: sensor.volume || 0
@@ -345,7 +344,7 @@ const selectSensor = (sensor) => {
   activeSensors.value.push(newSensor);
   cancelNewPopup();
   isAddingPopup.value = false;
-  showingPopupId.value = sensor.idSensor;
+  showingPopupId.value = sensor.idSensor || sensor.id;
 };
 
 const cancelNewPopup = () => {
@@ -458,10 +457,8 @@ const fetchData = async () => {
 
     const response = await getMapa(bodyRequest);
     aulaData.value = response;
-
-    console.log("Datos recibidos:", aulaData.value);
   } catch (error) {
-    console.error("Error al obtener datos:", error);
+    // Manejo de error
   }
 };
 
