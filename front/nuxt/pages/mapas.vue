@@ -54,8 +54,7 @@
             </button>
           </div>
 
-          <div
-            class="flex items-center gap-4 rounded-lg px-5 py-3 w-full md:w-auto">
+          <div class="flex items-center gap-4 rounded-lg px-5 py-3 w-full md:w-auto">
             <label for="dataType" class="text-white whitespace-nowrap text-base font-semibold">Tipus de dada:</label>
             <select id="dataType" v-model="selectedSensorType"
               class="bg-slate-800 border-2 border-slate-600 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-base hover:border-slate-500 transition-colors">
@@ -87,7 +86,7 @@
               'marker-point w-6 h-6 rounded-full absolute -top-3 -left-3 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200',
               getMarkerColor(popup),
             ]" @click.stop="
-              isDeletingPopup ? deletePopup(popup.id) : (showingPopupId = popup.id)
+              isDeletingPopup ? deletePopup(popup.id) : handlePopupClick(popup)
               ">
               <i class="fas fa-map-marker-alt text-white"></i>
             </div>
@@ -103,52 +102,40 @@
                 <span class="text-sm text-gray-400">ID: {{ popup.id }}</span>
               </div>
 
-              <!-- Mostrar los tres tipos de datos -->
-              <div class="space-y-3">
-                <!-- Temperatura -->
-                <div class="text-gray-300">
-                  <div class="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg">
-                    <div class="flex items-center space-x-2">
-                      <div
-                        :class="['w-3 h-3 rounded-full', getSensorStatusColorByValue(popup.temperature, 'temperature')]">
-                      </div>
-                      <span class="text-sm">Temperatura</span>
-                    </div>
-                    <span :class="getSensorStatusColorByValue(popup.temperature, 'temperature').replace('bg-', 'text-')"
-                      class="text-lg font-bold">
-                      {{ popup.temperature }}°C
+              <div v-if="lastSensorValues[popup.idAula || popup.id]">
+                <div v-if="!lastSensorValues[popup.idAula || popup.id].error" class="mt-4 space-y-2">
+                  <div class="flex items-center justify-between p-2 bg-slate-800/70 rounded-lg">
+                    <span class="text-sm text-white">Última Temperatura</span>
+                    <span class="text-lg font-bold text-white">
+                      {{
+                        lastSensorValues[popup.idAula || popup.id].temperatura?.average !== undefined
+                          ? Number(lastSensorValues[popup.idAula || popup.id].temperatura.average).toFixed(2)
+                      : 'N/A'
+                      }}°C
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-slate-800/70 rounded-lg">
+                    <span class="text-sm text-white">Última Humitat</span>
+                    <span class="text-lg font-bold text-white">
+                      {{
+                        lastSensorValues[popup.idAula || popup.id].humitat?.average !== undefined
+                          ? Number(lastSensorValues[popup.idAula || popup.id].humitat.average).toFixed(2)
+                      : 'N/A'
+                      }}ppm
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-slate-800/70 rounded-lg">
+                    <span class="text-sm text-white">Últim Volum</span>
+                    <span class="text-lg font-bold text-white">
+                      {{
+                        lastSensorValues[popup.idAula || popup.id].volum?.average !== undefined
+                          ? Number(lastSensorValues[popup.idAula || popup.id].volum.average).toFixed(2)
+                      : 'N/A'
+                      }} dB
                     </span>
                   </div>
                 </div>
-
-                <!-- Humitat -->
-                <div class="text-gray-300">
-                  <div class="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg">
-                    <div class="flex items-center space-x-2">
-                      <div :class="['w-3 h-3 rounded-full', getSensorStatusColorByValue(popup.humetat, 'humetat')]">
-                      </div>
-                      <span class="text-sm">Humitat</span>
-                    </div>
-                    <span :class="getSensorStatusColorByValue(popup.humetat, 'humetat').replace('bg-', 'text-')"
-                      class="text-lg font-bold">
-                      {{ popup.humetat }}ppm
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Volum -->
-                <div class="text-gray-300">
-                  <div class="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg">
-                    <div class="flex items-center space-x-2">
-                      <div :class="['w-3 h-3 rounded-full', getSensorStatusColorByValue(popup.volume, 'volume')]"></div>
-                      <span class="text-sm">Volum</span>
-                    </div>
-                    <span :class="getSensorStatusColorByValue(popup.volume, 'volume').replace('bg-', 'text-')"
-                      class="text-lg font-bold">
-                      {{ popup.volume }} dB
-                    </span>
-                  </div>
-                </div>
+                <div v-else class="mt-4 text-red-500">Error al cargar los datos</div>
               </div>
 
               <button v-if="isDeletingPopup" @click.stop="deletePopup(popup.id)"
@@ -201,6 +188,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "~/stores/userStore";
 import Dropdown from "primevue/dropdown";
+import { getUltimsSensorsAula } from '~/utils/communicationManager';
 
 import Mapaplanta1 from "~/components/Plantes/MapaPlanta-1.vue";
 import Mapaplanta2 from "~/components/Plantes/MapaPlanta-2.vue";
@@ -213,6 +201,7 @@ const plantaSeleccionada = ref("PLANTA 1");
 const aulaData = ref([]);
 const fetchDataText = ref("");
 const selectedSensorType = ref("temperature");
+const lastSensorValues = ref({}); // Guarda los últimos valores por sensor
 
 // Estado para los pop-ups personalizados
 const activeSensors = ref([]);
@@ -439,14 +428,23 @@ const getPopupPosition = (popup) => {
   };
 };
 
-const handlePopupClick = (popup) => {
+const handlePopupClick = async (popup) => {
   if (isDeletingPopup.value) {
     deletePopup(popup.id);
   } else {
     showingPopupId.value = popup.id;
+    // Cargar últimos valores solo si no están ya cargados
+    if (!lastSensorValues.value[popup.idAula || popup.id]) {
+      try {
+        // popup.idAula o popup.id según tu estructura
+        const data = await getUltimsSensorsAula(popup.idAula || popup.id);
+        lastSensorValues.value[popup.idAula || popup.id] = data;
+      } catch (e) {
+        lastSensorValues.value[popup.idAula || popup.id] = { error: true };
+      }
+    }
   }
 };
-
 const fetchData = async () => {
   try {
     const bodyRequest = {
