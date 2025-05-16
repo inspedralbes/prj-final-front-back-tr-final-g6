@@ -9,6 +9,7 @@
                     "temperature": "Número que representa la temperatura.",
                     "humidity": "Número que representa la humitat.",
                     "id_sensor": "Identificador del sensor.",
+                    "id_aula": "Identificador de l'aula associada al sensor.",
                     "date": "Data i hora de les dades."
                 }
             },
@@ -35,7 +36,8 @@
                             "max": 60,
                             "min": 50,
                             "avg": 55.0
-                        }
+                        },
+                        "id_aula": 1
                     },
                     "1": {
                         "volume": {
@@ -52,7 +54,8 @@
                             "max": 55,
                             "min": 45,
                             "avg": 50.0
-                        }
+                        },
+                        "id_aula": 2
                     },
                     "3": {
                         "volume": {
@@ -69,7 +72,8 @@
                             "max": 55,
                             "min": 55,
                             "avg": 55.0
-                        }
+                        },
+                        "id_aula": 3
                     }
                 }
             }
