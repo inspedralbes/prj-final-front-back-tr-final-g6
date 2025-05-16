@@ -15,7 +15,9 @@
 
     <!-- Main Content -->
     <div class="w-full max-w-7xl mx-auto px-4 py-6 flex-grow">
-      <v-card class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-lg">
+      <v-card
+        class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-lg"
+      >
         <div class="bg-slate-800 p-6 mb-6">
           <div class="flex flex-wrap gap-3 justify-center">
             <button
@@ -23,13 +25,12 @@
               :key="tab.value"
               @click="activeTab = tab.value"
               :class="[
-                'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2',
+                'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02]',
                 activeTab === tab.value
                   ? 'bg-teal-600 border-teal-600 text-white'
-                  : 'bg-slate-700 border-slate-600 text-white'
+                  : 'bg-slate-700 border-slate-600 text-white',
               ]"
             >
-              <v-icon :icon="tab.icon" class="mr-2" />
               {{ tab.label }}
             </button>
           </div>
@@ -57,7 +58,10 @@
                     <span class="text-body-2 text-medium-emphasis mr-2">
                       {{ getVolumeStatus(aula.volum) }}
                     </span>
-                    <v-icon :icon="getVolumeIcon(aula.volum)" :color="getVolumeColor(aula.volum)" />
+                    <v-icon
+                      :icon="getVolumeIcon(aula.volum)"
+                      :color="getVolumeColor(aula.volum)"
+                    />
                   </div>
                 </template>
               </v-list-item>
@@ -81,7 +85,10 @@
                   </v-avatar>
                 </template>
                 <template v-slot:append>
-                  <v-icon icon="pi pi-thermometer" :color="getTempColor(aula.temperatura)" />
+                  <v-icon
+                    icon="pi pi-thermometer"
+                    :color="getTempColor(aula.temperatura)"
+                  />
                 </template>
               </v-list-item>
             </v-list>
@@ -121,11 +128,7 @@
 
       <!-- Info de actualización -->
       <div class="mt-6 text-center">
-        <v-chip
-          class="ma-2 pa-4"
-          color="teal"
-          variant="outlined"
-        >
+        <v-chip class="ma-2 pa-4" color="teal" variant="outlined">
           <v-icon start icon="pi pi-sync" class="animate-spin-slow mr-2" />
           Última actualització: {{ lastUpdate.toLocaleTimeString() }}
         </v-chip>
@@ -138,11 +141,11 @@
 import { ref, onMounted } from "vue";
 import Header from "../components/header.vue";
 
-const activeTab = ref('so');
+const activeTab = ref("so");
 const tabs = [
-  { value: 'so', label: 'So', icon: 'pi pi-volume-off' },
-  { value: 'temperatura', label: 'Temperatura', icon: 'pi pi-sun' },
-  { value: 'humitat', label: 'Humitat', icon: 'pi pi-cloud' }
+  { value: "so", label: "So" },
+  { value: "temperatura", label: "Temperatura" },
+  { value: "humitat", label: "Humitat" },
 ];
 const rankingSo = ref([]);
 const rankingTemperatura = ref([]);
@@ -151,8 +154,8 @@ const rankingHumitat = ref([]);
 // Función para obtener el color según la posición
 const getRankingColor = (index) => {
   const colors = {
-    0: "amber-darken-2",    // Oro
-    1: "grey-lighten-1",    // Plata
+    0: "amber-darken-2", // Oro
+    1: "grey-lighten-1", // Plata
     2: "deep-orange-lighten-1", // Bronce
   };
   return colors[index] || "grey-darken-3";
@@ -197,41 +200,51 @@ const lastUpdate = ref(new Date());
 
 const updateRankings = async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/v1/aules/sensors');
-    const data = await response.json();
+    // Obtener todos los sensores activos
+    const responseSensors = await fetch("http://localhost:3000/api/v1/sensors");
+    const sensors = await responseSensors.json();
 
-    // Filtrar solo sensores activos y procesar datos para cada ranking
-    const processedData = data
-      .filter(aula => {
-        // Verificar si al menos uno de los sensores está activo
-        return (
-          (aula.volum && aula.volum.active) ||
-          (aula.temperatura && aula.temperatura.active) ||
-          (aula.humitat && aula.humitat.active)
+    // Obtener los últimos datos de cada tipo
+    const [responseMinut] = await Promise.all([
+      fetch("http://localhost:3000/api/v1/registres/minut"),
+    ]);
+
+    const minutData = await responseMinut.json();
+
+    // Procesar los datos para cada sensor activo
+    const processedData = sensors
+      .filter((sensor) => sensor.actiu === 1) // Solo sensores activos
+      .map((sensor) => {
+        // Buscar el último registro para este sensor
+        const lastRecord = minutData.find(
+          (record) => record.id_sensor === sensor.id
         );
-      })
-      .map(aula => ({
-        id: aula.id,
-        nom: aula.nom,
-        volum: aula.volum?.active ? (aula.volum.average || 0) : null,
-        temperatura: aula.temperatura?.active ? (aula.temperatura.average || 0) : null,
-        humitat: aula.humitat?.active ? (aula.humitat.average || 0) : null,
-        volumActive: aula.volum?.active || false,
-        temperaturaActive: aula.temperatura?.active || false,
-        humitatActive: aula.humitat?.active || false
-      }));
 
-    // Actualizar rankings (solo incluir aulas con sensores activos para cada métrica)
-    rankingSo.value = [...processedData]
-      .filter(aula => aula.volumActive && aula.volum !== null)
+        return {
+          id: sensor.id,
+          nom: sensor.nom,
+          volum: sensor.tipus === "volum" ? lastRecord?.valor || 0 : null,
+          temperatura: sensor.tipus === "temperatura" ? lastRecord?.valor || 0 : null,
+          humitat: sensor.tipus === "humitat" ? lastRecord?.valor || 0 : null,
+          volumActive: sensor.tipus === "volum",
+          temperaturaActive: sensor.tipus === "temperatura",
+          humitatActive: sensor.tipus === "humitat",
+        };
+      });
+
+    console.log("Processed Data:", processedData); // Para debug
+
+    // Actualizar rankings (solo incluir sensores activos para cada métrica)
+    rankingSo.value = processedData
+      .filter((sensor) => sensor.volumActive && sensor.volum !== null)
       .sort((a, b) => b.volum - a.volum);
 
-    rankingTemperatura.value = [...processedData]
-      .filter(aula => aula.temperaturaActive && aula.temperatura !== null)
+    rankingTemperatura.value = processedData
+      .filter((sensor) => sensor.temperaturaActive && sensor.temperatura !== null)
       .sort((a, b) => b.temperatura - a.temperatura);
 
-    rankingHumitat.value = [...processedData]
-      .filter(aula => aula.humitatActive && aula.humitat !== null)
+    rankingHumitat.value = processedData
+      .filter((sensor) => sensor.humitatActive && sensor.humitat !== null)
       .sort((a, b) => b.humitat - a.humitat);
 
     lastUpdate.value = new Date();
