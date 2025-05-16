@@ -359,11 +359,13 @@ onMounted(() => {
     fetchInitialData();
 
     try {
-        const socketUrl = getBaseUrl();
+        const socketUrl = getBaseUrl().replace(/\/back$/, '');
+
         socket.value = io(socketUrl, {
-            transports: ['websocket', 'polling'],
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
+        path: '/back/socket.io',
+        transports: ['websocket', 'polling'],
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000
         });
 
         socket.value.on('newAggregatedData', handleNewAggregatedData);
