@@ -1,29 +1,32 @@
 <template>
-  <div class="min-h-screen bg-slate-900">
+  <div class="min-h-screen bg-slate-900 flex flex-col">
     <Header />
-    <!-- Header con gradiente -->
-    <div class="bg-gradient-to-r from-teal-800 to-blue-900 py-8">
-      <div class="container mx-auto px-4 text-center">
-        <div class="w-16 h-16 bg-white/10 rounded-full mx-auto mb-4 flex items-center justify-center">
-          <v-icon icon="pi pi-chart-bar" class="text-white" size="32" />
-        </div>
-        <h1 class="text-3xl font-bold text-white mb-2">Rankings d'Aules</h1>
-        <p class="text-teal-200">Institut Pedralbes • Estadístiques en Temps Real</p>
+    <!-- Gradient Header Section -->
+    <div class="w-full bg-gradient-to-r from-teal-800 to-blue-900 p-6">
+      <div class="max-w-7xl mx-auto flex flex-col items-center">
+        <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">
+          Rankings d'Aules
+        </h1>
+        <p class="text-teal-200 font-medium">
+          Institut Pedralbes • Estadístiques en Temps Real
+        </p>
       </div>
     </div>
 
-    <!-- Contenido principal -->
-    <div class="container mx-auto px-4 py-8">
-      <v-card class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
-        <div class="retro-tabs-container bg-slate-750 border-b border-slate-700 px-4 py-2">
-          <div class="retro-tabs flex justify-center space-x-4">
+    <!-- Main Content -->
+    <div class="w-full max-w-7xl mx-auto px-4 py-6 flex-grow">
+      <v-card class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-lg">
+        <div class="bg-slate-800 p-6 mb-6">
+          <div class="flex flex-wrap gap-3 justify-center">
             <button
               v-for="tab in tabs"
               :key="tab.value"
               @click="activeTab = tab.value"
               :class="[
-                'retro-tab px-6 py-3 text-lg font-medium transition-all duration-300',
-                activeTab === tab.value ? 'active' : ''
+                'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2',
+                activeTab === tab.value
+                  ? 'bg-teal-600 border-teal-600 text-white'
+                  : 'bg-slate-700 border-slate-600 text-white'
               ]"
             >
               <v-icon :icon="tab.icon" class="mr-2" />
@@ -40,7 +43,7 @@
                 v-for="(aula, index) in rankingSo"
                 :key="aula.id"
                 :title="aula.nom"
-                :subtitle="`${aula.volum} dB`"
+                :subtitle="`${aula.volum.toFixed(1)} dB`"
                 class="rounded-lg border border-slate-700 mb-2 transition-all duration-300"
                 density="comfortable"
               >
@@ -68,7 +71,7 @@
                 v-for="(aula, index) in rankingTemperatura"
                 :key="aula.id"
                 :title="aula.nom"
-                :subtitle="`${aula.temperatura}°C`"
+                :subtitle="`${aula.temperatura.toFixed(1)}°C`"
                 class="rounded-lg border border-slate-700 mb-2 transition-all duration-300"
                 density="comfortable"
               >
@@ -91,7 +94,7 @@
                 v-for="(aula, index) in rankingHumitat"
                 :key="aula.id"
                 :title="aula.nom"
-                :subtitle="`${aula.humitat}%`"
+                :subtitle="`${aula.humitat.toFixed(1)}%`"
                 class="rounded-lg border border-slate-700 mb-2 transition-all duration-300"
                 density="comfortable"
               >
@@ -197,23 +200,43 @@ const updateRankings = async () => {
     const response = await fetch('http://localhost:3000/api/v1/aules/sensors');
     const data = await response.json();
 
-    // Procesar datos para cada ranking
-    const processedData = data.map(aula => ({
-      id: aula.id,
-      nom: aula.nom,
-      volum: aula.volum?.average || 0,
-      temperatura: aula.temperatura?.average || 0,
-      humitat: aula.humitat?.average || 0
-    }));
+    // Filtrar solo sensores activos y procesar datos para cada ranking
+    const processedData = data
+      .filter(aula => {
+        // Verificar si al menos uno de los sensores está activo
+        return (
+          (aula.volum && aula.volum.active) ||
+          (aula.temperatura && aula.temperatura.active) ||
+          (aula.humitat && aula.humitat.active)
+        );
+      })
+      .map(aula => ({
+        id: aula.id,
+        nom: aula.nom,
+        volum: aula.volum?.active ? (aula.volum.average || 0) : null,
+        temperatura: aula.temperatura?.active ? (aula.temperatura.average || 0) : null,
+        humitat: aula.humitat?.active ? (aula.humitat.average || 0) : null,
+        volumActive: aula.volum?.active || false,
+        temperaturaActive: aula.temperatura?.active || false,
+        humitatActive: aula.humitat?.active || false
+      }));
 
-    // Actualizar rankings
-    rankingSo.value = [...processedData].sort((a, b) => b.volum - a.volum);
-    rankingTemperatura.value = [...processedData].sort((a, b) => b.temperatura - a.temperatura);
-    rankingHumitat.value = [...processedData].sort((a, b) => b.humitat - a.humitat);
+    // Actualizar rankings (solo incluir aulas con sensores activos para cada métrica)
+    rankingSo.value = [...processedData]
+      .filter(aula => aula.volumActive && aula.volum !== null)
+      .sort((a, b) => b.volum - a.volum);
+
+    rankingTemperatura.value = [...processedData]
+      .filter(aula => aula.temperaturaActive && aula.temperatura !== null)
+      .sort((a, b) => b.temperatura - a.temperatura);
+
+    rankingHumitat.value = [...processedData]
+      .filter(aula => aula.humitatActive && aula.humitat !== null)
+      .sort((a, b) => b.humitat - a.humitat);
 
     lastUpdate.value = new Date();
   } catch (error) {
-    console.error("Error al cargar los datos del ranking:", error);
+    console.error("Error al cargar les dades del ranking:", error);
   }
 };
 
@@ -247,13 +270,13 @@ onMounted(async () => {
   }
 }
 
-/* Gradient animation for the header */
-.bg-gradient-to-r {
+/* Animación para el fondo del header */
+.w-full.bg-gradient-to-r {
   background-size: 200% 200%;
-  animation: gradient-shift 10s ease infinite;
+  animation: gradient 6s ease infinite;
 }
 
-@keyframes gradient-shift {
+@keyframes gradient {
   0% {
     background-position: 0% 50%;
   }
@@ -265,79 +288,55 @@ onMounted(async () => {
   }
 }
 
-/* Estilo retro para las pestañas */
-.retro-tabs-container {
-  position: relative;
-  background: linear-gradient(to bottom, #1a2234, #1e293b);
-  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.1);
+/* Animación de entrada para el título */
+h1 {
+  animation: fadeIn 1s ease-out;
 }
 
-.retro-tabs {
-  position: relative;
-  z-index: 1;
-}
-
-.retro-tab {
-  position: relative;
-  color: #94a3b8;
-  background: transparent;
-  border: none;
-  border-radius: 8px 8px 0 0;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-  overflow: hidden;
-}
-
-.retro-tab::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.retro-tab:hover::before {
-  opacity: 0.1;
-}
-
-.retro-tab.active {
-  color: #14b8a6;
-  background: rgba(20, 184, 166, 0.1);
-  box-shadow: 
-    inset 0 2px 0 #14b8a6,
-    0 0 20px rgba(20, 184, 166, 0.2);
-}
-
-.retro-tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  height: 2px;
-  background: #14b8a6;
-  box-shadow: 0 0 10px #14b8a6;
-}
-
-/* Animación de brillo para las pestañas activas */
-@keyframes glow {
-  0%, 100% {
-    box-shadow: 
-      inset 0 2px 0 #14b8a6,
-      0 0 20px rgba(20, 184, 166, 0.2);
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
   }
-  50% {
-    box-shadow: 
-      inset 0 2px 0 #14b8a6,
-      0 0 30px rgba(20, 184, 166, 0.4);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.retro-tab.active {
-  animation: glow 3s ease-in-out infinite;
+/* Efecto hover para los botones */
+button {
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Animaciones para los elementos de la lista */
+.v-list-item {
+  transition: all 0.3s ease;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Estilos para los chips y badges */
+.v-chip {
+  transition: all 0.3s ease;
+}
+
+.v-chip:hover {
+  transform: scale(1.05);
 }
 </style>
