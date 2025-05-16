@@ -20,7 +20,7 @@ server {
         proxy_set_header Connection 'upgrade';
     }
 
-    # WebSocket (rewriting /back/socket.io → /socket.io)
+    # WebSocket
     location /back/socket.io/ {
         rewrite ^/back/socket.io/(.*)$ /socket.io/$1 break;
         proxy_pass http://localhost:3020;

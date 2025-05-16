@@ -46,18 +46,6 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-slate-400 mb-1">WiFi SSID</label>
-                <input v-model="sensorConfig.wifi_ssid" type="text"
-                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-slate-400 mb-1">WiFi Password</label>
-                <input v-model="sensorConfig.wifi_password" type="password"
-                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
-              </div>
-
-              <div>
                 <label class="block text-sm font-medium text-slate-400 mb-1">Vref So (vref_sound)</label>
                 <input v-model.number="sensorConfig.vref_sound" type="number" step="0.01" min="0"
                   class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
@@ -86,6 +74,49 @@
                 <div>
                   <label class="block text-sm font-medium text-slate-400 mb-1">Valors molt alts (db_very_angry)</label>
                   <input v-model.number="sensorConfig.db_very_angry" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-slate-700 pt-6">
+              <h3 class="text-lg font-semibold text-white mb-4">Llindars de Temperatura (°C)</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Bona (temperature_good)</label>
+                  <input v-model.number="sensorConfig.temperature_good" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Normal (temperature_normal)</label>
+                  <input v-model.number="sensorConfig.temperature_normal" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Alta (temperature_angry)</label>
+                  <input v-model.number="sensorConfig.temperature_angry" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+              </div>
+            </div>
+
+            <!-- Llindars d'Humitat -->
+            <div class="border-t border-slate-700 pt-6">
+              <h3 class="text-lg font-semibold text-white mb-4">Llindars d'Humitat (%)</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Bona (humidity_good)</label>
+                  <input v-model.number="sensorConfig.humidity_good" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Normal (humidity_normal)</label>
+                  <input v-model.number="sensorConfig.humidity_normal" type="number" min="0"
+                    class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">Alta (humidity_angry)</label>
+                  <input v-model.number="sensorConfig.humidity_angry" type="number" min="0"
                     class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
                 </div>
               </div>
@@ -190,12 +221,13 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getSensorConfig, saveSensorConfig, uploadSensorImage } from '~/utils/communicationManager';
 
 const sensorConfig = ref({ images: [] });
-const tempImages = ref([]); // Array temporal para URLs de imágenes subidas
+const tempImages = ref([]);
 const loading = ref(false);
 
 onMounted(async () => {
@@ -203,7 +235,7 @@ onMounted(async () => {
   try {
     const data = await getSensorConfig();
     sensorConfig.value = { ...data };
-    tempImages.value = [...(data.images || [])]; // Inicializa con las imágenes actuales
+    tempImages.value = [...(data.images || [])];
   } catch (error) {
     alert('Error al cargar la configuración: ' + error.message);
   } finally {
@@ -237,26 +269,46 @@ const openImageUpload = (index) => {
 
 const handleFileChange = (event) => {
   const file = event.target.files[0];
-  if (file) {
-    const requiredName = imageTypes.value[currentImageIndex.value].requiredName;
-    if (!file.name.toLowerCase().endsWith(requiredName.toLowerCase())) {
-      alert(`El nom de l'arxiu ha de ser: ${requiredName}`);
-      event.target.value = '';
-      selectedFile.value = null;
-      return;
-    }
-    selectedFile.value = file;
+  if (!file) return;
+
+  // Validar tipo de archivo
+  if (!file.type.match('image/jpeg') && !file.type.match('image/jpg')) {
+    alert('El archivo debe ser una imagen JPG');
+    event.target.value = '';
+    return;
   }
+
+  // Validar dimensiones
+  const img = new Image();
+  img.onload = () => {
+    if (img.width !== 64 || img.height !== 64) {
+      alert('La imagen debe tener exactamente 64x64 píxeles');
+      event.target.value = '';
+    } else {
+      selectedFile.value = file;
+    }
+  };
+  img.src = URL.createObjectURL(file);
 };
 
 const uploadImage = async () => {
   if (!selectedFile.value) return;
+  
   try {
-    const response = await uploadSensorImage(selectedFile.value);
-    const imageUrl = response.url || `https://dev.acubox.cat/back/api/fileSensor/images/${selectedFile.value.name}`;
-    tempImages.value[currentImageIndex.value] = imageUrl; // Solo actualiza el array temporal
+    // Crear un nuevo Blob con el nombre requerido
+    const requiredName = imageTypes.value[currentImageIndex.value].requiredName;
+    const renamedFile = new File([selectedFile.value], requiredName, {
+      type: 'image/jpeg',
+      lastModified: selectedFile.value.lastModified
+    });
+
+    const response = await uploadSensorImage(renamedFile);
+    const imageUrl = response.url || `https://dev.acubox.cat/back/api/fileSensor/images/${requiredName}`;
+    
+    tempImages.value[currentImageIndex.value] = imageUrl;
     showImageUploadModal.value = false;
-    alert('Imatge pujada correctament. Recorda guardar la configuració per aplicar els canvis.');
+    
+    // Eliminado el alert de confirmación aquí
   } catch (error) {
     console.error('Error al pujar la imatge:', error);
     alert('Error al pujar la imatge: ' + error.message);
@@ -265,10 +317,10 @@ const uploadImage = async () => {
 
 const saveSensorConfigHandler = async () => {
   try {
-    sensorConfig.value.images = [...tempImages.value]; // Copia las URLs temporales a la config real
+    sensorConfig.value.images = [...tempImages.value];
     await saveSensorConfig(sensorConfig.value);
     alert('Configuració guardada correctament');
-    window.location.reload(); // Recarga la página para mostrar las nuevas imágenes
+    window.location.reload();
   } catch (error) {
     console.error('Error al guardar la configuració:', error);
     alert('Error al guardar la configuració: ' + error.message);

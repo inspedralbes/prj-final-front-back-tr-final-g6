@@ -1,8 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 import subprocess
 import os
 import requests
-import schedule
 import time
 from threading import Thread
 from datetime import datetime, timedelta
@@ -47,6 +46,16 @@ def run_script(script_name, data, timeSpan):
     result = subprocess.run(command, capture_output=True, text=True)
     return result.stdout
 
+def delete_all_mongo_data():
+    try:
+        response = requests.delete('http://prfg6-back:3020/api/data/mongodb')
+        if response.status_code == 200:
+            app.logger.info("Dades de MongoDB esborrades correctament després de l'agregació d'hora.")
+        else:
+            app.logger.error("Error esborrant les dades de MongoDB: %s", response.text)
+    except Exception as e:
+        app.logger.error("Excepció esborrant les dades de MongoDB: %s", str(e))
+
 def execute_scheduled_script(timeSpan):
     app.logger.info(f"Executant script programat per {timeSpan}...")
 
@@ -75,6 +84,9 @@ def execute_scheduled_script(timeSpan):
 
         output = run_script('agregationSql.py', data, timeSpan)
         app.logger.info("Script d'agregació executat amb èxit: %s", output)
+
+        # Esborra les dades de MongoDB després de l'agregació d'hora
+        delete_all_mongo_data()
 
     elif timeSpan == "dia":
         end_date = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -108,10 +120,11 @@ def execute_scheduled_script(timeSpan):
     else:
         app.logger.error(f"Interval de temps no reconegut: {timeSpan}")
         return
+    send_agregated_data(output, timeSpan)
 
-    send_agregated_data(output)
-
-def send_agregated_data(data):
+def send_agregated_data(data, timeSpan):
+    app.logger.info("Enviant dades agregades a l'API per %s...", timeSpan)
+    app.logger.info("Dades a enviar: %s", data)
     try:
         # Assegura't que `data` sigui un JSON vàlid
         if isinstance(data, str):
@@ -135,6 +148,7 @@ def run_scheduler_minute():
     while True:
         now = datetime.now(BARCELONA_TZ)
         seconds_to_next_minute = 60 - now.second
+        app.logger.info("Esperant %d segons per executar el script de minut...", seconds_to_next_minute)
         time.sleep(seconds_to_next_minute)
         execute_scheduled_script("minut")
 
@@ -142,6 +156,7 @@ def run_scheduler_hour():
     while True:
         now = datetime.now(BARCELONA_TZ)
         seconds_to_next_hour = (60 - now.second) + (60 * (60 - now.minute))
+        app.logger.info("Esperant %d segons per executar el script d'hora...", seconds_to_next_hour)
         time.sleep(seconds_to_next_hour)
         execute_scheduled_script("hora")
 
@@ -149,6 +164,7 @@ def run_scheduler_day():
     while True:
         now = datetime.now(BARCELONA_TZ)
         seconds_to_next_day = (60 - now.second) + (60 * (60 - now.minute)) + (24 * 60 * (24 - now.hour))
+        app.logger.info("Esperant %d segons per executar el script de dia...", seconds_to_next_day)
         time.sleep(seconds_to_next_day)
         execute_scheduled_script("dia")
 
@@ -157,6 +173,7 @@ def run_scheduler_week():
         now = datetime.now(BARCELONA_TZ)
         days_to_next_week = (7 - now.weekday()) % 7
         seconds_to_next_week = (60 - now.second) + (60 * (60 - now.minute)) + (24 * 60 * (24 * days_to_next_week - now.hour))
+        app.logger.info("Esperant %d segons per executar el script de setmana...", seconds_to_next_week)
         time.sleep(seconds_to_next_week)
         execute_scheduled_script("setmana")
 
@@ -165,6 +182,7 @@ def run_scheduler_month():
         now = datetime.now(BARCELONA_TZ)
         days_to_next_month = (30 - now.day) % 30
         seconds_to_next_month = (60 - now.second) + (60 * (60 - now.minute)) + (24 * 60 * (24 * days_to_next_month - now.hour))
+        app.logger.info("Esperant %d segons per executar el script de mes...", seconds_to_next_month)
         time.sleep(seconds_to_next_month)
         execute_scheduled_script("mes")
 

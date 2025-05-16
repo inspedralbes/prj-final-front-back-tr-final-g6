@@ -74,30 +74,38 @@ const lineChartKey = ref(0);
 // Computed properties
 const temperatureColorClass = computed(() => {
     const temp = currentTemperature.value;
-    if (temp < 20) return 'temp-cool';
-    if (temp < 30) return 'temp-normal';
-    if (temp < 35) return 'temp-warm';
-    return 'temp-hot';
+    if (temp < 20) return 'temp-cool';      // temperature_good
+    if (temp < 30) return 'temp-normal';    // temperature_normal
+    return 'temp-angry';                    // temperature_angry
 });
 
-// Chart configurations
+const tempColorRanges = [
+    { max: 20, border: '#60a5fa', background: 'rgba(96, 165, 250, 0.5)' },  // temperature_good (blue)
+    { max: 30, border: '#34d399', background: 'rgba(52, 211, 153, 0.5)' },  // temperature_normal (green)
+    { max: Infinity, border: '#f87171', background: 'rgba(248, 113, 113, 0.5)' }  // temperature_angry (red)
+];
+
 const chartData = ref({
     labels: [],
     datasets: [
         {
             label: 'Temperature (°C)',
             data: [],
-            fill: {
-                target: 'origin',
-                above: 'rgba(33, 150, 243, 0.2)',
-                below: 'rgba(33, 150, 243, 0.2)'
-            },
-            borderColor: '#2196F3',
-            backgroundColor: 'rgba(33, 150, 243, 0.2)',
+            borderColor: '#9CA3AF',
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
             tension: 0,
             borderWidth: 2,
-            pointRadius: 0, // Hide points
-            pointHoverRadius: 0 // Hide points on hover
+            pointRadius: 0,
+            pointHoverRadius: 0,
+            fill: {
+                target: 'origin',
+                above: 'rgba(0, 0, 0, 0.1)',
+                below: 'rgba(0, 0, 0, 0.1)'
+            },
+            segment: {
+                borderColor: '#9CA3AF',
+                backgroundColor: 'rgba(0, 0, 0, 0.1)'
+            }
         },
     ],
 });
@@ -221,10 +229,9 @@ onBeforeUnmount(() => {
     }
 });
 
-// Data handling functions
 function addTemperatureDataPoint(temp, timestamp) {
     currentTemperature.value = temp;
-    
+
     recentTemperatures.value.push({
         time: timestamp,
         value: temp
@@ -234,18 +241,73 @@ function addTemperatureDataPoint(temp, timestamp) {
         recentTemperatures.value.shift();
     }
 
+    updateChartData();
+    lineChartKey.value++;
+}
+
+function updateChartData() {
+    const labels = recentTemperatures.value.map(item => item.time);
+    const dataPoints = recentTemperatures.value.map(item => item.value);
+
+    // Assign colors to each point
+    const pointColors = dataPoints.map(value => {
+        const range = tempColorRanges.find(r => value < r.max) || tempColorRanges[tempColorRanges.length - 1];
+        return {
+            border: range?.border || '#9CA3AF',
+            background: range?.background || 'rgba(0, 0, 0, 0.1)'
+        };
+    });
+
     chartData.value = {
-        ...chartData.value,
-        labels: recentTemperatures.value.map(item => item.time),
+        labels: labels,
         datasets: [
             {
-                ...chartData.value.datasets[0],
-                data: recentTemperatures.value.map(item => item.value)
+                label: 'Temperature (°C)',
+                data: dataPoints,
+                borderColor: pointColors.map(c => c.border),
+                backgroundColor: pointColors.map(c => c.background),
+                tension: 0,
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 0,
+                fill: {
+                    target: 'origin',
+                    above: (ctx) => {
+                        const index = ctx.dataIndex;
+                        return pointColors[index]?.background || 'rgba(0, 0, 0, 0.1)';
+                    },
+                    below: (ctx) => {
+                        const index = ctx.dataIndex;
+                        return pointColors[index]?.background || 'rgba(0, 0, 0, 0.1)';
+                    }
+                },
+                segment: {
+                    borderColor: ctx => {
+                        if (!ctx.p0 || !ctx.p1 || !ctx.p0.parsed || !ctx.p1.parsed) {
+                            return pointColors[0]?.border || '#9CA3AF';
+                        }
+
+                        const p0 = ctx.p0.parsed.y;
+                        const p1 = ctx.p1.parsed.y;
+                        const avgValue = (p0 + p1) / 2;
+                        const range = tempColorRanges.find(r => avgValue < r.max) || tempColorRanges[tempColorRanges.length - 1];
+                        return range?.border || '#9CA3AF';
+                    },
+                    backgroundColor: ctx => {
+                        if (!ctx.p0 || !ctx.p1 || !ctx.p0.parsed || !ctx.p1.parsed) {
+                            return pointColors[0]?.background || 'rgba(0, 0, 0, 0.1)';
+                        }
+
+                        const p0 = ctx.p0.parsed.y;
+                        const p1 = ctx.p1.parsed.y;
+                        const avgValue = (p0 + p1) / 2;
+                        const range = tempColorRanges.find(r => avgValue < r.max) || tempColorRanges[tempColorRanges.length - 1];
+                        return range?.background || 'rgba(0, 0, 0, 0.1)';
+                    }
+                }
             }
         ]
     };
-
-    lineChartKey.value++;
 }
 </script>
 
@@ -339,20 +401,20 @@ function addTemperatureDataPoint(temp, timestamp) {
 }
 
 /* Temperature color classes */
+
 .temp-cool {
     color: #60a5fa;
+    /* Azul */
 }
 
 .temp-normal {
     color: #34d399;
+    /* Verde */
 }
 
-.temp-warm {
-    color: #fbbf24;
-}
-
-.temp-hot {
-    color: #f87171;
+.temp-angry {
+    color: #e01414;
+    /* Rojo */
 }
 
 /* Chart.js overrides */

@@ -108,6 +108,64 @@ io.on('connection', (socket) => {
 
 //ENDPOINTS API
 
+// Get medias de temperatura y volumen
+app.get('/api/stats/medias', async (req, res) => {
+  try {
+    // Consulta para obtener la media de temperatura
+    const queryTemp = `
+      SELECT AVG(average) as mediaTemperatura 
+      FROM dia 
+      WHERE tipus = 'temperatura' 
+      AND dataIni >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+    `;
+
+    // Consulta para obtener la media de volumen
+    const queryVol = `
+      SELECT AVG(average) as mediaVolumen 
+      FROM dia 
+      WHERE tipus = 'volum' 
+      AND dataIni >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+    `;
+
+    // Consulta para obtener el total de sensores activos
+    const querySensors = `
+      SELECT COUNT(*) as totalSensors 
+      FROM sensor 
+      WHERE api_key IS NOT NULL
+    `;
+
+    const [tempResults, volResults, sensorResults] = await Promise.all([
+      new Promise((resolve, reject) => {
+        connexioBD.query(queryTemp, (err, results) => {
+          if (err) reject(err);
+          resolve(results[0]);
+        });
+      }),
+      new Promise((resolve, reject) => {
+        connexioBD.query(queryVol, (err, results) => {
+          if (err) reject(err);
+          resolve(results[0]);
+        });
+      }),
+      new Promise((resolve, reject) => {
+        connexioBD.query(querySensors, (err, results) => {
+          if (err) reject(err);
+          resolve(results[0]);
+        });
+      })
+    ]);
+
+    res.json({
+      mediaTemperatura: parseFloat(tempResults.mediaTemperatura || 0).toFixed(1),
+      mediaVolumen: parseFloat(volResults.mediaVolumen || 0).toFixed(1),
+      totalSensors: sensorResults.totalSensors
+    });
+  } catch (error) {
+    console.error('Error al obtener medias:', error);
+    res.status(500).json({ message: 'Error al obtener las medias', error: error.message });
+  }
+});
+
 app.post('/api/login', (req, res) => {
   const { correu, contrasenya } = req.body;
 
@@ -130,9 +188,9 @@ app.post('/api/login', (req, res) => {
       if (user.contrasenya === contrasenya) {
         // Eliminamos la contraseña antes de enviar los datos del usuario
         const { contrasenya, ...userWithoutPassword } = user;
-        res.status(200).send({ 
-          message: 'Login successful', 
-          user: userWithoutPassword 
+        res.status(200).send({
+          message: 'Login successful',
+          user: userWithoutPassword
         });
       } else {
         res.status(401).send({ message: 'Credencials incorrectes' });
@@ -267,7 +325,7 @@ app.put('/api/aules/:id/activa', (req, res) => {
 });
 
 // Get mitjanes de dades
-app.get('/api/mapa', async (req, res) => {
+app.post('/api/mapa', async (req, res) => {
   const { aules, tipus, data } = req.body;
 
   if (!aules || !tipus || !data) {
@@ -337,13 +395,13 @@ app.get('/api/aules/:id/grafic', (req, res) => {
 app.get('/api/sensors', (req, res) => {
   const query = 'SELECT * FROM sensor';
   connexioBD.execute(query, (err, results) => {
-      if (err) {
-          console.error('Error en la consulta a la base de dades: ' + err.stack);
-          res.status(500).send('Error en la consulta a la base de dades');
-          return;
-      }
-      console.log('Resultados obtenidos:', results); // Log para depuración
-      res.status(200).send(results);
+    if (err) {
+      console.error('Error en la consulta a la base de dades: ' + err.stack);
+      res.status(500).send('Error en la consulta a la base de dades');
+      return;
+    }
+    console.log('Resultados obtenidos:', results); // Log para depuración
+    res.status(200).send(results);
   });
 });
 
@@ -414,11 +472,11 @@ app.put('/api/newsensors/:id/accept', (req, res) => {
   const { id } = req.params;
   const query = 'UPDATE newsensor SET accepted = 1 WHERE id = ?';
   connexioBD.execute(query, [id], (err, results) => {
-      if (err) {
-          console.error('Error en la consulta a la base de dades:', err);
-          return res.status(500).send('Error en la consulta a la base de dades');
-      }
-      res.status(200).send({ message: 'Sensor acceptat correctament' });
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err);
+      return res.status(500).send('Error en la consulta a la base de dades');
+    }
+    res.status(200).send({ message: 'Sensor acceptat correctament' });
   });
 });
 
@@ -426,45 +484,70 @@ app.put('/api/newsensors/:id/reject', (req, res) => {
   const { id } = req.params;
   const query = 'UPDATE newsensor SET accepted = 0, banned = 1 WHERE id = ?';
   connexioBD.execute(query, [id], (err, results) => {
-      if (err) {
-          console.error('Error en la consulta a la base de dades:', err);
-          return res.status(500).send('Error en la consulta a la base de dades');
-      }
-      res.status(200).send({ message: 'Sensor rebutjat correctament' });
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err);
+      return res.status(500).send('Error en la consulta a la base de dades');
+    }
+    res.status(200).send({ message: 'Sensor rebutjat correctament' });
   });
 });
 
 app.put('/api/newsensors/:id/status', (req, res) => {
   const { id } = req.params;
-  const { status } = req.body; // status should be 'accept' or 'reject'
+  const { status } = req.body;
 
   if (!['accept', 'reject'].includes(status)) {
     return res.status(400).send({ message: 'El estado debe ser "accept" o "reject"' });
   }
 
-  const query =
-    status === 'accept'
-      ? 'UPDATE newsensor SET accepted = 1, banned = 0 WHERE idSensor = ?'
-      : 'UPDATE newsensor SET accepted = 0, banned = 1 WHERE idSensor = ?';
-
-  console.log('Executing query:', query, 'with idSensor:', id); // Debugging log
-
-  connexioBD.execute(query, [id], (err, results) => {
-    if (err) {
-      console.error('Error en la consulta a la base de dades:', err); // Log the error
-      return res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
-    }
-
-    if (results.affectedRows > 0) {
-      const message =
-        status === 'accept'
-          ? 'Sensor acceptat correctament'
-          : 'Sensor rebutjat correctament';
-      res.status(200).send({ message });
-    } else {
-      res.status(404).send({ message: 'Sensor no trobat' });
-    }
-  });
+  if (status === 'accept') {
+    // Obtener datos del newsensor
+    const selectQuery = 'SELECT * FROM newsensor WHERE idSensor = ?';
+    connexioBD.execute(selectQuery, [id], (err, results) => {
+      if (err || results.length === 0) {
+        return res.status(500).send({ message: 'Error obteniendo el sensor pendiente' });
+      }
+      const newsensor = results[0];
+      // Generar api_key
+      const apiKey = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      // Insertar en sensor
+      const insertQuery = 'INSERT INTO sensor (mac, api_key, nombre, ubicacion, x, y, idAula) VALUES (?, ?, ?, ?, ?, ?, ?)';
+      connexioBD.execute(
+        insertQuery,
+        [
+          newsensor.mac,
+          apiKey,
+          `Sensor ${newsensor.mac}`,
+          'Ubicación no definida',
+          0,
+          0,
+          null
+        ],
+        (err2) => {
+          if (err2) {
+            return res.status(500).send({ message: 'Error insertando en sensor' });
+          }
+          // Actualizar newsensor
+          const updateQuery = 'UPDATE newsensor SET accepted = 1, banned = 0 WHERE idSensor = ?';
+          connexioBD.execute(updateQuery, [id], (err3) => {
+            if (err3) {
+              return res.status(500).send({ message: 'Error actualizando newsensor' });
+            }
+            res.status(200).send({ message: 'Sensor aceptado y guardado correctamente' });
+          });
+        }
+      );
+    });
+  } else {
+    // Rechazar: solo actualizar newsensor
+    const query = 'UPDATE newsensor SET accepted = 0, banned = 1 WHERE idSensor = ?';
+    connexioBD.execute(query, [id], (err, results) => {
+      if (err) {
+        return res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
+      }
+      res.status(200).send({ message: 'Sensor rechazado correctamente' });
+    });
+  }
 });
 
 app.put('/api/newsensors/:id/unban', (req, res) => {
@@ -622,6 +705,18 @@ app.post('/api/data/mongodb', async (req, res) => {
   });
 });
 
+
+app.delete('/api/data/mongodb', async (req, res) => {
+  try {
+    const result = await collection.deleteMany({});
+    res.status(200).json({ message: 'Totes les dades han estat esborrades', deletedCount: result.deletedCount });
+  } catch (error) {
+    console.error('Error esborrant les dades de MongoDB:', error);
+    res.status(500).json({ message: 'Error esborrant les dades de MongoDB', error: error.message });
+  }
+});
+
+
 app.post('/api/data/mysql', (req, res) => {
   const { timeSpan, sensors } = req.body;
 
@@ -635,8 +730,8 @@ app.post('/api/data/mysql', (req, res) => {
 
 
   const currentDate = moment.tz('Europe/Madrid');
-  const dataIni = currentDate.format('YYYY-MM-DD HH:mm:ss'); 
-  const dataFi = currentDate.add(1, 'minute').format('YYYY-MM-DD HH:mm:ss'); 
+  const dataIni = currentDate.format('YYYY-MM-DD HH:mm:ss');
+  const dataFi = currentDate.add(1, 'minute').format('YYYY-MM-DD HH:mm:ss');
 
   const values = Object.entries(sensors).flatMap(([idSensor, { volume, temperature, humidity }]) => [
     [1, idSensor, 'volum', volume.max, volume.min, volume.avg, dataIni, dataFi],
@@ -667,7 +762,7 @@ app.get('/api/data/mysql', (req, res) => {
 
   dataIni = dataIni.replace('T', ' ');
   dataFi = dataFi.replace('T', ' ');
-  
+
   if (timeSpan === 'hora') {
     timeSpan = 'minut';
   } else if (timeSpan === 'dia') {
@@ -691,29 +786,6 @@ app.get('/api/data/mysql', (req, res) => {
   });
 });
 
-
-async function verifyAPI(req, res, next) {
-  const apiKey = req.headers['x-api-key'];
-
-  if (!apiKey) {
-    return res.status(401).json({ message: 'API key es requerida' });
-  }
-
-  const query = 'SELECT * FROM sensor WHERE api_key = ?';
-  connexioBD.execute(query, [apiKey], (err, results) => {
-    if (err) {
-      console.error('Error en la consulta a la base de datos:', err);
-      return res.status(500).json({ message: 'Error en la consulta a la base de datos' });
-    }
-
-    if (results.length === 0) {
-      return res.status(403).json({ message: 'API key no válida' });
-    }
-    
-    next();
-  });
-}
-
 app.get('/api/sensors/banned', (req, res) => {
   const query = 'SELECT * FROM sensor WHERE banned = 1'; // Ensure the correct table and column names
   connexioBD.execute(query, (err, results) => {
@@ -723,6 +795,72 @@ app.get('/api/sensors/banned', (req, res) => {
     }
     res.status(200).send(results);
   });
+});
+
+// Endpoint para obtener los sensores activos
+app.get('/api/sensors/active', (req, res) => {
+  const query = 'SELECT * FROM sensor WHERE api_key IS NOT NULL AND banned = 0';
+  connexioBD.execute(query, (err, results) => {
+    if (err) {
+      console.error('Error en la consulta a la base de dades:', err.stack);
+      return res.status(500).send({ message: 'Error en la consulta a la base de dades', error: err.message });
+    }
+    res.status(200).send(results);
+  });
+});
+
+// Endpoint para obtener todos los datos de gráficos
+app.get('/api/grafics/all', (req, res) => {
+    const { dataIni, dataFi } = req.query;
+
+    if (!dataIni || !dataFi) {
+        return res.status(400).json({ message: 'dataIni i dataFi són necessaris' });
+    }
+
+    // Consulta para temperatura
+    const queryTemp = `
+        SELECT s.idSensor, s.nombre, s.ubicacion, a.id as aulaId, a.Curs, 
+               t.temperatura, t.data_lectura
+        FROM sensor s
+        LEFT JOIN aula a ON s.idAula = a.id
+        JOIN temperatura t ON s.idSensor = t.idSensor
+        WHERE t.data_lectura BETWEEN ? AND ?
+        ORDER BY t.data_lectura ASC`;
+
+    // Consulta para volumen
+    const queryVol = `
+        SELECT s.idSensor, s.nombre, s.ubicacion, a.id as aulaId, a.Curs, 
+               v.volumen, v.data_lectura
+        FROM sensor s
+        LEFT JOIN aula a ON s.idAula = a.id
+        JOIN volumen v ON s.idSensor = v.idSensor
+        WHERE v.data_lectura BETWEEN ? AND ?
+        ORDER BY v.data_lectura ASC`;
+
+    Promise.all([
+        new Promise((resolve, reject) => {
+            connexioBD.query(queryTemp, [dataIni, dataFi], (err, tempResults) => {
+                if (err) reject(err);
+                resolve(tempResults);
+            });
+        }),
+        new Promise((resolve, reject) => {
+            connexioBD.query(queryVol, [dataIni, dataFi], (err, volResults) => {
+                if (err) reject(err);
+                resolve(volResults);
+            });
+        })
+    ])
+    .then(([temperaturas, volumenes]) => {
+        res.json({
+            temperaturas,
+            volumenes
+        });
+    })
+    .catch(err => {
+        console.error('Error al obtener datos:', err);
+        res.status(500).json({ message: 'Error al obtener los datos', error: err.message });
+    });
 });
 
 // Endpoint per enviar missatges a RabbitMQ
@@ -797,7 +935,7 @@ app.put('/api/sensor/config', (req, res) => {
 
     const mergedConfig = { ...currentConfig, ...newConfig };
 
-    mergedConfig.date = new Date().toISOString();
+    mergedConfig.date = moment.tz('Europe/Madrid').format();
 
     fs.writeFile(configPath, JSON.stringify(mergedConfig, null, 2), 'utf8', (err) => {
       if (err) {
@@ -830,7 +968,41 @@ app.post('/api/sensor/images', upload.single('image'), (req, res) => {
   res.json({ url });
 });
 
+app.get('/api/aules/:id/ultimsensors', (req, res) => {
+  const idAula = req.params.id;
+  const tipusList = ['temperatura', 'humitat', 'volum'];
+  const taula = 'hora';
 
+  const promises = tipusList.map(tipus => {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT average, max, min, dataIni, dataFi
+        FROM ${taula}
+        WHERE idAula = ? AND tipus = ?
+        ORDER BY dataFi DESC
+        LIMIT 1
+      `;
+      connexioBD.execute(query, [idAula, tipus], (err, results) => {
+        if (err) return reject(err);
+        resolve({ tipus, ...results[0] });
+      });
+    });
+  });
+
+  Promise.all(promises)
+    .then(results => {
+      // results: [{tipus: 'temperatura', ...}, ...]
+      const data = {};
+      results.forEach(r => {
+        if (r) data[r.tipus] = r;
+      });
+      res.json(data);
+    })
+    .catch(err => {
+      console.error('Error obtenint últims sensors:', err);
+      res.status(500).json({ message: 'Error obtenint últims sensors' });
+    });
+});
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor en funcionament a http://localhost:${PORT}`);
