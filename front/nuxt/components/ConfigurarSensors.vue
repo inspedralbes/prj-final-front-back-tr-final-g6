@@ -52,7 +52,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-slate-400 mb-1">Màxim de mostres (maxSamples)</label>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Màxim de mostres (maxSamples / 2 = segons)</label>
                 <input v-model.number="sensorConfig.maxSamples" type="number" min="1"
                   class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
               </div>

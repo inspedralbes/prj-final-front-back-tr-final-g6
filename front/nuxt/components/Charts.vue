@@ -67,6 +67,7 @@ import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
+import { getAulaById } from "@/utils/communicationManager";
 
 import TemperatureActual from './charts/temperatura/TemperatureActual.vue';
 import TemperatureMinuteChart from "./charts/temperatura/TemperatureMinuteChart.vue";
@@ -154,6 +155,16 @@ const selectedRange = ref("actual");
 const currentChart = computed(() => {
   const chartType = chartComponents[selectedChart.value];
   return chartType ? chartType[selectedRange.value] : null;
+});
+
+onMounted(async () => {
+  try {
+    const data = await getAulaById(aulaId);
+    aula.value = data;
+  } catch (error) {
+    console.error("Error al cargar el aula:", error);
+    aula.value = null;
+  }
 });
 </script>
 
