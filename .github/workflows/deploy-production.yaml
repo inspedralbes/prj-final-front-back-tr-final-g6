@@ -57,7 +57,7 @@ jobs:
           systemctl start docker
           echo "Docker iniciat"
           echo "Esborrant imatges velles"
-          docker system prune -a
+          docker system prune -a -y
 
           # Executar Docker Compose
           docker compose -f compose.prod.yaml up -d --build
