@@ -436,9 +436,9 @@ app.delete('/api/sensors/:id', (req, res) => {
 // Actualizar un sensor
 app.put('/api/sensors/:id', (req, res) => {
   const { id } = req.params;
-  const { nombre, ubicacion, x, y } = req.body;
-  const query = 'UPDATE sensor SET nombre = ?, ubicacion = ?, x = ?, y = ? WHERE idSensor = ?';
-  connexioBD.execute(query, [nombre, ubicacion, x, y, id], (err, results) => {
+  const { nombre, ubicacion, x, y, idAula } = req.body;
+  const query = 'UPDATE sensor SET nombre = ?, ubicacion = ?, x = ?, y = ?, idAula = ? WHERE idSensor = ?';
+  connexioBD.execute(query, [nombre, ubicacion, x, y, idAula, id], (err, results) => {
     if (err) {
       console.error('Error en la actualización del sensor:', err.stack);
       return res.status(500).send({ message: 'Error en la actualización del sensor' });
