@@ -71,6 +71,13 @@ const lastUpdate = ref('--:--');
 const recentTemperatures = ref([]);
 const lineChartKey = ref(0);
 
+const props = defineProps({
+    idAula: {
+        type: Number,
+        required: true
+    }
+});
+
 // Computed properties
 const temperatureColorClass = computed(() => {
     const temp = currentTemperature.value;
@@ -178,7 +185,11 @@ onMounted(() => {
         socket.value.on('newRawData', (data) => {
             console.log('Received data via socket:', JSON.stringify(data, null, 2));
 
-            if (data && data.temperature !== undefined) {
+            if (
+                data &&
+                data.temperature !== undefined &&
+                data.id_aula === props.idAula
+            ) {
                 const tempValue = typeof data.temperature === 'string'
                     ? parseFloat(data.temperature)
                     : data.temperature;

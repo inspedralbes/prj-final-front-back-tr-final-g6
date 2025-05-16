@@ -11,6 +11,13 @@ import { ref } from 'vue';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale } from 'chart.js';
 
+const props = defineProps({
+    idAula: {
+        type: Number,
+        required: true
+    }
+});
+
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale);
 
 const chartData = ref({
