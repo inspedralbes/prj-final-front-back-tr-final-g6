@@ -71,6 +71,13 @@ const lastUpdate = ref('--:--');
 const recentVolumes = ref([]);
 const lineChartKey = ref(0);
 
+const props = defineProps({
+    idAula: {
+        type: Number,
+        required: true
+    }
+});
+
 const volumeColorClass = computed(() => {
     const volume = currentVolume.value;
     if (volume < 70) return 'volume-low';      
@@ -192,7 +199,8 @@ onMounted(() => {
         socket.value.on('newRawData', (data) => {
             console.log('Received data via socket:', JSON.stringify(data, null, 2));
 
-            if (data && data.volume !== undefined) {
+            // Solo actualiza si el dato es del aula correspondiente
+            if (data && data.volume !== undefined && data.id_aula === props.idAula) {
                 const volumeValue = typeof data.volume === 'string'
                     ? parseFloat(data.volume)
                     : data.volume;

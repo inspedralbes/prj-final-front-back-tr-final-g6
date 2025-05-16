@@ -71,6 +71,13 @@ const lastUpdate = ref('--:--');
 const recentHumidityReadings = ref([]);
 const lineChartKey = ref(0);
 
+const props = defineProps({
+    idAula: {
+        type: Number,
+        required: true
+    }
+});
+
 // Computed properties
 const humidityColorClass = computed(() => {
     const humidity = currentHumidity.value;
@@ -170,7 +177,8 @@ onMounted(() => {
         socket.value.on('newRawData', (data) => {
             console.log('Received data via socket:', JSON.stringify(data, null, 2));
 
-            if (data && data.humidity !== undefined) {
+            // Solo actualiza si el dato es del aula correspondiente
+            if (data && data.humidity !== undefined && data.id_aula === props.idAula) {
                 const humidityValue = typeof data.humidity === 'string'
                     ? parseFloat(data.humidity)
                     : data.humidity;

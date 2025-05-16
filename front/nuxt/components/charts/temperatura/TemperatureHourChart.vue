@@ -86,7 +86,7 @@ const route = useRoute();
 const props = defineProps({
     idAula: {
         type: Number,
-        default: null
+        required: true
     }
 });
 

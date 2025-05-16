@@ -692,10 +692,11 @@ app.post('/api/data/mongodb', async (req, res) => {
     console.log('API key vàlida, inserint dades a MongoDB');
     const id_sensor = results[0].idSensor;
     try {
+      const id_aula = await getAulaIdBySensorId(id_sensor);
       const result = await collection.insertOne({ volume, temperature, humidity, id_sensor, date });
       console.log(`Dades inserides amb l'ID: ${result.insertedId}`);
 
-      io.emit('newRawData', { volume, temperature, humidity, id_sensor, date });
+      io.emit('newRawData', { volume, temperature, humidity, id_sensor, id_aula, date });
 
       res.status(201).json({ message: 'Dades inserides correctament', id: result.insertedId });
     } catch (error) {
@@ -716,8 +717,21 @@ app.delete('/api/data/mongodb', async (req, res) => {
   }
 });
 
+async function getAulaIdBySensorId(idSensor) {
+  return new Promise((resolve, reject) => {
+    const query = 'SELECT idAula FROM sensor WHERE idSensor = ?';
+    connexioBD.execute(query, [idSensor], (err, results) => {
+      if (err) return reject(err);
+      if (results.length > 0) {
+        resolve(results[0].idAula);
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
 
-app.post('/api/data/mysql', (req, res) => {
+app.post('/api/data/mysql', async (req, res) => {
   const { timeSpan, sensors } = req.body;
 
   if (!timeSpan || typeof sensors !== 'object') {
@@ -728,30 +742,42 @@ app.post('/api/data/mysql', (req, res) => {
   console.log('TimeSpan: ', timeSpan);
   const query = `INSERT INTO ${mysql2.escapeId(timeSpan)} (idAula, idSensor, tipus, max, min, average, dataIni, dataFi) VALUES ?`;
 
-
   const currentDate = moment.tz('Europe/Madrid');
   const dataIni = currentDate.format('YYYY-MM-DD HH:mm:ss');
   const dataFi = currentDate.add(1, 'minute').format('YYYY-MM-DD HH:mm:ss');
 
-  const values = Object.entries(sensors).flatMap(([idSensor, { volume, temperature, humidity }]) => [
-    [1, idSensor, 'volum', volume.max, volume.min, volume.avg, dataIni, dataFi],
-    [1, idSensor, 'temperatura', temperature.max, temperature.min, temperature.avg, dataIni, dataFi],
-    [1, idSensor, 'humitat', humidity.max, humidity.min, humidity.avg, dataIni, dataFi]
-  ]);
+  try {
+    // Obtenir idAula per cada idSensor i afegir-lo a l'objecte sensors
+    const values = await Promise.all(
+      Object.entries(sensors).flatMap(async ([idSensor, { volume, temperature, humidity }]) => {
+        const idAula = await getAulaIdBySensorId(idSensor);
+        // Afegim l'idAula a l'objecte sensors
+        sensors[idSensor].id_aula = idAula;
+        return [
+          [idAula, idSensor, 'volum', volume.max, volume.min, volume.avg, dataIni, dataFi],
+          [idAula, idSensor, 'temperatura', temperature.max, temperature.min, temperature.avg, dataIni, dataFi],
+          [idAula, idSensor, 'humitat', humidity.max, humidity.min, humidity.avg, dataIni, dataFi]
+        ];
+      })
+    ).then(arrays => arrays.flat());
 
-  connexioBD.query(query, [values], (err, results) => {
-    console.log('Query completa: ', query);
+    connexioBD.query(query, [values], (err, results) => {
+      console.log('Query completa: ', query);
 
-    if (err) {
-      console.error('Error en la inserció a la base de dades: ' + err.stack);
-      return res.status(500).json({ message: 'Error en la inserció a la base de dades' });
-    }
+      if (err) {
+        console.error('Error en la inserció a la base de dades: ' + err.stack);
+        return res.status(500).json({ message: 'Error en la inserció a la base de dades' });
+      }
 
-    io.emit('newAggregatedData', { timeSpan, sensors });
+      io.emit('newAggregatedData', { timeSpan, sensors });
 
-    console.log('Dades inserides correctament a MySQL: ', results);
-    res.status(201).json({ message: 'Dades inserides correctament', affectedRows: results.affectedRows });
-  });
+      console.log('Dades inserides correctament a MySQL: ', results);
+      res.status(201).json({ message: 'Dades inserides correctament', affectedRows: results.affectedRows });
+    });
+  } catch (error) {
+    console.error('Error obtenint idAula:', error);
+    res.status(500).json({ message: 'Error obtenint idAula', error: error.message });
+  }
 });
 
 app.get('/api/data/mysql', (req, res) => {

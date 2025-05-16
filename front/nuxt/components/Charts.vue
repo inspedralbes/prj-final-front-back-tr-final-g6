@@ -56,7 +56,7 @@
       </div>
 
       <div class="h-[500px]">
-        <component :is="currentChart" />
+        <component :is="currentChart" :idAula="Number(aulaId)" />
       </div>
     </div>
   </div>

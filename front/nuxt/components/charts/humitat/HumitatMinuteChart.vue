@@ -20,6 +20,13 @@ import {
     PointElement
 } from 'chart.js';
 
+const props = defineProps({
+    idAula: {
+        type: Number,
+        required: true
+    }
+});
+
 // Registra los componentes necesarios de Chart.js
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement);
 

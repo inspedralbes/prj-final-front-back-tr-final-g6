@@ -68,7 +68,7 @@ let currentHour = new Date().getHours(); // Almacena la hora actual
 const props = defineProps({
     idAula: {
         type: Number,
-        default: null
+        required: true
     }
 });
 
