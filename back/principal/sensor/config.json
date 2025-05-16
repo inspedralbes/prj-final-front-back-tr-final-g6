@@ -15,6 +15,7 @@
   "db_good": 0,
   "db_normal": 70,
   "db_angry": 80,
+  "maxSamples": 10,
   "temperature_good": 0,
   "temperature_normal": 20,
   "temperature_angry": 30,
