@@ -83,20 +83,11 @@
           <component :is="getMapComponent(plantaSeleccionada)" :aulaData="aulaData"
             :imageUrl="getMapImageUrl(plantaSeleccionada)" class="w-full h-full" />
 
-          <!-- Heatmap overlay encima del mapa -->
-          <HeatmapOverlay 
-            v-if="showHeatmap" 
-            :data-points="heatmapDataPoints" 
-            :max="heatmapMax" 
-            :min="heatmapMin"
-            :radius="heatmapRadius"
-            :gradient="heatmapGradient"
-            class="absolute inset-0"
-          />
+          <HeatmapOverlay :data-points="heatmapDataPoints" :max="heatmapMax" :min="heatmapMin" :radius="heatmapRadius"
+            :gradient="heatmapGradient" />
 
           <!-- Popups encima de todo -->
-          <div v-for="popup in filteredPopups" :key="popup.id" 
-            :style="{ left: popup.x + 'px', top: popup.y + 'px' }"
+          <div v-for="popup in filteredPopups" :key="popup.id" :style="{ left: popup.x + 'px', top: popup.y + 'px' }"
             class="custom-popup absolute z-20">
             <!-- Punto indicador -->
             <div :class="[
@@ -333,7 +324,7 @@ const toggleHeatmap = async () => {
 
 const updateHeatmapData = () => {
   if (!showHeatmap.value) return;
-  
+
   const points = [];
   let max = -Infinity;
   let min = Infinity;
@@ -342,7 +333,7 @@ const updateHeatmapData = () => {
   filteredPopups.value.forEach(sensor => {
     const sensorKey = sensor.idAula || sensor.id;
     const sensorData = lastSensorValues.value[sensorKey] || {};
-    
+
     let value = 0;
     if (selectedSensorType.value === 'temperature') {
       value = sensorData.temperatura?.average ?? sensor.temperature ?? defaultRanges.low;
@@ -352,14 +343,14 @@ const updateHeatmapData = () => {
       value = sensorData.volum?.average ?? sensor.volume ?? defaultRanges.low;
     }
 
-    // Solo añadir puntos con coordenadas válidas
-    if (typeof sensor.x === 'number' && typeof sensor.y === 'number') {
+    // Solo añadir puntos con coordenadas válidas y valores numéricos
+    if (typeof sensor.x === 'number' && typeof sensor.y === 'number' && !isNaN(value)) {
       points.push({
         x: Math.round(sensor.x),
         y: Math.round(sensor.y),
         value: value
       });
-      
+
       // Actualizar min/max
       max = Math.max(max, value);
       min = Math.min(min, value);
