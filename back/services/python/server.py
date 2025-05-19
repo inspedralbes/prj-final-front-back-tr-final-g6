@@ -178,7 +178,7 @@ def run_scheduler_week():
         time.sleep(seconds_to_next_week)
         execute_scheduled_script("setmana")
 
-def run_scheduler_month():
+def run_scheduler_month(): 
     import calendar
     while True:
         now = datetime.now(BARCELONA_TZ)
