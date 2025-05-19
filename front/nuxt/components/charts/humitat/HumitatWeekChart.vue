@@ -344,12 +344,14 @@ onMounted(() => {
     fetchInitialData();
 
     try {
-        const socketUrl = getBaseUrl();
+        const socketUrl = getBaseUrl().replace(/\/back$/, '');
         socket.value = io(socketUrl, {
+            path: '/back/socket.io',
             transports: ['websocket', 'polling'],
             reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
+            reconnectionDelay: 1000
         });
+
 
         socket.value.on('newAggregatedData', handleNewAggregatedData);
         socket.value.on('connect', () => console.log('Connected to socket server'));
@@ -536,23 +538,28 @@ onBeforeUnmount(() => {
 
 /* Humidity color classes */
 .humidity-low {
-    color: #34d399; /* Green for low humidity */
+    color: #34d399;
+    /* Green for low humidity */
 }
 
 .humidity-medium-low {
-    color: #60a5fa; /* Blue for medium-low humidity */
+    color: #60a5fa;
+    /* Blue for medium-low humidity */
 }
 
 .humidity-medium {
-    color: #fbbf24; /* Yellow for medium humidity */
+    color: #fbbf24;
+    /* Yellow for medium humidity */
 }
 
 .humidity-high {
-    color: #f97316; /* Orange for high humidity */
+    color: #f97316;
+    /* Orange for high humidity */
 }
 
 .humidity-extreme {
-    color: #f87171; /* Red for extreme humidity */
+    color: #f87171;
+    /* Red for extreme humidity */
 }
 
 .humidity-neutral {

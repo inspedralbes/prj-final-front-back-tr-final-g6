@@ -16,9 +16,11 @@
                         {{ currentHumidity !== null ? parseFloat(currentHumidity).toFixed(2) : '--' }}%
                     </div>
                     <div class="humidity-range">
-                        <span class="min-humidity">{{ minHumidity !== null ? parseFloat(minHumidity).toFixed(2) : '--' }}%</span>
+                        <span class="min-humidity">{{ minHumidity !== null ? parseFloat(minHumidity).toFixed(2) : '--'
+                            }}%</span>
                         <span class="range-separator">-</span>
-                        <span class="max-humidity">{{ maxHumidity !== null ? parseFloat(maxHumidity).toFixed(2) : '--' }}%</span>
+                        <span class="max-humidity">{{ maxHumidity !== null ? parseFloat(maxHumidity).toFixed(2) : '--'
+                            }}%</span>
                     </div>
                     <div class="humidity-label">Current Humidity (Avg/Min/Max)</div>
                 </div>
@@ -220,7 +222,7 @@ const formatDayLabel = (date) => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const dayName = days[date.getDay()];
     const dayNumber = date.getDate();
-    return { 
+    return {
         label: `${dayName} ${dayNumber}`,
         isWeekend: date.getDay() === 0 || date.getDay() === 6 // 0 = Domingo, 6 = Sábado
     };
@@ -232,12 +234,12 @@ const fetchInitialData = async () => {
         const startDate = new Date(now);
         startDate.setDate(startDate.getDate() - 6); // 7 días atrás
         startDate.setHours(0, 0, 0, 0);
-        
+
         const endDate = new Date(now);
         endDate.setHours(23, 59, 59, 999);
-        
+
         const idAula = props.idAula || (route.params.id ? Number(route.params.id) : 1);
-        
+
         const data = await getDadesGrafic(
             'dia',
             'humitat',
@@ -245,7 +247,7 @@ const fetchInitialData = async () => {
             startDate.toISOString(),
             endDate.toISOString()
         );
-        
+
         // Generar etiquetas y filtrar fines de semana
         const dayLabels = Array.from({ length: 7 }, (_, i) => {
             const date = new Date(startDate);
@@ -268,17 +270,17 @@ const fetchInitialData = async () => {
             const date = weekdayDates[index];
             const found = data.find(item => {
                 const itemDate = new Date(item.dataIni);
-                return itemDate.getDate() === date.getDate() && 
-                       itemDate.getMonth() === date.getMonth() && 
-                       itemDate.getFullYear() === date.getFullYear();
+                return itemDate.getDate() === date.getDate() &&
+                    itemDate.getMonth() === date.getMonth() &&
+                    itemDate.getFullYear() === date.getFullYear();
             });
-            
-            return found ? { 
-                day: dayObj.label, 
+
+            return found ? {
+                day: dayObj.label,
                 value: found.average,
                 date: date
-            } : { 
-                day: dayObj.label, 
+            } : {
+                day: dayObj.label,
                 value: null,
                 date: date
             };
@@ -288,17 +290,17 @@ const fetchInitialData = async () => {
             const date = weekdayDates[index];
             const found = data.find(item => {
                 const itemDate = new Date(item.dataIni);
-                return itemDate.getDate() === date.getDate() && 
-                       itemDate.getMonth() === date.getMonth() && 
-                       itemDate.getFullYear() === date.getFullYear();
+                return itemDate.getDate() === date.getDate() &&
+                    itemDate.getMonth() === date.getMonth() &&
+                    itemDate.getFullYear() === date.getFullYear();
             });
-            
-            return found ? { 
-                day: dayObj.label, 
+
+            return found ? {
+                day: dayObj.label,
                 value: found.min,
                 date: date
-            } : { 
-                day: dayObj.label, 
+            } : {
+                day: dayObj.label,
                 value: null,
                 date: date
             };
@@ -308,17 +310,17 @@ const fetchInitialData = async () => {
             const date = weekdayDates[index];
             const found = data.find(item => {
                 const itemDate = new Date(item.dataIni);
-                return itemDate.getDate() === date.getDate() && 
-                       itemDate.getMonth() === date.getMonth() && 
-                       itemDate.getFullYear() === date.getFullYear();
+                return itemDate.getDate() === date.getDate() &&
+                    itemDate.getMonth() === date.getMonth() &&
+                    itemDate.getFullYear() === date.getFullYear();
             });
-            
-            return found ? { 
-                day: dayObj.label, 
+
+            return found ? {
+                day: dayObj.label,
                 value: found.max,
                 date: date
-            } : { 
-                day: dayObj.label, 
+            } : {
+                day: dayObj.label,
                 value: null,
                 date: date
             };
@@ -377,7 +379,7 @@ const handleNewAggregatedData = (data) => {
         if (avgHum >= 0 && avgHum <= 100) {
             // Find today in our data
             const dayIndex = humidityData.value.findIndex(item => item.day === todayLabel);
-            
+
             if (dayIndex !== -1) {
                 // Update all three datasets
                 humidityData.value[dayIndex].value = avgHum;
@@ -400,12 +402,14 @@ onMounted(() => {
     fetchInitialData();
 
     try {
-        const socketUrl = getBaseUrl();
+        const socketUrl = getBaseUrl().replace(/\/back$/, '');
         socket.value = io(socketUrl, {
+            path: '/back/socket.io',
             transports: ['websocket', 'polling'],
             reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
+            reconnectionDelay: 1000
         });
+
 
         socket.value.on('newAggregatedData', handleNewAggregatedData);
         socket.value.on('connect', () => console.log('Connected to socket server'));
@@ -592,19 +596,23 @@ onBeforeUnmount(() => {
 
 /* Humidity color classes */
 .humidity-low {
-    color: #60a5fa; /* Azul para humedad baja */
+    color: #60a5fa;
+    /* Azul para humedad baja */
 }
 
 .humidity-optimal {
-    color: #34d399; /* Verde para humedad óptima */
+    color: #34d399;
+    /* Verde para humedad óptima */
 }
 
 .humidity-medium {
-    color: #fbbf24; /* Amarillo para humedad media */
+    color: #fbbf24;
+    /* Amarillo para humedad media */
 }
 
 .humidity-high {
-    color: #f87171; /* Rojo para humedad alta */
+    color: #f87171;
+    /* Rojo para humedad alta */
 }
 
 .humidity-neutral {

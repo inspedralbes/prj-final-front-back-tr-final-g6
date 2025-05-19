@@ -16,9 +16,11 @@
                         {{ currentHumidity !== null ? parseFloat(currentHumidity.avg).toFixed(2) : '--' }}%
                     </div>
                     <div class="humidity-range">
-                        <span class="min-humidity">{{ currentHumidity?.min !== undefined ? parseFloat(currentHumidity.min).toFixed(2) : '--' }}%</span>
+                        <span class="min-humidity">{{ currentHumidity?.min !== undefined ?
+                            parseFloat(currentHumidity.min).toFixed(2) : '--' }}%</span>
                         <span class="range-separator">-</span>
-                        <span class="max-humidity">{{ currentHumidity?.max !== undefined ? parseFloat(currentHumidity.max).toFixed(2) : '--' }}%</span>
+                        <span class="max-humidity">{{ currentHumidity?.max !== undefined ?
+                            parseFloat(currentHumidity.max).toFixed(2) : '--' }}%</span>
                     </div>
                     <div class="humidity-label">Current Humidity (Avg/Min/Max)</div>
                 </div>
@@ -172,7 +174,7 @@ const chartOptions = ref({
                 maxRotation: 45,
                 minRotation: 45,
                 autoSkip: false,
-                callback: function(value, index, values) {
+                callback: function (value, index, values) {
                     if (index === values.length - 1) return '24:00';
                     return this.getLabelForValue(value);
                 }
@@ -260,35 +262,35 @@ const fetchInitialData = async () => {
                     const itemHour = new Date(item.dataIni).getHours();
                     return itemHour === 23;
                 });
-                return midnightData ? { 
-                    time: '24:00', 
+                return midnightData ? {
+                    time: '24:00',
                     value: {
                         avg: midnightData.average,
                         min: midnightData.min,
                         max: midnightData.max
                     }
-                } : { 
-                    time: '24:00', 
-                    value: null 
+                } : {
+                    time: '24:00',
+                    value: null
                 };
             }
-            
+
             const hour = parseInt(label.split(':')[0]);
             const found = data.find(item => {
                 const itemHour = new Date(item.dataIni).getHours();
                 return itemHour === hour;
             });
-            
-            return found ? { 
-                time: label, 
+
+            return found ? {
+                time: label,
                 value: {
                     avg: found.average,
                     min: found.min,
                     max: found.max
                 }
-            } : { 
-                time: label, 
-                value: null 
+            } : {
+                time: label,
+                value: null
             };
         });
 
@@ -303,10 +305,10 @@ const fetchInitialData = async () => {
 };
 
 const updateChartData = (data) => {
-    const labels = data.map((item, index) => 
+    const labels = data.map((item, index) =>
         index === data.length - 1 ? '24:00' : item.time
     );
-    
+
     const avgValues = data.map(item => item.value?.avg);
     const minValues = data.map(item => item.value?.min);
     const maxValues = data.map(item => item.value?.max);
@@ -360,12 +362,14 @@ onMounted(() => {
     fetchInitialData();
 
     try {
-        const socketUrl = getBaseUrl();
+        const socketUrl = getBaseUrl().replace(/\/back$/, '');
         socket.value = io(socketUrl, {
+            path: '/back/socket.io',
             transports: ['websocket', 'polling'],
             reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
+            reconnectionDelay: 1000
         });
+
 
         socket.value.on('newAggregatedData', handleNewAggregatedData);
         socket.value.on('connect', () => console.log('Connected to socket server'));

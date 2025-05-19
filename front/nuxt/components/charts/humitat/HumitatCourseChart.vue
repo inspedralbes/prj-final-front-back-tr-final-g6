@@ -16,9 +16,11 @@
                         {{ currentHumidity !== null ? parseFloat(currentHumidity).toFixed(2) : '--' }}%
                     </div>
                     <div class="volume-range">
-                        <span class="min-volume">{{ minHumidity !== null ? parseFloat(minHumidity).toFixed(2) : '--' }}%</span>
+                        <span class="min-volume">{{ minHumidity !== null ? parseFloat(minHumidity).toFixed(2) : '--'
+                            }}%</span>
                         <span class="range-separator">-</span>
-                        <span class="max-volume">{{ maxHumidity !== null ? parseFloat(maxHumidity).toFixed(2) : '--' }}%</span>
+                        <span class="max-volume">{{ maxHumidity !== null ? parseFloat(maxHumidity).toFixed(2) : '--'
+                            }}%</span>
                     </div>
                     <div class="volume-label">Current Course Humidity (Avg/Min/Max)</div>
                 </div>
@@ -375,12 +377,14 @@ onMounted(() => {
     fetchInitialData();
 
     try {
-        const socketUrl = getBaseUrl();
+        const socketUrl = getBaseUrl().replace(/\/back$/, '');
         socket.value = io(socketUrl, {
+            path: '/back/socket.io',
             transports: ['websocket', 'polling'],
             reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
+            reconnectionDelay: 1000
         });
+
 
         socket.value.on('newAggregatedData', handleNewAggregatedData);
         socket.value.on('connect', () => console.log('Connected to socket server'));
@@ -567,19 +571,23 @@ onMounted(() => {
 
 /* Humidity color classes */
 .hum-low {
-    color: #2196F3; /* Blue for low humidity */
+    color: #2196F3;
+    /* Blue for low humidity */
 }
 
 .hum-moderate {
-    color: #4CAF50; /* Green for moderate humidity */
+    color: #4CAF50;
+    /* Green for moderate humidity */
 }
 
 .hum-high {
-    color: #FF9800; /* Orange for high humidity */
+    color: #FF9800;
+    /* Orange for high humidity */
 }
 
 .hum-extreme {
-    color: #F44336; /* Red for extreme humidity */
+    color: #F44336;
+    /* Red for extreme humidity */
 }
 
 .hum-neutral {
