@@ -241,21 +241,29 @@ app.get('/api/aules/:id', (req, res) => {
 });
 
 app.post('/api/aules', (req, res) => {
-  const { curs, classe, etapa } = req.body;
+  let { curs, classe, etapa, Planta, Aula, turn, activa } = req.body;
 
-  if (!curs || !classe || !etapa) {
-    return res.status(400).send({ message: 'curs, classe i etapa són necessaris' });
-  }
+  curs = curs || null;
+  classe = classe || null;
+  etapa = etapa || null;
+  Planta = Planta !== undefined ? Planta : null;
+  Aula = Aula !== undefined ? Aula : null;
+  turn = turn || null;
+  activa = activa !== undefined ? activa : 1;
 
-  const query = 'INSERT INTO aula (curs, classe, etapa) VALUES (?, ?, ?)';
-  connexioBD.execute(query, [curs, classe, etapa], (err, results) => {
+  const query = `
+    INSERT INTO aula (curs, classe, etapa, Planta, Aula, turn, activa)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+  connexioBD.execute(query, [curs, classe, etapa, Planta, Aula, turn, activa], (err, results) => {
     if (err) {
       console.error('Error en la inserció a la base de dades: ' + err.stack);
-      res.status(500).send('Error en la inserció a la base de dades');
+      // Cambia a respuesta JSON
+      res.status(500).json({ message: 'Error en la inserció a la base de dades' });
       return;
     }
 
-    res.status(201).send({ message: 'Aula creada correctament', id: results.insertId });
+    res.status(201).json({ message: 'Aula creada correctament', id: results.insertId });
   });
 });
 
@@ -656,10 +664,10 @@ app.post('/api/data/mongodb', async (req, res) => {
   console.log('Rebent dades per a MongoDB');
   const { volume, temperature, humidity, date, MAC, api_key } = req.body;
   if (volume == null || temperature == null || humidity == null || date == null || MAC == null || api_key == null) {
-    return res.status(400).json({ message: 'Dades incompletes' }); 
+    return res.status(400).json({ message: 'Dades incompletes' });
   }
 
-  const query = 'SELECT * FROM sensor WHERE mac = ? AND api_key = ?'; 
+  const query = 'SELECT * FROM sensor WHERE mac = ? AND api_key = ?';
   connexioBD.execute(query, [MAC, api_key], async (err, results) => {
     if (err) {
       console.error('Error en la consulta a la base de dades: ' + err.stack);
@@ -817,14 +825,14 @@ app.get('/api/sensors/active', (req, res) => {
 
 // Endpoint para obtener todos los datos de gráficos
 app.get('/api/grafics/all', (req, res) => {
-    const { dataIni, dataFi } = req.query;
+  const { dataIni, dataFi } = req.query;
 
-    if (!dataIni || !dataFi) {
-        return res.status(400).json({ message: 'dataIni i dataFi són necessaris' });
-    }
+  if (!dataIni || !dataFi) {
+    return res.status(400).json({ message: 'dataIni i dataFi són necessaris' });
+  }
 
-    // Consulta para temperatura
-    const queryTemp = `
+  // Consulta para temperatura
+  const queryTemp = `
         SELECT s.idSensor, s.nombre, s.ubicacion, a.id as aulaId, a.Curs, 
                t.temperatura, t.data_lectura
         FROM sensor s
@@ -833,8 +841,8 @@ app.get('/api/grafics/all', (req, res) => {
         WHERE t.data_lectura BETWEEN ? AND ?
         ORDER BY t.data_lectura ASC`;
 
-    // Consulta para volumen
-    const queryVol = `
+  // Consulta para volumen
+  const queryVol = `
         SELECT s.idSensor, s.nombre, s.ubicacion, a.id as aulaId, a.Curs, 
                v.volumen, v.data_lectura
         FROM sensor s
@@ -843,29 +851,29 @@ app.get('/api/grafics/all', (req, res) => {
         WHERE v.data_lectura BETWEEN ? AND ?
         ORDER BY v.data_lectura ASC`;
 
-    Promise.all([
-        new Promise((resolve, reject) => {
-            connexioBD.query(queryTemp, [dataIni, dataFi], (err, tempResults) => {
-                if (err) reject(err);
-                resolve(tempResults);
-            });
-        }),
-        new Promise((resolve, reject) => {
-            connexioBD.query(queryVol, [dataIni, dataFi], (err, volResults) => {
-                if (err) reject(err);
-                resolve(volResults);
-            });
-        })
-    ])
+  Promise.all([
+    new Promise((resolve, reject) => {
+      connexioBD.query(queryTemp, [dataIni, dataFi], (err, tempResults) => {
+        if (err) reject(err);
+        resolve(tempResults);
+      });
+    }),
+    new Promise((resolve, reject) => {
+      connexioBD.query(queryVol, [dataIni, dataFi], (err, volResults) => {
+        if (err) reject(err);
+        resolve(volResults);
+      });
+    })
+  ])
     .then(([temperaturas, volumenes]) => {
-        res.json({
-            temperaturas,
-            volumenes
-        });
+      res.json({
+        temperaturas,
+        volumenes
+      });
     })
     .catch(err => {
-        console.error('Error al obtener datos:', err);
-        res.status(500).json({ message: 'Error al obtener los datos', error: err.message });
+      console.error('Error al obtener datos:', err);
+      res.status(500).json({ message: 'Error al obtener los datos', error: err.message });
     });
 });
 

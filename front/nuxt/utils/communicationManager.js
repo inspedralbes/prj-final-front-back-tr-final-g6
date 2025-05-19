@@ -104,15 +104,11 @@ export async function getAulaById(id) {
     }
 }
 
-export async function createAula(curs, classe, etapa) {
-    if (!curs || !classe || !etapa) {
-        throw new Error("curs, classe i etapa són necessaris");
-    }
-
+export async function createAula(Curs, Classe, Etapa, Planta, Aula, turn, activa) {
     const response = await fetch(`${getBaseUrl()}/api/aules`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ curs, classe, etapa })
+        body: JSON.stringify({ curs: Curs, classe: Classe, etapa: Etapa, Planta, Aula, turn, activa })
     });
 
     if (!response.ok) {
@@ -557,5 +553,16 @@ export async function getUltimsSensorsAula(idAula) {
     } catch (error) {
         console.error(error);
         throw new Error(error.message || 'Hubo un error en la solicitud');
+    }
+}
+
+export async function getStatsMedias() {
+    try {
+        const response = await fetch(`${getBaseUrl()}/api/stats/medias`);
+        if (!response.ok) throw new Error("Error al obtener estadísticas");
+        return await response.json();
+    } catch (error) {
+        console.error("Error:", error);
+        throw error;
     }
 }

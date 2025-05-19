@@ -134,6 +134,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import Header from "../components/header.vue";
+import { getAulesSensorsRanking } from '~/utils/communicationManager';
 
 const activeTab = ref('so');
 const tabs = [
@@ -194,8 +195,7 @@ const lastUpdate = ref(new Date());
 
 const updateRankings = async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/v1/aules/sensors');
-    const data = await response.json();
+    const data = await getAulesSensorsRanking();
 
     // Procesar datos para cada ranking
     const processedData = data.map(aula => ({
