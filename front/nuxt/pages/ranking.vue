@@ -41,10 +41,10 @@
           <v-window-item value="so">
             <v-list class="bg-transparent pa-0 space-y-2">
               <v-list-item
-                v-for="(aula, index) in rankingSo"
-                :key="aula.id"
-                :title="aula.nom"
-                :subtitle="`${aula.volum.toFixed(1)} dB`"
+                v-for="(sensor, index) in rankingSo"
+                :key="sensor.idSensor"
+                :title="sensor.nombre"
+                :subtitle="`${sensor.volum.toFixed(1)} dB`"
                 class="rounded-lg border border-slate-700 mb-2 transition-all duration-300"
                 density="comfortable"
               >
@@ -56,11 +56,11 @@
                 <template v-slot:append>
                   <div class="d-flex align-center">
                     <span class="text-body-2 text-medium-emphasis mr-2">
-                      {{ getVolumeStatus(aula.volum) }}
+                      {{ getVolumeStatus(sensor.volum) }}
                     </span>
                     <v-icon
-                      :icon="getVolumeIcon(aula.volum)"
-                      :color="getVolumeColor(aula.volum)"
+                      :icon="getVolumeIcon(sensor.volum)"
+                      :color="getVolumeColor(sensor.volum)"
                     />
                   </div>
                 </template>
@@ -72,10 +72,10 @@
           <v-window-item value="temperatura">
             <v-list class="bg-transparent pa-0 space-y-2">
               <v-list-item
-                v-for="(aula, index) in rankingTemperatura"
-                :key="aula.id"
-                :title="aula.nom"
-                :subtitle="`${aula.temperatura.toFixed(1)}°C`"
+                v-for="(sensor, index) in rankingTemperatura"
+                :key="sensor.idSensor"
+                :title="sensor.nombre"
+                :subtitle="`${sensor.temperatura.toFixed(1)}°C`"
                 class="rounded-lg border border-slate-700 mb-2 transition-all duration-300"
                 density="comfortable"
               >
@@ -87,7 +87,7 @@
                 <template v-slot:append>
                   <v-icon
                     icon="pi pi-thermometer"
-                    :color="getTempColor(aula.temperatura)"
+                    :color="getTempColor(sensor.temperatura)"
                   />
                 </template>
               </v-list-item>
@@ -98,10 +98,10 @@
           <v-window-item value="humitat">
             <v-list class="bg-transparent pa-0 space-y-2">
               <v-list-item
-                v-for="(aula, index) in rankingHumitat"
-                :key="aula.id"
-                :title="aula.nom"
-                :subtitle="`${aula.humitat.toFixed(1)}%`"
+                v-for="(sensor, index) in rankingHumitat"
+                :key="sensor.idSensor"
+                :title="sensor.nombre"
+                :subtitle="`${sensor.humitat.toFixed(1)}%`"
                 class="rounded-lg border border-slate-700 mb-2 transition-all duration-300"
                 density="comfortable"
               >
@@ -112,12 +112,12 @@
                 </template>
                 <template v-slot:append>
                   <v-progress-circular
-                    :model-value="aula.humitat"
-                    :color="getHumidityColor(aula.humitat)"
+                    :model-value="sensor.humitat"
+                    :color="getHumidityColor(sensor.humitat)"
                     size="32"
                     width="3"
                   >
-                    <small>{{ aula.humitat }}%</small>
+                    <small>{{ sensor.humitat.toFixed(0) }}%</small>
                   </v-progress-circular>
                 </template>
               </v-list-item>
@@ -140,6 +140,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import Header from "../components/header.vue";
+import { getAllSensors, getUltimsSensorsAula } from "~/utils/communicationManager";
 
 const activeTab = ref("so");
 const tabs = [
@@ -201,55 +202,51 @@ const lastUpdate = ref(new Date());
 const updateRankings = async () => {
   try {
     // Obtener todos los sensores activos
-    const responseSensors = await fetch("http://localhost:3000/api/v1/sensors");
-    const sensors = await responseSensors.json();
+    const sensors = await getAllSensors();
 
-    // Obtener los últimos datos de cada tipo
-    const [responseMinut] = await Promise.all([
-      fetch("http://localhost:3000/api/v1/registres/minut"),
-    ]);
+    // Procesar los datos para cada sensor
+    const processedData = await Promise.all(sensors.map(async (sensor) => {
+      if (sensor.actiu !== 1) return null;
 
-    const minutData = await responseMinut.json();
-
-    // Procesar los datos para cada sensor activo
-    const processedData = sensors
-      .filter((sensor) => sensor.actiu === 1) // Solo sensores activos
-      .map((sensor) => {
-        // Buscar el último registro para este sensor
-        const lastRecord = minutData.find(
-          (record) => record.id_sensor === sensor.id
-        );
-
+      try {
+        const latestData = await getUltimsSensorsAula(sensor.idSensor);
         return {
-          id: sensor.id,
-          nom: sensor.nom,
-          volum: sensor.tipus === "volum" ? lastRecord?.valor || 0 : null,
-          temperatura: sensor.tipus === "temperatura" ? lastRecord?.valor || 0 : null,
-          humitat: sensor.tipus === "humitat" ? lastRecord?.valor || 0 : null,
-          volumActive: sensor.tipus === "volum",
-          temperaturaActive: sensor.tipus === "temperatura",
-          humitatActive: sensor.tipus === "humitat",
+          idSensor: sensor.idSensor,
+          nombre: sensor.nombre || sensor.ubicacion || `Sensor ${sensor.idSensor}`,
+          volum: latestData.volum?.average || 0,
+          temperatura: latestData.temperatura?.average || 0,
+          humitat: latestData.humitat?.average || 0,
+          tipus: sensor.tipus
         };
-      });
+      } catch (error) {
+        console.error(`Error al obtener datos para el sensor ${sensor.idSensor}:`, error);
+        return null;
+      }
+    });
 
-    console.log("Processed Data:", processedData); // Para debug
+    // Filtrar nulos y actualizar rankings
+    const validData = processedData.filter(item => item !== null);
 
-    // Actualizar rankings (solo incluir sensores activos para cada métrica)
-    rankingSo.value = processedData
-      .filter((sensor) => sensor.volumActive && sensor.volum !== null)
+    rankingSo.value = validData
+      .filter(sensor => sensor.volum > 0)
       .sort((a, b) => b.volum - a.volum);
 
-    rankingTemperatura.value = processedData
-      .filter((sensor) => sensor.temperaturaActive && sensor.temperatura !== null)
+    rankingTemperatura.value = validData
+      .filter(sensor => sensor.temperatura > 0)
       .sort((a, b) => b.temperatura - a.temperatura);
 
-    rankingHumitat.value = processedData
-      .filter((sensor) => sensor.humitatActive && sensor.humitat !== null)
+    rankingHumitat.value = validData
+      .filter(sensor => sensor.humitat > 0)
       .sort((a, b) => b.humitat - a.humitat);
 
     lastUpdate.value = new Date();
+    console.log("Rankings actualizados:", {
+      sonido: rankingSo.value,
+      temperatura: rankingTemperatura.value,
+      humitat: rankingHumitat.value
+    });
   } catch (error) {
-    console.error("Error al cargar les dades del ranking:", error);
+    console.error("Error al actualizar rankings:", error);
   }
 };
 
