@@ -50,6 +50,12 @@
                 <input v-model.number="sensorConfig.vref_sound" type="number" step="0.01" min="0"
                   class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
               </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Màxim de mostres (maxSamples / 2 = segons)</label>
+                <input v-model.number="sensorConfig.maxSamples" type="number" min="1"
+                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+              </div>
             </div>
 
             <!-- Niveles de sonido -->
@@ -293,7 +299,7 @@ const handleFileChange = (event) => {
 
 const uploadImage = async () => {
   if (!selectedFile.value) return;
-  
+
   try {
     // Crear un nuevo Blob con el nombre requerido
     const requiredName = imageTypes.value[currentImageIndex.value].requiredName;
@@ -304,10 +310,10 @@ const uploadImage = async () => {
 
     const response = await uploadSensorImage(renamedFile);
     const imageUrl = response.url || `https://dev.acubox.cat/back/api/fileSensor/images/${requiredName}`;
-    
+
     tempImages.value[currentImageIndex.value] = imageUrl;
     showImageUploadModal.value = false;
-    
+
     // Eliminado el alert de confirmación aquí
   } catch (error) {
     console.error('Error al pujar la imatge:', error);

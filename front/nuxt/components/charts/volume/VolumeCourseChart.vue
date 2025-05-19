@@ -88,7 +88,7 @@ const lastDataFetchTime = ref(null);
 const props = defineProps({
     idAula: {
         type: Number,
-        default: null
+        required: true
     }
 });
 

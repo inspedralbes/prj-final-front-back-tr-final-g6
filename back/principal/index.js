@@ -241,21 +241,29 @@ app.get('/api/aules/:id', (req, res) => {
 });
 
 app.post('/api/aules', (req, res) => {
-  const { curs, classe, etapa } = req.body;
+  let { curs, classe, etapa, Planta, Aula, turn, activa } = req.body;
 
-  if (!curs || !classe || !etapa) {
-    return res.status(400).send({ message: 'curs, classe i etapa són necessaris' });
-  }
+  curs = curs || null;
+  classe = classe || null;
+  etapa = etapa || null;
+  Planta = Planta !== undefined ? Planta : null;
+  Aula = Aula !== undefined ? Aula : null;
+  turn = turn || null;
+  activa = activa !== undefined ? activa : 1;
 
-  const query = 'INSERT INTO aula (curs, classe, etapa) VALUES (?, ?, ?)';
-  connexioBD.execute(query, [curs, classe, etapa], (err, results) => {
+  const query = `
+    INSERT INTO aula (curs, classe, etapa, Planta, Aula, turn, activa)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+  connexioBD.execute(query, [curs, classe, etapa, Planta, Aula, turn, activa], (err, results) => {
     if (err) {
       console.error('Error en la inserció a la base de dades: ' + err.stack);
-      res.status(500).send('Error en la inserció a la base de dades');
+      // Cambia a respuesta JSON
+      res.status(500).json({ message: 'Error en la inserció a la base de dades' });
       return;
     }
 
-    res.status(201).send({ message: 'Aula creada correctament', id: results.insertId });
+    res.status(201).json({ message: 'Aula creada correctament', id: results.insertId });
   });
 });
 
@@ -436,9 +444,9 @@ app.delete('/api/sensors/:id', (req, res) => {
 // Actualizar un sensor
 app.put('/api/sensors/:id', (req, res) => {
   const { id } = req.params;
-  const { nombre, ubicacion, x, y } = req.body;
-  const query = 'UPDATE sensor SET nombre = ?, ubicacion = ?, x = ?, y = ? WHERE idSensor = ?';
-  connexioBD.execute(query, [nombre, ubicacion, x, y, id], (err, results) => {
+  const { nombre, ubicacion, x, y, idAula } = req.body;
+  const query = 'UPDATE sensor SET nombre = ?, ubicacion = ?, x = ?, y = ?, idAula = ? WHERE idSensor = ?';
+  connexioBD.execute(query, [nombre, ubicacion, x, y, idAula, id], (err, results) => {
     if (err) {
       console.error('Error en la actualización del sensor:', err.stack);
       return res.status(500).send({ message: 'Error en la actualización del sensor' });
@@ -672,10 +680,11 @@ app.post('/api/data/mongodb', async (req, res) => {
     console.log('API key vàlida, inserint dades a MongoDB');
     const id_sensor = results[0].idSensor;
     try {
+      const id_aula = await getAulaIdBySensorId(id_sensor);
       const result = await collection.insertOne({ volume, temperature, humidity, id_sensor, date });
       console.log(`Dades inserides amb l'ID: ${result.insertedId}`);
 
-      io.emit('newRawData', { volume, temperature, humidity, id_sensor, date });
+      io.emit('newRawData', { volume, temperature, humidity, id_sensor, id_aula, date });
 
       res.status(201).json({ message: 'Dades inserides correctament', id: result.insertedId });
     } catch (error) {
@@ -696,8 +705,21 @@ app.delete('/api/data/mongodb', async (req, res) => {
   }
 });
 
+async function getAulaIdBySensorId(idSensor) {
+  return new Promise((resolve, reject) => {
+    const query = 'SELECT idAula FROM sensor WHERE idSensor = ?';
+    connexioBD.execute(query, [idSensor], (err, results) => {
+      if (err) return reject(err);
+      if (results.length > 0) {
+        resolve(results[0].idAula);
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
 
-app.post('/api/data/mysql', (req, res) => {
+app.post('/api/data/mysql', async (req, res) => {
   const { timeSpan, sensors } = req.body;
 
   if (!timeSpan || typeof sensors !== 'object') {
@@ -708,30 +730,42 @@ app.post('/api/data/mysql', (req, res) => {
   console.log('TimeSpan: ', timeSpan);
   const query = `INSERT INTO ${mysql2.escapeId(timeSpan)} (idAula, idSensor, tipus, max, min, average, dataIni, dataFi) VALUES ?`;
 
-
   const currentDate = moment.tz('Europe/Madrid');
   const dataIni = currentDate.format('YYYY-MM-DD HH:mm:ss');
   const dataFi = currentDate.add(1, 'minute').format('YYYY-MM-DD HH:mm:ss');
 
-  const values = Object.entries(sensors).flatMap(([idSensor, { volume, temperature, humidity }]) => [
-    [1, idSensor, 'volum', volume.max, volume.min, volume.avg, dataIni, dataFi],
-    [1, idSensor, 'temperatura', temperature.max, temperature.min, temperature.avg, dataIni, dataFi],
-    [1, idSensor, 'humitat', humidity.max, humidity.min, humidity.avg, dataIni, dataFi]
-  ]);
+  try {
+    // Obtenir idAula per cada idSensor i afegir-lo a l'objecte sensors
+    const values = await Promise.all(
+      Object.entries(sensors).flatMap(async ([idSensor, { volume, temperature, humidity }]) => {
+        const idAula = await getAulaIdBySensorId(idSensor);
+        // Afegim l'idAula a l'objecte sensors
+        sensors[idSensor].id_aula = idAula;
+        return [
+          [idAula, idSensor, 'volum', volume.max, volume.min, volume.avg, dataIni, dataFi],
+          [idAula, idSensor, 'temperatura', temperature.max, temperature.min, temperature.avg, dataIni, dataFi],
+          [idAula, idSensor, 'humitat', humidity.max, humidity.min, humidity.avg, dataIni, dataFi]
+        ];
+      })
+    ).then(arrays => arrays.flat());
 
-  connexioBD.query(query, [values], (err, results) => {
-    console.log('Query completa: ', query);
+    connexioBD.query(query, [values], (err, results) => {
+      console.log('Query completa: ', query);
 
-    if (err) {
-      console.error('Error en la inserció a la base de dades: ' + err.stack);
-      return res.status(500).json({ message: 'Error en la inserció a la base de dades' });
-    }
+      if (err) {
+        console.error('Error en la inserció a la base de dades: ' + err.stack);
+        return res.status(500).json({ message: 'Error en la inserció a la base de dades' });
+      }
 
-    io.emit('newAggregatedData', { timeSpan, sensors });
+      io.emit('newAggregatedData', { timeSpan, sensors });
 
-    console.log('Dades inserides correctament a MySQL: ', results);
-    res.status(201).json({ message: 'Dades inserides correctament', affectedRows: results.affectedRows });
-  });
+      console.log('Dades inserides correctament a MySQL: ', results);
+      res.status(201).json({ message: 'Dades inserides correctament', affectedRows: results.affectedRows });
+    });
+  } catch (error) {
+    console.error('Error obtenint idAula:', error);
+    res.status(500).json({ message: 'Error obtenint idAula', error: error.message });
+  }
 });
 
 app.get('/api/data/mysql', (req, res) => {
@@ -791,14 +825,14 @@ app.get('/api/sensors/active', (req, res) => {
 
 // Endpoint para obtener todos los datos de gráficos
 app.get('/api/grafics/all', (req, res) => {
-    const { dataIni, dataFi } = req.query;
+  const { dataIni, dataFi } = req.query;
 
-    if (!dataIni || !dataFi) {
-        return res.status(400).json({ message: 'dataIni i dataFi són necessaris' });
-    }
+  if (!dataIni || !dataFi) {
+    return res.status(400).json({ message: 'dataIni i dataFi són necessaris' });
+  }
 
-    // Consulta para temperatura
-    const queryTemp = `
+  // Consulta para temperatura
+  const queryTemp = `
         SELECT s.idSensor, s.nombre, s.ubicacion, a.id as aulaId, a.Curs, 
                t.temperatura, t.data_lectura
         FROM sensor s
@@ -807,8 +841,8 @@ app.get('/api/grafics/all', (req, res) => {
         WHERE t.data_lectura BETWEEN ? AND ?
         ORDER BY t.data_lectura ASC`;
 
-    // Consulta para volumen
-    const queryVol = `
+  // Consulta para volumen
+  const queryVol = `
         SELECT s.idSensor, s.nombre, s.ubicacion, a.id as aulaId, a.Curs, 
                v.volumen, v.data_lectura
         FROM sensor s
@@ -817,29 +851,29 @@ app.get('/api/grafics/all', (req, res) => {
         WHERE v.data_lectura BETWEEN ? AND ?
         ORDER BY v.data_lectura ASC`;
 
-    Promise.all([
-        new Promise((resolve, reject) => {
-            connexioBD.query(queryTemp, [dataIni, dataFi], (err, tempResults) => {
-                if (err) reject(err);
-                resolve(tempResults);
-            });
-        }),
-        new Promise((resolve, reject) => {
-            connexioBD.query(queryVol, [dataIni, dataFi], (err, volResults) => {
-                if (err) reject(err);
-                resolve(volResults);
-            });
-        })
-    ])
+  Promise.all([
+    new Promise((resolve, reject) => {
+      connexioBD.query(queryTemp, [dataIni, dataFi], (err, tempResults) => {
+        if (err) reject(err);
+        resolve(tempResults);
+      });
+    }),
+    new Promise((resolve, reject) => {
+      connexioBD.query(queryVol, [dataIni, dataFi], (err, volResults) => {
+        if (err) reject(err);
+        resolve(volResults);
+      });
+    })
+  ])
     .then(([temperaturas, volumenes]) => {
-        res.json({
-            temperaturas,
-            volumenes
-        });
+      res.json({
+        temperaturas,
+        volumenes
+      });
     })
     .catch(err => {
-        console.error('Error al obtener datos:', err);
-        res.status(500).json({ message: 'Error al obtener los datos', error: err.message });
+      console.error('Error al obtener datos:', err);
+      res.status(500).json({ message: 'Error al obtener los datos', error: err.message });
     });
 });
 

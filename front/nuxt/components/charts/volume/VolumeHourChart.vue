@@ -16,9 +16,11 @@
                         {{ currentVolume !== null ? parseFloat(currentVolume.avg).toFixed(2) : '--' }} dB
                     </div>
                     <div class="volume-range">
-                        <span class="min-volume">{{ currentVolume?.min !== undefined ? parseFloat(currentVolume.min).toFixed(2) : '--' }} dB</span>
+                        <span class="min-volume">{{ currentVolume?.min !== undefined ?
+                            parseFloat(currentVolume.min).toFixed(2) : '--' }} dB</span>
                         <span class="range-separator">-</span>
-                        <span class="max-volume">{{ currentVolume?.max !== undefined ? parseFloat(currentVolume.max).toFixed(2) : '--' }} dB</span>
+                        <span class="max-volume">{{ currentVolume?.max !== undefined ?
+                            parseFloat(currentVolume.max).toFixed(2) : '--' }} dB</span>
                     </div>
                     <div class="volume-label">Current Volume (Avg/Min/Max)</div>
                 </div>
@@ -84,7 +86,7 @@ const route = useRoute();
 const props = defineProps({
     idAula: {
         type: Number,
-        default: null
+        required: true
     }
 });
 
@@ -172,7 +174,7 @@ const chartOptions = ref({
                 maxRotation: 45,
                 minRotation: 45,
                 autoSkip: false,
-                callback: function(value, index, values) {
+                callback: function (value, index, values) {
                     if (index === values.length - 1) return '24:00';
                     return this.getLabelForValue(value);
                 }
@@ -259,35 +261,38 @@ const fetchInitialData = async () => {
                     const itemHour = new Date(item.dataIni).getHours();
                     return itemHour === 23;
                 });
-                return midnightData ? { 
-                    time: '24:00', 
+                return midnightData ? {
+                    time: '24:00',
                     value: {
                         avg: midnightData.average,
                         min: midnightData.min,
                         max: midnightData.max
                     }
-                } : { 
-                    time: '24:00', 
-                    value: null 
+                } : {
+                    time: '24:00',
+                    value: null
                 };
             }
-            
+
             const hour = parseInt(label.split(':')[0]);
             const found = data.find(item => {
-                const itemHour = new Date(item.dataIni).getHours();
-                return itemHour === hour;
+                const itemDate = new Date(item.dataIni);
+                return (
+                    itemDate.getHours() === hour &&
+                    Math.abs(itemDate.getMinutes()) <= 10 // margen de 10 minutos
+                );
             });
-            
-            return found ? { 
-                time: label, 
+
+            return found ? {
+                time: label,
                 value: {
                     avg: found.average,
                     min: found.min,
                     max: found.max
                 }
-            } : { 
-                time: label, 
-                value: null 
+            } : {
+                time: label,
+                value: null
             };
         });
 
@@ -302,10 +307,10 @@ const fetchInitialData = async () => {
 };
 
 const updateChartData = (data) => {
-    const labels = data.map((item, index) => 
+    const labels = data.map((item, index) =>
         index === data.length - 1 ? '24:00' : item.time
     );
-    
+
     const avgValues = data.map(item => item.value?.avg);
     const minValues = data.map(item => item.value?.min);
     const maxValues = data.map(item => item.value?.max);
