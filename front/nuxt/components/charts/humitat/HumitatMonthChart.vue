@@ -16,9 +16,11 @@
                         {{ currentHumidity !== null ? parseFloat(currentHumidity).toFixed(2) : '--' }}%
                     </div>
                     <div class="humidity-range">
-                        <span class="min-humidity">{{ minHumidity !== null ? parseFloat(minHumidity).toFixed(2) : '--' }}%</span>
+                        <span class="min-humidity">{{ minHumidity !== null ? parseFloat(minHumidity).toFixed(2) : '--'
+                            }}%</span>
                         <span class="range-separator">-</span>
-                        <span class="max-humidity">{{ maxHumidity !== null ? parseFloat(maxHumidity).toFixed(2) : '--' }}%</span>
+                        <span class="max-humidity">{{ maxHumidity !== null ? parseFloat(maxHumidity).toFixed(2) : '--'
+                            }}%</span>
                     </div>
                     <div class="humidity-label">Current Humidity (Avg/Min/Max)</div>
                 </div>
@@ -425,12 +427,14 @@ onMounted(() => {
     const monthCheckInterval = setInterval(checkForMonthChange, 86400000); // 24 hours
 
     try {
-        const socketUrl = getBaseUrl();
+        const socketUrl = getBaseUrl().replace(/\/back$/, '');
         socket.value = io(socketUrl, {
+            path: '/back/socket.io',
             transports: ['websocket', 'polling'],
             reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
+            reconnectionDelay: 1000
         });
+
 
         socket.value.on('newAggregatedData', handleNewAggregatedData);
         socket.value.on('connect', () => console.log('Connected to socket server'));
@@ -618,19 +622,23 @@ onMounted(() => {
 
 /* Humidity color classes */
 .humidity-low {
-    color: #60a5fa; /* Azul para humedad baja */
+    color: #60a5fa;
+    /* Azul para humedad baja */
 }
 
 .humidity-optimal {
-    color: #34d399; /* Verde para humedad óptima */
+    color: #34d399;
+    /* Verde para humedad óptima */
 }
 
 .humidity-medium {
-    color: #fbbf24; /* Amarillo para humedad media */
+    color: #fbbf24;
+    /* Amarillo para humedad media */
 }
 
 .humidity-high {
-    color: #f87171; /* Rojo para humedad alta */
+    color: #f87171;
+    /* Rojo para humedad alta */
 }
 
 .humidity-neutral {

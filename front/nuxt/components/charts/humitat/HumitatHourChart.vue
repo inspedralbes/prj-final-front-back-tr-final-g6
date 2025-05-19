@@ -365,12 +365,14 @@ onMounted(() => {
     fetchInitialData();
 
     try {
-        const socketUrl = getBaseUrl();
+        const socketUrl = getBaseUrl().replace(/\/back$/, '');
         socket.value = io(socketUrl, {
+            path: '/back/socket.io',
             transports: ['websocket', 'polling'],
             reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
+            reconnectionDelay: 1000
         });
+
 
         socket.value.on('newAggregatedData', handleNewAggregatedData);
         socket.value.on('connect', () => console.log('Connected to socket server'));
