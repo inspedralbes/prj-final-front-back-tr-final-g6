@@ -148,8 +148,6 @@ def run_scheduler_minute():
     while True:
         now = datetime.now(BARCELONA_TZ)
         seconds_to_next_minute = 60 - now.second
-        if seconds_to_next_minute == 60:
-            seconds_to_next_minute = 0
         app.logger.info("Esperant %d segons per executar el script de minut...", seconds_to_next_minute)
         time.sleep(seconds_to_next_minute)
         execute_scheduled_script("minut")
@@ -158,8 +156,6 @@ def run_scheduler_hour():
     while True:
         now = datetime.now(BARCELONA_TZ)
         seconds_to_next_hour = (59 - now.minute) * 60 + (60 - now.second)
-        if seconds_to_next_hour == 3600:
-            seconds_to_next_hour = 0
         app.logger.info("Esperant %d segons per executar el script d'hora...", seconds_to_next_hour)
         time.sleep(seconds_to_next_hour)
         execute_scheduled_script("hora")
@@ -168,8 +164,6 @@ def run_scheduler_day():
     while True:
         now = datetime.now(BARCELONA_TZ)
         seconds_to_next_day = ((23 - now.hour) * 3600) + ((59 - now.minute) * 60) + (60 - now.second)
-        if seconds_to_next_day == 86400:
-            seconds_to_next_day = 0
         app.logger.info("Esperant %d segons per executar el script de dia...", seconds_to_next_day)
         time.sleep(seconds_to_next_day)
         execute_scheduled_script("dia")
@@ -179,8 +173,6 @@ def run_scheduler_week():
         now = datetime.now(BARCELONA_TZ)
         # Days until next Monday (weekday 0)
         days_to_next_week = (7 - now.weekday()) % 7
-        if days_to_next_week == 0:
-            days_to_next_week = 7
         seconds_to_next_week = ((days_to_next_week - 1) * 86400) + ((23 - now.hour) * 3600) + ((59 - now.minute) * 60) + (60 - now.second)
         app.logger.info("Esperant %d segons per executar el script de setmana...", seconds_to_next_week)
         time.sleep(seconds_to_next_week)
@@ -193,8 +185,6 @@ def run_scheduler_month():
         # Get last day of current month
         last_day = calendar.monthrange(now.year, now.month)[1]
         days_to_next_month = last_day - now.day
-        if days_to_next_month == 0:
-            days_to_next_month = calendar.monthrange(now.year, now.month + 1 if now.month < 12 else 1)[1]
         seconds_to_next_month = (days_to_next_month * 86400) + ((23 - now.hour) * 3600) + ((59 - now.minute) * 60) + (60 - now.second)
         app.logger.info("Esperant %d segons per executar el script de mes...", seconds_to_next_month)
         time.sleep(seconds_to_next_month)
