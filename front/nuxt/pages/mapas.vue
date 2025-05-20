@@ -389,7 +389,7 @@ const loadAvailableSensors = async () => {
     console.log("Sensores recibidos:", data);
 
     // Mostrar todos los sensores sin filtrar
-    availableSensors.value = data.filter((sensor) => sensor.mac); // Solo filtrar por sensores con MAC válida
+    availableSensors.value = data; // Elimina cualquier filtro
 
     console.log("Sensores disponibles:", availableSensors.value); // Depuración
   } catch (error) {
