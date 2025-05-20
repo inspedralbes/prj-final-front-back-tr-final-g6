@@ -386,17 +386,20 @@ const availableSensors = ref([]);
 const loadAvailableSensors = async () => {
   try {
     const data = await getAllSensors();
-    // Filtra los sensores que ya están colocados en cualquier planta
+    console.log("Sensores recibidos:", data);
+
     const placedIds = activeSensors.value.map((s) => s.idSensor || s.id);
-    availableSensors.value = data
-      .filter((sensor) => sensor.mac && !placedIds.includes(sensor.idSensor || sensor.id))
-      .map((sensor) => ({
-        ...sensor,
-        temperatura: sensor.temperatura || 0,
-        humitat: sensor.humatat || 0,
-        volum: sensor.volum || 0,
-      }));
+    console.log("Sensores colocados (placedIds):", placedIds); // Depuración
+
+    availableSensors.value = data.filter((sensor) => {
+      const isPlaced = placedIds.includes(sensor.idSensor || sensor.id);
+      console.log(`Sensor ${sensor.idSensor || sensor.id} colocado:`, isPlaced); // Depuración
+      return sensor.mac && !isPlaced;
+    });
+
+    console.log("Sensores disponibles:", availableSensors.value); // Depuración
   } catch (error) {
+    console.error("Error al cargar sensores:", error);
     availableSensors.value = [];
   }
 };
