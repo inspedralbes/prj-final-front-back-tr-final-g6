@@ -1,7 +1,7 @@
 <template>
     <div class="dashboard-container">
         <div v-if="loading" class="loading-overlay">
-            <div class="loading-message">Loading data...</div>
+            <div class="loading-message">Carregant dades...</div>
         </div>
 
         <div v-else-if="error" class="error-overlay">
@@ -22,12 +22,12 @@
                         <span class="max-volume">{{ currentVolume?.max !== undefined ?
                             parseFloat(currentVolume.max).toFixed(2) : '--' }}dB</span>
                     </div>
-                    <div class="volume-label">Current Volume (Avg/Min/Max)</div>
+                    <div class="volume-label">Volum actual (Mitjana/Mínim/Màxim)</div>
                 </div>
 
                 <div class="time-range-info">
-                    <div class="time-range-indicator">Last 4 weeks</div>
-                    <div class="update-time">Last update: {{ lastUpdateTime }}</div>
+                    <div class="time-range-indicator">Últimes 4 setmanes</div>
+                    <div class="update-time">Última actualització: {{ lastUpdateTime }}</div>
                 </div>
             </div>
 
@@ -40,15 +40,15 @@
             <div class="chart-legend">
                 <div class="legend-item">
                     <span class="legend-color avg-color"></span>
-                    <span class="legend-label">Average</span>
+                    <span class="legend-label">Mitjana</span>
                 </div>
                 <div class="legend-item">
                     <span class="legend-color max-color"></span>
-                    <span class="legend-label">Maximum</span>
+                    <span class="legend-label">Màxim</span>
                 </div>
                 <div class="legend-item">
                     <span class="legend-color min-color"></span>
-                    <span class="legend-label">Minimum</span>
+                    <span class="legend-label">Mínim</span>
                 </div>
             </div>
         </div>

@@ -6,7 +6,7 @@
                 <span>{{ item.text }}</span>
             </div>
         </div>
-        <button @click="$emit('close')" class="close-btn">X</button>
+        <button @click="$emit('close')" class="close-btn">Tanca</button>
     </div>
 </template>
 
@@ -30,11 +30,13 @@ const parsedInfo = computed(() => {
     const parts = props.info.split(' - ');
     return parts.map(part => {
         if (part.includes('Temperatura')) {
-            return { text: part, icon: 'fas fa-thermometer-half' };
+            return { text: part.replace('Temperatura', 'Temperatura'), icon: 'fas fa-thermometer-half' };
         } else if (part.includes('Humitat')) {
-            return { text: part, icon: 'fas fa-tint' };
+            return { text: part.replace('Humitat', 'Humitat'), icon: 'fas fa-tint' };
         } else if (part.includes('Volum')) {
-            return { text: part, icon: 'fas fa-volume-up' };
+            return { text: part.replace('Volum', 'Volum'), icon: 'fas fa-volume-up' };
+        } else if (part.includes('Informació no disponible')) {
+            return { text: 'Informació no disponible' };
         }
         return { text: part };
     });

@@ -1,7 +1,7 @@
 <template>
     <div class="dashboard-container">
         <div v-if="loading" class="loading-overlay">
-            <div class="loading-message">Loading data...</div>
+            <div class="loading-message">Carregant dades...</div>
         </div>
 
         <div v-else-if="error" class="error-overlay">
@@ -15,12 +15,12 @@
                     <div class="current-temperature" :class="temperatureColorClass">
                         {{ currentTemperature !== null ? parseFloat(currentTemperature).toFixed(2) : '--' }}°C
                     </div>
-                    <div class="temperature-label">Current Temperature</div>
+                    <div class="temperature-label">Temperatura actual</div>
                 </div>
 
                 <div class="time-range-info">
-                    <div class="time-range-indicator">Last 60 minutes</div>
-                    <div class="update-time">Last update: {{ new Date().toLocaleTimeString('es-ES', {
+                    <div class="time-range-indicator">Últims 60 minuts</div>
+                    <div class="update-time">Última actualització: {{ new Date().toLocaleTimeString('ca-ES', {
                         hour: '2-digit',
                         minute: '2-digit'
                     }) }}
@@ -63,7 +63,7 @@ const socket = ref(null);
 const loading = ref(true);
 const error = ref(null);
 const route = useRoute();
-let currentHour = new Date().getHours(); // Almacena la hora actual
+let currentHour = new Date().getHours(); // Emmagatzema l'hora actual
 
 const props = defineProps({
     idAula: {
@@ -77,7 +77,7 @@ const chartData = ref({
     labels: [],
     datasets: [
         {
-            label: 'Temperature (°C)',
+            label: 'Temperatura (°C)',
             data: [],
             fill: {
                 target: 'origin',
@@ -110,7 +110,7 @@ const chartOptions = ref({
             titleColor: '#E5E7EB',
             bodyColor: '#E5E7EB',
             callbacks: {
-                label: (context) => `Temperature: ${parseFloat(context.raw).toFixed(2)}°C`
+                label: (context) => `Temperatura: ${parseFloat(context.raw).toFixed(2)}°C`
             }
         }
     },
@@ -118,7 +118,7 @@ const chartOptions = ref({
         x: {
             title: {
                 display: true,
-                text: 'Time',
+                text: 'Hora',
                 color: '#9CA3AF',
                 font: {
                     size: 12
@@ -130,11 +130,11 @@ const chartOptions = ref({
                 minRotation: 45,
                 autoSkip: false,
                 callback: function (value, index, values) {
-                    // Show only every 5th minute and the last value
+                    // Mostra només cada 5è minut i l'últim valor
                     const time = this.getLabelForValue(value);
                     const minutes = parseInt(time.split(':')[1], 10);
                     if (index === values.length - 1) {
-                        // Ensure the last value shows the full hour (e.g., 13:00 instead of 12:59)
+                        // Assegura que l'últim valor mostri l'hora completa (ex.: 13:00 en lloc de 12:59)
                         const lastHour = parseInt(time.split(':')[0], 10) + (minutes === 59 ? 1 : 0);
                         return `${lastHour.toString().padStart(2, '0')}:00`;
                     }
@@ -148,7 +148,7 @@ const chartOptions = ref({
         y: {
             title: {
                 display: true,
-                text: 'Temperature (°C)',
+                text: 'Temperatura (°C)',
                 color: '#9CA3AF',
                 font: {
                     size: 12
@@ -186,22 +186,22 @@ const fetchInitialData = async () => {
     try {
         const now = new Date();
 
-        // Calcular el inicio y el final de la hora actual
+        // Calcular l'inici i el final de l'hora actual
         const startOfHour = new Date(now);
-        startOfHour.setMinutes(0, 0, 0); // Inicio de la hora actual (e.g., 11:00:00)
+        startOfHour.setMinutes(0, 0, 0); // Inici de l'hora actual (ex.: 11:00:00)
         const endOfHour = new Date(startOfHour);
-        endOfHour.setMinutes(59, 59, 999); // Final de la hora actual (e.g., 11:59:59)
+        endOfHour.setMinutes(59, 59, 999); // Final de l'hora actual (ex.: 11:59:59)
 
-        // Formatear las fechas al formato 'YYYY-MM-DD HH:mm:ss'
+        // Format de les dates en 'YYYY-MM-DD HH:mm:ss'
         const formatDate = (date) => {
-            const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000); // Ajustar al horario local
+            const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000); // Ajustar a l'horari local
             return localDate.toISOString().slice(0, 19).replace('T', ' ');
         };
 
         const dataIni = formatDate(startOfHour);
         const dataFi = formatDate(endOfHour);
 
-        console.log('Obteniendo datos desde:', dataIni, 'hasta:', dataFi);
+        console.log('Obtenint dades des de:', dataIni, 'fins a:', dataFi);
 
         const idAula = props.idAula || (route.params.id ? Number(route.params.id) : 1);
 
@@ -213,46 +213,46 @@ const fetchInitialData = async () => {
             dataFi
         );
 
-        console.log('Datos recibidos de la API:', data);
+        console.log('Dades rebudes de l\'API:', data);
 
-        // Generar etiquetas para toda la franja horaria actual
+        // Generar etiquetes per a tota la franja horària actual
         const labels = [];
         for (let i = 0; i < 60; i++) {
-            const label = new Date(startOfHour.getTime() + i * 60000).toLocaleTimeString('es-ES', {
+            const label = new Date(startOfHour.getTime() + i * 60000).toLocaleTimeString('ca-ES', {
                 hour: '2-digit',
                 minute: '2-digit'
             });
             labels.push(label);
         }
 
-        // Mapear los datos recibidos a las etiquetas generadas
+        // Mapar les dades rebudes a les etiquetes generades
         const values = labels.map(label => {
             const dataPoint = data.find(item => {
-                const itemTime = new Date(item.dataIni).toLocaleTimeString('es-ES', {
+                const itemTime = new Date(item.dataIni).toLocaleTimeString('ca-ES', {
                     hour: '2-digit',
                     minute: '2-digit'
                 });
                 return itemTime === label;
             });
-            return dataPoint ? dataPoint.average : null; // Rellenar con null si no hay datos
+            return dataPoint ? dataPoint.average : null; // Omplir amb null si no hi ha dades
         });
 
-        console.log('Etiquetas generadas:', labels);
-        console.log('Valores alineados:', values);
+        console.log('Etiquetes generades:', labels);
+        console.log('Valors alineats:', values);
 
-        // Actualizar los datos del gráfico
+        // Actualitzar les dades del gràfic
         chartData.value.labels = labels;
         chartData.value.datasets[0].data = values;
         chartKey.value++;
 
-        // Actualizar la temperatura actual
+        // Actualitzar la temperatura actual
         const lastValue = values.filter(value => value !== null).pop();
         currentTemperature.value = lastValue !== undefined ? lastValue : null;
 
         loading.value = false;
     } catch (error) {
-        console.error('Error al obtener los datos iniciales:', error);
-        error.value = 'Error al cargar los datos iniciales';
+        console.error('Error en obtenir les dades inicials:', error);
+        error.value = 'Error en carregar les dades inicials';
         loading.value = false;
     }
 };

@@ -1,7 +1,7 @@
 <template>
     <div class="dashboard-container">
         <div v-if="loading" class="loading-overlay">
-            <div class="loading-message">Loading data...</div>
+            <div class="loading-message">Carregant dades...</div>
         </div>
 
         <div v-else-if="error" class="error-overlay">
@@ -9,18 +9,18 @@
         </div>
 
         <div v-else class="dashboard-content">
-            <!-- Header Section -->
+            <!-- Secció de capçalera -->
             <div class="dashboard-header">
                 <div class="humidity-display">
                     <div class="current-humidity" :class="humidityColorClass">
                         {{ currentHumidity !== null ? parseFloat(currentHumidity).toFixed(2) : '--' }}%
                     </div>
-                    <div class="humidity-label">Current Humidity</div>
+                    <div class="humidity-label">Humitat actual</div>
                 </div>
 
                 <div class="time-range-info">
-                    <div class="time-range-indicator">Last 60 minutes</div>
-                    <div class="update-time">Last update: {{ new Date().toLocaleTimeString('es-ES', {
+                    <div class="time-range-indicator">Últims 60 minuts</div>
+                    <div class="update-time">Última actualització: {{ new Date().toLocaleTimeString('ca-ES', {
                         hour: '2-digit',
                         minute: '2-digit'
                     }) }}
@@ -28,7 +28,7 @@
                 </div>
             </div>
 
-            <!-- Chart Section -->
+            <!-- Secció del gràfic -->
             <div class="chart-container">
                 <Line :key="chartKey" :data="chartData" :options="chartOptions" class="humidity-chart" />
             </div>
@@ -53,17 +53,17 @@ import { io } from 'socket.io-client';
 import { getBaseUrl, getDadesGrafic } from '~/utils/communicationManager';
 import { useRoute } from 'vue-router';
 
-// Register Chart.js components
+// Registrar components de Chart.js
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement);
 
-// Reactive state
+// Estat reactiu
 const humidityData = ref([]);
 const chartKey = ref(0);
 const socket = ref(null);
 const loading = ref(true);
 const error = ref(null);
 const route = useRoute();
-let currentHour = new Date().getHours(); // Stores current hour
+let currentHour = new Date().getHours(); // Emmagatzema l'hora actual
 
 const props = defineProps({
     idAula: {
@@ -72,12 +72,12 @@ const props = defineProps({
     }
 });
 
-// Chart data configuration
+// Configuració de dades del gràfic
 const chartData = ref({
     labels: [],
     datasets: [
         {
-            label: 'Humidity (%)',
+            label: 'Humitat (%)',
             data: [],
             fill: {
                 target: 'origin',
@@ -96,7 +96,7 @@ const chartData = ref({
     ],
 });
 
-// Chart options
+// Opcions del gràfic
 const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
@@ -110,7 +110,7 @@ const chartOptions = ref({
             titleColor: '#E5E7EB',
             bodyColor: '#E5E7EB',
             callbacks: {
-                label: (context) => `Humidity: ${parseFloat(context.raw).toFixed(2)}%`
+                label: (context) => `Humitat: ${parseFloat(context.raw).toFixed(2)}%`
             }
         }
     },
@@ -118,7 +118,7 @@ const chartOptions = ref({
         x: {
             title: {
                 display: true,
-                text: 'Time',
+                text: 'Hora',
                 color: '#9CA3AF',
                 font: {
                     size: 12
@@ -130,11 +130,11 @@ const chartOptions = ref({
                 minRotation: 45,
                 autoSkip: false,
                 callback: function (value, index, values) {
-                    // Show only every 5th minute and the last value
+                    // Mostrar només cada 5 minuts i l'últim valor
                     const time = this.getLabelForValue(value);
                     const minutes = parseInt(time.split(':')[1], 10);
                     if (index === values.length - 1) {
-                        // Ensure the last value shows the full hour (e.g., 13:00 instead of 12:59)
+                        // Assegurar que l'últim valor mostra l'hora completa (ex.: 13:00 en lloc de 12:59)
                         const lastHour = parseInt(time.split(':')[0], 10) + (minutes === 59 ? 1 : 0);
                         return `${lastHour.toString().padStart(2, '0')}:00`;
                     }
@@ -148,7 +148,7 @@ const chartOptions = ref({
         y: {
             title: {
                 display: true,
-                text: 'Humidity (%)',
+                text: 'Humitat (%)',
                 color: '#9CA3AF',
                 font: {
                     size: 12

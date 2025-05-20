@@ -1,7 +1,7 @@
 <template>
     <div class="dashboard-container">
         <div v-if="loading" class="loading-overlay">
-            <div class="loading-message">Loading data...</div>
+            <div class="loading-message">Carregant dades...</div>
         </div>
 
         <div v-else-if="error" class="error-overlay">
@@ -15,12 +15,12 @@
                     <div class="current-humidity" :class="humidityColorClass">
                         {{ currentHumidity }}%
                     </div>
-                    <div class="humidity-label">Current Humidity</div>
+                    <div class="humidity-label">Humitat Actual</div>
                 </div>
 
                 <div class="sensor-info">
-                    <span class="sensor-id">Sensor ID: {{ sensorId || 'Not available' }}</span>
-                    <span class="update-time">Last update: {{ lastUpdate }}</span>
+                    <span class="sensor-id">ID del Sensor: {{ sensorId || 'No disponible' }}</span>
+                    <span class="update-time">Última actualització: {{ lastUpdate }}</span>
                 </div>
             </div>
 
@@ -91,7 +91,7 @@ const chartData = ref({
     labels: [],
     datasets: [
         {
-            label: 'Humidity (%)',
+            label: 'Humitat (%)',
             data: [],
             fill: {
                 target: 'origin',
@@ -121,7 +121,7 @@ const chartOptions = ref({
             titleColor: '#E5E7EB',
             bodyColor: '#E5E7EB',
             callbacks: {
-                label: (context) => `Humidity: ${context.raw}%`
+                label: (context) => `Humitat: ${context.raw}%`
             }
         }
     },
@@ -150,7 +150,7 @@ const chartOptions = ref({
             },
             title: {
                 display: true,
-                text: 'Humidity (%)',
+                text: 'Humitat (%)',
                 color: '#9CA3AF'
             }
         }

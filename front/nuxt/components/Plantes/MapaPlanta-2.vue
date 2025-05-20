@@ -16,11 +16,11 @@ const aulaData = ref([]);
 const popups = ref([]);
 const fetchDataText = ref("");
 
-// Función para obtener los datos de las aulas
+// Funció per obtenir les dades de les aules
 const fetchData = async () => {
   try {
     const bodyRequest = {
-      aules: [8, 9, 10, 11, 12, 13, 14], // Cambia aquí las aulas que corresponden a Planta 1
+      aules: [8, 9, 10, 11, 12, 13, 14], // Canvia aquí les aules que corresponen a la Planta 1
       data: "2025-02-10",
       tipus: "volum",
     };
@@ -30,22 +30,22 @@ const fetchData = async () => {
 
     fetchDataText.value = response
       .map((aula) => {
-        return `Aula: ${aula.Curs}, Volumen: ${aula.average}`;
+        return `Aula: ${aula.Curs}, Volum: ${aula.average}`;
       })
       .join("\n");
 
-    console.log("Datos recibidos:", aulaData.value);
+    console.log("Dades rebudes:", aulaData.value);
   } catch (error) {
-    console.error("Error al obtener datos:", error);
+    console.error("Error en obtenir les dades:", error);
   }
 };
 
-// Cerrar un popup
+// Tancar un popup
 const closePopup = (index) => {
   popups.value.splice(index, 1);
 };
 
-// Función para obtener el color interpolado en base al volumen
+// Funció per obtenir el color interpolat en funció del volum
 const getInterpolatedColor = (value, min, max) => {
   const ratio = (value - min) / (max - min);
   const red = Math.round(255 * ratio);
@@ -53,17 +53,17 @@ const getInterpolatedColor = (value, min, max) => {
   return `rgb(${red}, 0, ${blue})`;
 };
 
-// Se ejecuta al montar el componente
+// Es crida al muntar el component
 onMounted(async () => {
   await fetchData();
   await nextTick();
 
   if (!stageRef.value) {
-    console.error("stageRef is null");
+    console.error("stageRef és null");
     return;
   }
 
-  const image = "./PLANTA 2.png"; // Ruta de la imagen de la planta 1
+  const image = "./PLANTA 2.png"; // Ruta de la imatge de la planta 1
   const imageObj = new Image();
 
   imageObj.onload = function () {
@@ -76,7 +76,7 @@ onMounted(async () => {
     const scaledWidth = imgWidth * scaleFactor;
     const scaledHeight = imgHeight * scaleFactor;
     const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 2 - 200; // ← Imagen más arriba
+    const y = (canvasHeight - scaledHeight) / 2 - 200; // ← Imatge més amunt
     const stage = new Konva.Stage({
       container: stageRef.value,
       width: canvasWidth,
@@ -96,15 +96,15 @@ onMounted(async () => {
 
     layer.add(konvaImage);
 
-    console.log("Puntos procesados:", points);
+    console.log("Punts processats:", points);
 
-    // Asegúrate de que `points` esté correctamente definido para esta planta
-    const minVolumen = Math.min(...points.map((p) => p.volumen));
-    const maxVolumen = Math.max(...points.map((p) => p.volumen));
+    // Assegura't que `points` estigui correctament definit per aquesta planta
+    const minVolum = Math.min(...points.map((p) => p.volumen));
+    const maxVolum = Math.max(...points.map((p) => p.volumen));
 
     points.forEach((point) => {
       const color = point.enabled
-        ? getInterpolatedColor(point.volumen, minVolumen, maxVolumen)
+        ? getInterpolatedColor(point.volumen, minVolum, maxVolum)
         : "gray";
 
       const circle = new Konva.Circle({
@@ -149,7 +149,7 @@ onMounted(async () => {
     />
 
     <div class="info-text">
-      <h3>Información de Aulas</h3>
+      <h3>Informació d’Aules</h3>
       <pre>{{ fetchDataText }}</pre>
     </div>
   </div>
