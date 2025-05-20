@@ -413,17 +413,17 @@ app.get('/api/sensors', (req, res) => {
       return res.status(500).send({ message: 'Error en la consulta a la base de datos' });
     }
     
-    // Asegúrate de mapear los resultados correctamente
+    const plantaMapping = {
+      0: 'PLANTA BAJA',
+      1: 'PLANTA 1',
+      2: 'PLANTA 2',
+      3: 'PLANTA 3',
+      4: 'PLANTA SUBTERRANEA'
+    };
+    
     const sensorsWithPlanta = results.map(row => ({
-      idSensor: row.idSensor,
-      mac: row.mac,
-      api_key: row.api_key,
-      nombre: row.nombre,
-      ubicacion: row.ubicacion,
-      x: row.x,
-      y: row.y,
-      idAula: row.idAula,
-      planta: row.planta || 'PLANTA 1' // Valor por defecto si es NULL
+      ...row,
+      planta: plantaMapping[row.planta] || 'PLANTA DESCONOCIDA'
     }));
     
     res.status(200).send(sensorsWithPlanta);

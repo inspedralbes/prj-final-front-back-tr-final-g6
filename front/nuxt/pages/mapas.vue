@@ -126,6 +126,15 @@
       </div>
     </div>
 
+    <div v-if="availableSensors.length > 0" class="debug-info p-4 bg-gray-800 text-white">
+      <h3 class="font-bold">Debug Info:</h3>
+      <div>Planta seleccionada: {{ plantaSeleccionada }}</div>
+      <div>Sensores disponibles: {{ availableSensors.length }}</div>
+      <div v-for="sensor in availableSensors" :key="sensor.idSensor">
+        {{ sensor.nombre }} - Planta: {{ sensor.planta }} - Aula: {{ sensor.idAula }}
+      </div>
+    </div>
+
     <!-- Selector de sensors actius -->
     <div v-if="showPopupForm">
       <div v-for="sensor in availableSensors" :key="sensor.idSensor" @click="selectSensor(sensor)">
@@ -263,12 +272,8 @@ watch(
 
 const filteredPopups = computed(() => {
   return activeSensors.value.filter((sensor) => {
-    // Convierte ambas a mayúsculas para comparación insensible a mayúsculas/minúsculas
-    const sensorPlanta = (sensor.planta || '').toUpperCase();
-    const selectedPlanta = plantaSeleccionada.value.toUpperCase();
-
-    return sensorPlanta.includes(selectedPlanta) ||
-      selectedPlanta.includes(sensorPlanta);
+    if (!sensor.planta) return false;
+    return sensor.planta.toUpperCase() === plantaSeleccionada.value.toUpperCase();
   });
 });
 
@@ -307,13 +312,15 @@ const availableSensors = ref([]);
 const loadAvailableSensors = async () => {
   try {
     const data = await getAllSensors();
-    console.log("Datos de sensores recibidos:", data); // Para depuración
-    
+    console.log("Datos de sensores recibidos:", data);
+
     availableSensors.value = data.map(sensor => ({
       ...sensor,
-      planta: sensor.planta || 'PLANTA 1' // Valor por defecto si no existe
+      // Asegúrate de que las coordenadas sean números
+      x: Number(sensor.x),
+      y: Number(sensor.y)
     }));
-    
+
     console.log("Sensores disponibles procesados:", availableSensors.value);
   } catch (error) {
     console.error("Error al cargar sensores:", error);
@@ -328,9 +335,10 @@ const selectSensor = (sensor) => {
     ...sensor,
     x: tempPopupPosition.value.x,
     y: tempPopupPosition.value.y,
-    planta: sensor.planta || plantaSeleccionada.value, // Usa la planta del sensor o la actual
+    // Asegúrate de que la planta esté definida
+    planta: sensor.planta || plantaSeleccionada.value,
     temperatura: sensor.temperatura || 0,
-    humitat: sensor.humatat || 0,
+    humitat: sensor.humitat || 0,
     volum: sensor.volum || 0,
   };
 
