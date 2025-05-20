@@ -140,13 +140,12 @@ onMounted(async () => {
 
 <template>
   <div ref="stageRef" class="canvas-container">
-    <InfoCard
-      v-for="(popup, index) in popups"
-      :key="index"
-      :info="`Aula: ${popup.Curs} - Volum: ${popup.volumen}`"
-      :position="popup.position"
-      @close="closePopup(index)"
-    />
+    <InfoCard v-for="(popup, index) in popups" :key="index" :info="`Aula: ${popup.Curs} - Volum: ${popup.volumen}`"
+      :position="popup.position" :title="popup.Curs || 'Sensor'" :sensorData="{
+        temperatura: popup.temperatura,
+        humitat: popup.humitat,
+        volum: popup.volumen
+      }" @close="closePopup(index)" />
 
     <div class="info-text">
       <h3>Informació d’Aules</h3>
