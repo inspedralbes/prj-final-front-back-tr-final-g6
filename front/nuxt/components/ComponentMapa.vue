@@ -38,7 +38,7 @@ import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
 
 const selectedRange = ref('');
-const selectedSensorType = ref('temperature'); // Valor por defecto
+const selectedSensorType = ref('temperature'); // Valor per defecte
 
 const items = [
   { label: 'Temperatura', value: 'temperature', icon: 'fas fa-temperature-high' },

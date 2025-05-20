@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-slate-800 flex flex-col">
-    <!-- Main Content -->
+    <!-- Contingut Principal -->
     <div class="flex-grow w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
       <div class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700">
         <div class="p-6">
@@ -8,7 +8,7 @@
 
           <form @submit.prevent="saveSensorConfigHandler" class="space-y-6">
 
-            <!-- Configuración básica -->
+            <!-- Configuració bàsica -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label class="block text-sm font-medium text-slate-400 mb-1">Lluminositat inicial (startglow)</label>
@@ -58,7 +58,7 @@
               </div>
             </div>
 
-            <!-- Niveles de sonido -->
+            <!-- Nivells de so -->
             <div class="border-t border-slate-700 pt-6">
               <h3 class="text-lg font-semibold text-white mb-4">Llindars de So (dB)</h3>
               <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -128,9 +128,9 @@
               </div>
             </div>
 
-            <!-- Niveles de brillo -->
+            <!-- Nivells de brillo -->
             <div class="border-t border-slate-700 pt-6">
-              <h3 class="text-lg font-semibold text-white mb-4">Nivells de Brillo (glowlevels)</h3>
+              <h3 class="text-lg font-semibold text-white mb-4">Nivells de Brillantor (glowlevels)</h3>
               <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div v-for="(level, index) in sensorConfig.glowlevels" :key="index">
                   <label class="block text-sm font-medium text-slate-400 mb-1">Nivell {{ index }}</label>
@@ -145,7 +145,7 @@
               <h3 class="text-lg font-semibold text-white mb-4">URLs de Connexió</h3>
               <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium text-slate-400 mb-1">URL per nous sensors</label>
+                  <label class="block text-sm font-medium text-slate-400 mb-1">URL per a nous sensors</label>
                   <input v-model="sensorConfig.url_newsensor" type="url"
                     class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
                 </div>
@@ -157,7 +157,7 @@
               </div>
             </div>
 
-            <!-- Imágenes -->
+            <!-- Imatges -->
             <div class="border-t border-slate-700 pt-6">
               <h3 class="text-lg font-semibold text-white mb-4">Imatges del Sensor</h3>
               <div class="space-y-4">
@@ -175,7 +175,7 @@
                     <div>
                       <button type="button" @click="openImageUpload(index)"
                         class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all">
-                        Canviar
+                        Canvia
                       </button>
                     </div>
                   </div>
@@ -187,7 +187,7 @@
             <div class="flex justify-end gap-3 pt-6 border-t border-slate-700">
               <button type="submit"
                 class="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-all">
-                Guardar Configuració
+                Desa Configuració
               </button>
             </div>
           </form>
@@ -195,15 +195,15 @@
       </div>
     </div>
 
-    <!-- Modal para subir imágenes -->
+    <!-- Modal per pujar imatges -->
     <div v-if="showImageUploadModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-md border border-slate-700">
         <div class="p-6">
-          <h2 class="text-2xl font-bold text-white mb-4">Pujar Nova Imatge</h2>
+          <h2 class="text-2xl font-bold text-white mb-4">Puja Nova Imatge</h2>
           <p class="text-slate-400 mb-2">Tipus: {{ imageTypes[currentImageIndex].label }}</p>
           <p class="text-slate-400 mb-4">Nom requerit: {{ imageTypes[currentImageIndex].requiredName }}</p>
-          <p class="text-slate-400 mb-4">El tamany ha de ser de 64x64px</p>
+          <p class="text-slate-400 mb-4">La mida ha de ser de 64x64px</p>
 
           <div class="mb-4">
             <label class="block text-sm font-medium text-slate-400 mb-2">Selecciona una imatge</label>
@@ -214,11 +214,11 @@
           <div class="flex justify-end gap-3">
             <button @click="showImageUploadModal = false"
               class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all">
-              Cancel·lar
+              Cancel·la
             </button>
             <button @click="uploadImage" :disabled="!selectedFile"
               class="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-all disabled:opacity-50">
-              Pujar Imatge
+              Puja Imatge
             </button>
           </div>
         </div>
@@ -226,7 +226,6 @@
     </div>
   </div>
 </template>
-
 
 <script setup>
 import { ref, onMounted } from 'vue';
@@ -243,7 +242,7 @@ onMounted(async () => {
     sensorConfig.value = { ...data };
     tempImages.value = [...(data.images || [])];
   } catch (error) {
-    alert('Error al cargar la configuración: ' + error.message);
+    alert('Error en carregar la configuració: ' + error.message);
   } finally {
     loading.value = false;
   }
@@ -252,11 +251,11 @@ onMounted(async () => {
 const imageTypes = ref([
   { label: "Imatge Logo", requiredName: "logo.jpg" },
   { label: "Imatge Normal", requiredName: "normal.jpg" },
-  { label: "Imatge Bo", requiredName: "good.jpg" },
-  { label: "Imatge Enfadat", requiredName: "angry.jpg" },
+  { label: "Imatge Bona", requiredName: "good.jpg" },
+  { label: "Imatge Enfadada", requiredName: "angry.jpg" },
   { label: "Imatge Connectat", requiredName: "connected.jpg" },
   { label: "Imatge Desconnectat", requiredName: "disconnected.jpg" },
-  { label: "Imatge Access Point", requiredName: "accesspoint.jpg" }
+  { label: "Imatge Punt d'Accés", requiredName: "accesspoint.jpg" }
 ]);
 
 const showImageUploadModal = ref(false);
@@ -277,18 +276,18 @@ const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (!file) return;
 
-  // Validar tipo de archivo
+  // Validar tipus d'arxiu
   if (!file.type.match('image/jpeg') && !file.type.match('image/jpg')) {
-    alert('El archivo debe ser una imagen JPG');
+    alert('El fitxer ha de ser una imatge JPG');
     event.target.value = '';
     return;
   }
 
-  // Validar dimensiones
+  // Validar dimensions
   const img = new Image();
   img.onload = () => {
     if (img.width !== 64 || img.height !== 64) {
-      alert('La imagen debe tener exactamente 64x64 píxeles');
+      alert('La imatge ha de tenir exactament 64x64 píxels');
       event.target.value = '';
     } else {
       selectedFile.value = file;
@@ -301,7 +300,7 @@ const uploadImage = async () => {
   if (!selectedFile.value) return;
 
   try {
-    // Crear un nuevo Blob con el nombre requerido
+    // Crear un nou Blob amb el nom requerit
     const requiredName = imageTypes.value[currentImageIndex.value].requiredName;
     const renamedFile = new File([selectedFile.value], requiredName, {
       type: 'image/jpeg',
@@ -314,10 +313,10 @@ const uploadImage = async () => {
     tempImages.value[currentImageIndex.value] = imageUrl;
     showImageUploadModal.value = false;
 
-    // Eliminado el alert de confirmación aquí
+    // Eliminat l'alerta de confirmació aquí
   } catch (error) {
-    console.error('Error al pujar la imatge:', error);
-    alert('Error al pujar la imatge: ' + error.message);
+    console.error('Error en pujar la imatge:', error);
+    alert('Error en pujar la imatge: ' + error.message);
   }
 };
 
@@ -325,11 +324,11 @@ const saveSensorConfigHandler = async () => {
   try {
     sensorConfig.value.images = [...tempImages.value];
     await saveSensorConfig(sensorConfig.value);
-    alert('Configuració guardada correctament');
+    alert('Configuració desada correctament');
     window.location.reload();
   } catch (error) {
-    console.error('Error al guardar la configuració:', error);
-    alert('Error al guardar la configuració: ' + error.message);
+    console.error('Error en desar la configuració:', error);
+    alert('Error en desar la configuració: ' + error.message);
   }
 };
 </script>

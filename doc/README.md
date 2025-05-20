@@ -447,3 +447,108 @@ Els serveis utilitzen l'arxiu `.env.PROD.DOCKER` per carregar les variables d'en
 
 > **Nota 2:**
 > Si en el procés de desplegament es produeix un error, és recomanable revisar l'estat dels contenidors amb `portainer` o `docker ps` i els logs amb `docker logs <container_id>` per identificar el problema. També es pot accedir a la GUI de RabbitMQ per verificar l'estat de les cues i missatges.
+
+<br>
+
+# Manual d'Instal·lació en una Màquina Nova
+
+Aquest manual explica com desplegar el projecte **prj-final-front-back-tr-final-g6** en una màquina nova, des de zero.
+
+---
+
+## 1. Requisits previs
+
+Abans de començar, assegura't que la màquina compleix els següents requisits:
+
+- **Sistema operatiu:** Ubuntu 20.04/22.04 (o similar)
+- **Accés root** o permisos sudo
+- **Git**
+- **Docker** i **Docker Compose**
+- **Node.js** (només si vols executar scripts fora de Docker)
+- **Accés a internet**
+
+---
+
+## 2. Clonar el repositori
+
+```bash
+cd /ruta/on/vols/instal-lar
+git clone https://github.com/nom-usuari/prj-final-front-back-tr-final-g6.git
+cd prj-final-front-back-tr-final-g6
+```
+
+---
+
+## 3. Configuració d'arxius d'entorn
+
+Copia els arxius d'entorn de producció als seus llocs corresponents:
+
+```bash
+cp ./back/principal/.env.PROD ./back/principal/.env
+cp ./front/nuxt/.env.PROD ./front/nuxt/.env
+cp ./back/services/DBinsert/.env.PROD ./back/services/DBinsert/.env
+cp ./back/services/sensor/.env.PROD ./back/services/sensor/.env
+cp .env.PROD.DOCKER .env.PROD.DOCKER
+```
+
+Edita els arxius `.env` i `.env.PROD.DOCKER` per afegir les variables d'entorn reals (usuaris, contrasenyes, URIs, etc.) segons la teva configuració.
+
+---
+
+## 4. Arrencada dels serveis amb Docker Compose
+
+```bash
+docker compose -f compose.prod.yaml up -d --build
+```
+
+Aquesta comanda construirà i aixecarà tots els serveis definits a `compose.prod.yaml`.
+
+---
+
+## 5. Verificació
+
+Comprova que tots els contenidors estan funcionant:
+
+```bash
+docker ps
+```
+
+Accedeix als serveis principals des del navegador:
+
+- **Frontend:** http://localhost:3000
+- **Backend:** http://localhost:3020
+- **Adminer (MySQL):** http://localhost:8080
+- **Mongo Express:** http://localhost:8081
+- **RabbitMQ:** http://localhost:15672
+- **Portainer:** http://localhost:9000
+
+---
+
+## 6. Actualització del projecte
+
+Per actualitzar el projecte a una nova versió:
+
+```bash
+git pull
+docker compose -f compose.prod.yaml up -d --build
+```
+
+---
+
+## 7. Notes addicionals
+
+- Si algun contenidor falla, consulta els logs amb:
+  ```bash
+  docker logs <nom_o_id_del_contenidor>
+  ```
+- Pots gestionar els contenidors gràficament amb Portainer (`http://localhost:9000`).
+
+---
+
+## 8. Desplegament automàtic (opcional)
+
+Si vols automatitzar el desplegament, configura els secrets i el workflow de GitHub Actions (`.github/workflows/deploy-production.yaml`) segons la teva infraestructura.
+
+---
+
+**Fi del manual**

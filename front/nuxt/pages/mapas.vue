@@ -52,7 +52,7 @@
               ]"
             >
               <i :class="isAddingPopup ? 'fas fa-times' : 'fas fa-microchip'"></i>
-              <span>{{ isAddingPopup ? "Cancelar" : "Agregar Sensor" }}</span>
+              <span>{{ isAddingPopup ? "Cancel·lar" : "Afegir Sensor" }}</span>
             </button>
             <button
               v-if="customPopups.length > 0"
@@ -65,7 +65,7 @@
               ]"
             >
               <i :class="isDeletingPopup ? 'fas fa-check' : 'fas fa-trash'"></i>
-              <span>{{ isDeletingPopup ? "Terminar Borrado" : "Borrar Sensor" }}</span>
+              <span>{{ isDeletingPopup ? "Finalitzar Esborrat" : "Esborrar Sensor" }}</span>
             </button>
           </div>
 
@@ -121,14 +121,14 @@
             imageUrl="/planos/plantasubterranea.png"
           />
 
-          <!-- Pop-ups personalizados -->
+          <!-- Pop-ups personalitzats -->
           <div
             v-for="popup in filteredPopups"
             :key="popup.id"
             :style="{ left: popup.x + 'px', top: popup.y + 'px' }"
             class="custom-popup absolute"
           >
-            <!-- Punto indicador -->
+            <!-- Punt indicador -->
             <div
               :class="[
                 'marker-point w-8 h-8 rounded-full absolute -top-4 -left-4 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200 bg-gradient-to-r',
@@ -140,7 +140,7 @@
             >
               <i class="fas fa-map-marker-alt text-white"></i>
             </div>
-            <!-- Contenido del popup -->
+            <!-- Contingut del popup -->
             <div
               v-if="showingPopupId === popup.id"
               class="popup-content bg-slate-700/90 border-2 border-teal-500 rounded-xl p-8 shadow-2xl min-w-[400px] relative animate-fadeIn overflow-hidden"
@@ -174,7 +174,7 @@
                     </span>
                   </div>
                 </div>
-                <div v-else class="mt-4 text-red-500">Error al cargar los datos</div>
+                <div v-else class="mt-4 text-red-500">Error en carregar les dades</div>
               </div>
 
               <button
@@ -190,17 +190,17 @@
       </div>
     </div>
 
-    <!-- Selector de sensores activos -->
+    <!-- Selector de sensors actius -->
     <div
       v-if="showPopupForm"
       class="popup-form fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
     >
       <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 max-w-md w-full">
         <div class="form-header text-xl font-bold text-white mb-4">
-          Seleccionar Sensor
+          Selecciona Sensor
         </div>
 
-        <!-- Lista de sensores activos -->
+        <!-- Llista de sensors actius -->
         <div class="space-y-2 max-h-[400px] overflow-y-auto mb-4">
           <div
             v-for="sensor in availableSensors"
@@ -212,20 +212,20 @@
               <div>
                 <div class="font-semibold">{{ sensor.nombre }}</div>
                 <div class="text-sm text-gray-400">MAC: {{ sensor.mac }}</div>
-                <div class="text-sm text-gray-400">Ubicación: {{ sensor.ubicacion }}</div>
+                <div class="text-sm text-gray-400">Ubicació: {{ sensor.ubicacion }}</div>
               </div>
               <i class="fas fa-chevron-right text-gray-400"></i>
             </div>
           </div>
         </div>
 
-        <!-- Botón para cancelar -->
+        <!-- Botó per cancel·lar -->
         <div class="flex justify-end">
           <button
             @click="cancelNewPopup"
             class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-red-700 hover:scale-[1.02]"
           >
-            <i class="fas fa-times mr-2"></i>Cancelar
+            <i class="fas fa-times mr-2"></i>Cancel·lar
           </button>
         </div>
       </div>
@@ -268,10 +268,10 @@ const getSensorLabel = () => {
 };
 
 const getSensorValue = (sensorData) => {
-  if (!sensorData) return 'N/A';
+  if (!sensorData) return 'N/D';
   
   const value = sensorData[selectedSensorType.value]?.average;
-  if (value === undefined) return 'N/A';
+  if (value === undefined) return 'N/D';
   
   const formattedValue = Number(value).toFixed(2);
   switch (selectedSensorType.value) {
@@ -286,16 +286,16 @@ const getSensorValue = (sensorData) => {
   }
 };
 
-const lastSensorValues = ref({}); // Guarda los últimos valores por sensor
+const lastSensorValues = ref({}); // Guarda els últims valors per sensor
 
-// Estado para los pop-ups personalizados
+// Estat per als pop-ups personalitzats
 const activeSensors = ref([]);
 const customPopups = ref([]);
 const showingPopupId = ref(null);
 const isAddingPopup = ref(false);
 const isDeletingPopup = ref(false);
 
-// Cargar sensores activos al montar el componente (persistencia local)
+// Carregar sensors actius al muntar el component (persistència local)
 onMounted(async () => {
   const savedSensors = localStorage.getItem("activeSensors");
   if (savedSensors) {
@@ -325,7 +325,7 @@ const showPopupForm = ref(false);
 const newPopupText = ref("");
 const tempPopupPosition = ref(null);
 
-// Cargar pop-ups guardados al iniciar (si usas customPopups)
+// Carregar pop-ups guardats a l'inici (si uses customPopups)
 onMounted(() => {
   const savedPopups = localStorage.getItem("customMapPopups");
   if (savedPopups) {
@@ -335,7 +335,7 @@ onMounted(() => {
   }
 });
 
-// Guardar sensores activos en localStorage cuando cambien
+// Guardar sensors actius en localStorage quan canviïn
 watch(
   activeSensors,
   (newSensors) => {
@@ -344,7 +344,7 @@ watch(
   { deep: true }
 );
 
-// Filtrar pop-ups por planta seleccionada
+// Filtrar pop-ups per planta seleccionada
 const filteredPopups = computed(() => {
   return activeSensors.value.filter((sensor) => {
     return sensor.planta === plantaSeleccionada.value;
@@ -516,10 +516,10 @@ const handlePopupClick = async (popup) => {
     deletePopup(popup.id);
   } else {
     showingPopupId.value = popup.id;
-    // Cargar últimos valores solo si no están ya cargados
+    // Carregar últims valors només si no estan ja carregats
     if (!lastSensorValues.value[popup.idAula || popup.id]) {
       try {
-        // popup.idAula o popup.id según tu estructura
+        // popup.idAula o popup.id segons la teva estructura
         const data = await getUltimsSensorsAula(popup.idAula || popup.id);
         lastSensorValues.value[popup.idAula || popup.id] = data;
       } catch (e) {
@@ -539,7 +539,7 @@ const fetchData = async () => {
     const response = await getMapa(bodyRequest);
     aulaData.value = response;
   } catch (error) {
-    // Manejo de error
+    // Gestió d'error
   }
 };
 

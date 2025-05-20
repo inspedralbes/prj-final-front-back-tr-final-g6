@@ -51,7 +51,7 @@
 
           <Dropdown v-model="selectedRange" :options="ranges" optionLabel="label" optionValue="value"
             class="w-48 [&>div]:bg-slate-700 [&>div]:border-slate-600 [&>div]:text-white"
-            panelClass="bg-slate-700 border border-slate-600 text-white" placeholder="Selecciona el Rango" />
+            panelClass="bg-slate-700 border border-slate-600 text-white" placeholder="Selecciona el Rang" />
         </div>
       </div>
 
@@ -151,7 +151,7 @@ const ranges = [
 const selectedChart = ref("Temperatura");
 const selectedRange = ref("actual");
 
-// Computed para determinar el componente actual basado en el tipo de gráfico y el rango
+// Computed per determinar el component actual basat en el tipus de gràfic i el rang
 const currentChart = computed(() => {
   const chartType = chartComponents[selectedChart.value];
   return chartType ? chartType[selectedRange.value] : null;
@@ -162,7 +162,7 @@ onMounted(async () => {
     const data = await getAulaById(aulaId);
     aula.value = data;
   } catch (error) {
-    console.error("Error al cargar el aula:", error);
+    console.error("Error en carregar l'aula:", error);
     aula.value = null;
   }
 });
