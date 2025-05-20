@@ -4,27 +4,19 @@
     <Header />
 
     <!-- Confirmation Popup -->
-    <div
-      v-if="showConfirmationPopup"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-    >
-      <div
-        class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-md border border-slate-700"
-      >
+    <div v-if="showConfirmationPopup"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-md border border-slate-700">
         <div class="p-6">
           <h2 class="text-2xl font-bold text-white mb-4">Confirmació</h2>
           <p class="text-slate-400 mb-6">{{ confirmationMessage }}</p>
           <div class="flex justify-end gap-3">
-            <button
-              @click="closeConfirmationPopup"
-              class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all"
-            >
+            <button @click="closeConfirmationPopup"
+              class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all">
               Tancar
             </button>
-            <button
-              @click="executeConfirmationAction"
-              class="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-all"
-            >
+            <button @click="executeConfirmationAction"
+              class="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-all">
               Confirmar
             </button>
           </div>
@@ -36,57 +28,35 @@
     <div v-if="loading" class="text-center text-white py-4">Carregant...</div>
 
     <!-- Edit Sensor Modal -->
-    <div
-      v-if="showEditModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-    >
-      <div
-        class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-md border border-slate-700"
-      >
+    <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-md border border-slate-700">
         <div class="p-6">
           <h2 class="text-2xl font-bold text-white mb-6">Editar Sensor</h2>
 
           <form @submit.prevent="submitEditForm" class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-slate-400 mb-1">Nom</label>
-              <input
-                v-model="editForm.nombre"
-                type="text"
-                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-              />
+              <input v-model="editForm.nombre" type="text"
+                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
             </div>
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-slate-400 mb-1"
-                  >Coordenada X</label
-                >
-                <input
-                  v-model.number="editForm.x"
-                  type="number"
-                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-                />
+                <label class="block text-sm font-medium text-slate-400 mb-1">Coordenada X</label>
+                <input v-model.number="editForm.x" type="number"
+                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
               </div>
               <div>
-                <label class="block text-sm font-medium text-slate-400 mb-1"
-                  >Coordenada Y</label
-                >
-                <input
-                  v-model.number="editForm.y"
-                  type="number"
-                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-                />
+                <label class="block text-sm font-medium text-slate-400 mb-1">Coordenada Y</label>
+                <input v-model.number="editForm.y" type="number"
+                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
               </div>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-400 mb-1"
-                >Ubicació</label
-              >
-              <select
-                v-model="editForm.idAula"
-                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-              >
+              <label class="block text-sm font-medium text-slate-400 mb-1">Ubicació</label>
+              <select v-model="editForm.idAula"
+                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
                 <option :value="null">No assignada</option>
                 <option v-for="aula in aulas" :key="aula.id" :value="aula.id">
                   {{ aula.Curs }}
@@ -95,17 +65,12 @@
             </div>
 
             <div class="flex justify-end gap-3 pt-4">
-              <button
-                type="button"
-                @click="showEditModal = false"
-                class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all"
-              >
+              <button type="button" @click="showEditModal = false"
+                class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all">
                 Cancel·lar
               </button>
-              <button
-                type="submit"
-                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all"
-              >
+              <button type="submit"
+                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all">
                 Guardar Canvis
               </button>
             </div>
@@ -115,33 +80,23 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div
-      v-if="showDeleteModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-    >
-      <div
-        class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-md border border-slate-700"
-      >
+    <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-md border border-slate-700">
         <div class="p-6">
           <h2 class="text-2xl font-bold text-white mb-6">Confirmar Eliminació</h2>
           <p class="text-slate-400 mb-6">
             Estàs segur que vols eliminar el sensor
             <span class="text-white font-bold">{{
               sensorToDelete?.nombre || `Sensor ${sensorToDelete?.mac}`
-            }}</span
-            >?
+              }}</span>?
           </p>
           <div class="flex justify-end gap-3">
-            <button
-              @click="showDeleteModal = false"
-              class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all"
-            >
+            <button @click="showDeleteModal = false"
+              class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all">
               Cancel·lar
             </button>
-            <button
-              @click="confirmDeleteSensor"
-              class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all"
-            >
+            <button @click="confirmDeleteSensor"
+              class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all">
               Eliminar
             </button>
           </div>
@@ -152,67 +107,40 @@
     <div class="flex-grow w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
       <!-- Tabs for Sensor Types -->
       <div class="flex border-b border-slate-600">
-        <button
-          @click="activeTab = 'active'"
-          :class="{
-            'border-b-2 border-teal-500 text-teal-400': activeTab === 'active',
-            'text-slate-400': activeTab !== 'active',
-          }"
-          class="px-4 py-2 font-medium"
-        >
-          Sensores Activos
+        <button @click="activeTab = 'active'" :class="{
+          'border-b-2 border-teal-500 text-teal-400': activeTab === 'active',
+          'text-slate-400': activeTab !== 'active',
+        }" class="px-4 py-2 font-medium">
+          Sensors Actius
         </button>
-        <button
-          @click="activeTab = 'pending'"
-          :class="{
-            'border-b-2 border-teal-500 text-teal-400': activeTab === 'pending',
-            'text-slate-400': activeTab !== 'pending',
-          }"
-          class="px-4 py-2 font-medium"
-        >
-          Sensores Pendientes
+        <button @click="activeTab = 'pending'" :class="{
+          'border-b-2 border-teal-500 text-teal-400': activeTab === 'pending',
+          'text-slate-400': activeTab !== 'pending',
+        }" class="px-4 py-2 font-medium">
+          Sensors Pendents
         </button>
-        <button
-          @click="activeTab = 'banned'"
-          :class="{
-            'border-b-2 border-teal-500 text-teal-400': activeTab === 'banned',
-            'text-slate-400': activeTab !== 'banned',
-          }"
-          class="px-4 py-2 font-medium"
-        >
-          Sensores Bannejats
+        <button @click="activeTab = 'banned'" :class="{
+          'border-b-2 border-teal-500 text-teal-400': activeTab === 'banned',
+          'text-slate-400': activeTab !== 'banned',
+        }" class="px-4 py-2 font-medium">
+          Sensors Bannejats
         </button>
-        <button
-          @click="activeTab = 'settings'"
-          :class="{
-            'border-b-2 border-teal-500 text-teal-400': activeTab === 'settings',
-            'text-slate-400': activeTab !== 'settings',
-          }"
-          class="px-4 py-2 font-medium"
-        >
+        <button @click="activeTab = 'settings'" :class="{
+          'border-b-2 border-teal-500 text-teal-400': activeTab === 'settings',
+          'text-slate-400': activeTab !== 'settings',
+        }" class="px-4 py-2 font-medium">
           Configurar Sensors
         </button>
       </div>
 
       <!-- Action Buttons -->
       <div class="flex flex-wrap gap-4 justify-center">
-        <button
-          @click="navigateToAulas"
-          class="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 inline mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 14l9-5-9-5-9 5 9 5zm0 0v6m0-6l-9-5m9 5l9-5"
-            />
+        <button @click="navigateToAulas"
+          class="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 14l9-5-9-5-9 5 9 5zm0 0v6m0-6l-9-5m9 5l9-5" />
           </svg>
           Configurar Aules
         </button>
@@ -220,15 +148,9 @@
 
       <!-- Active Sensors List -->
       <div v-if="activeTab === 'active'" class="space-y-6">
-        <div
-          v-for="sensor in filteredActiveSensors"
-          :key="sensor.idSensor"
-          class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 hover:border-teal-500 transition-all duration-300"
-        >
-          <div
-            class="p-6 cursor-pointer"
-            @click="sensor.showDetails = !sensor.showDetails"
-          >
+        <div v-for="sensor in filteredActiveSensors" :key="sensor.idSensor"
+          class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 hover:border-teal-500 transition-all duration-300">
+          <div class="p-6 cursor-pointer" @click="sensor.showDetails = !sensor.showDetails">
             <div class="flex justify-between items-center">
               <div>
                 <h2 class="text-2xl font-bold text-white">
@@ -237,7 +159,7 @@
                 <div class="flex items-center mt-1">
                   <span class="text-sm text-teal-400">{{
                     sensor.ubicacion || "Ubicació no definida"
-                  }}</span>
+                    }}</span>
                 </div>
               </div>
               <div class="flex items-center">
@@ -281,16 +203,12 @@
                 </div>
               </div>
               <div class="flex flex-wrap gap-3 pt-4">
-                <button
-                  @click.stop="handleEditSensor(sensor)"
-                  class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all flex items-center"
-                >
+                <button @click.stop="handleEditSensor(sensor)"
+                  class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all flex items-center">
                   Editar
                 </button>
-                <button
-                  @click.stop="handleDeleteSensor(sensor)"
-                  class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all flex items-center"
-                >
+                <button @click.stop="handleDeleteSensor(sensor)"
+                  class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all flex items-center">
                   Eliminar
                 </button>
               </div>
@@ -301,15 +219,9 @@
 
       <!-- Pending Sensors List -->
       <div v-if="activeTab === 'pending'" class="space-y-6">
-        <div
-          v-for="sensor in filteredPendingSensors"
-          :key="sensor.idSensor"
-          class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 hover:border-teal-500 transition-all duration-300"
-        >
-          <div
-            class="p-6 cursor-pointer"
-            @click="sensor.showDetails = !sensor.showDetails"
-          >
+        <div v-for="sensor in filteredPendingSensors" :key="sensor.idSensor"
+          class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 hover:border-teal-500 transition-all duration-300">
+          <div class="p-6 cursor-pointer" @click="sensor.showDetails = !sensor.showDetails">
             <div class="flex justify-between items-center">
               <div>
                 <h2 class="text-2xl font-bold text-white">
@@ -318,11 +230,11 @@
                 <div class="flex items-center mt-1">
                   <span class="text-sm text-teal-400">{{
                     sensor.ubicacion || "Ubicació no definida"
-                  }}</span>
+                    }}</span>
                   <span v-if="sensor.idAula" class="mx-2 text-slate-400">•</span>
                   <span v-if="sensor.idAula" class="text-sm text-slate-300">{{
                     getAulaName(sensor.idAula)
-                  }}</span>
+                    }}</span>
                 </div>
               </div>
               <div class="flex items-center">
@@ -370,16 +282,12 @@
                 </div>
               </div>
               <div class="flex flex-wrap gap-3 pt-4">
-                <button
-                  @click.stop="acceptPendingSensor(sensor)"
-                  class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all flex items-center"
-                >
+                <button @click.stop="acceptPendingSensor(sensor)"
+                  class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all flex items-center">
                   Acceptar
                 </button>
-                <button
-                  @click.stop="handleRejectPendingSensor(sensor)"
-                  class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all flex items-center"
-                >
+                <button @click.stop="handleRejectPendingSensor(sensor)"
+                  class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all flex items-center">
                   Rebutjar
                 </button>
               </div>
@@ -390,15 +298,9 @@
 
       <!-- Banned Sensors List -->
       <div v-if="activeTab === 'banned'" class="space-y-6">
-        <div
-          v-for="sensor in filteredBannedSensors"
-          :key="sensor.idSensor"
-          class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 hover:border-teal-500 transition-all duration-300"
-        >
-          <div
-            class="p-6 cursor-pointer"
-            @click="sensor.showDetails = !sensor.showDetails"
-          >
+        <div v-for="sensor in filteredBannedSensors" :key="sensor.idSensor"
+          class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 hover:border-teal-500 transition-all duration-300">
+          <div class="p-6 cursor-pointer" @click="sensor.showDetails = !sensor.showDetails">
             <div class="flex justify-between items-center">
               <div>
                 <h2 class="text-2xl font-bold text-white">
@@ -407,7 +309,7 @@
                 <div class="flex items-center mt-1">
                   <span class="text-sm text-teal-400">{{
                     sensor.ubicacion || "Ubicació no definida"
-                  }}</span>
+                    }}</span>
                 </div>
               </div>
               <div class="flex items-center">
@@ -416,7 +318,7 @@
               </div>
             </div>
 
-            <!-- Sensor Details (same as active sensors) -->
+            <!-- Sensor Details -->
             <div v-if="sensor.showDetails" class="mt-6 space-y-4" @click.stop>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -447,10 +349,8 @@
                 </div>
               </div>
               <div class="flex flex-wrap gap-3 pt-4">
-                <button
-                  @click.stop="handleUnbanSensor(sensor)"
-                  class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                >
+                <button @click.stop="handleUnbanSensor(sensor)"
+                  class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                   Desbannejar
                 </button>
               </div>
@@ -793,7 +693,7 @@ const handleImageUpload = async (event) => {
     // Validar dimensiones 64x64
     const img = new Image();
     img.src = URL.createObjectURL(file);
-    
+
     img.onload = async () => {
       if (img.width !== 64 || img.height !== 64) {
         alert('La imagen debe ser exactamente de 64x64 píxeles');
@@ -801,7 +701,7 @@ const handleImageUpload = async (event) => {
         URL.revokeObjectURL(img.src);
         return;
       }
-      
+
       try {
         const response = await uploadSensorImage(file);
         editForm.value.image = response.imageUrl;

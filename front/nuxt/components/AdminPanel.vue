@@ -1,11 +1,11 @@
 <template>
   <div class="min-h-screen bg-slate-800 flex flex-col">
-    <!-- Custom Header Component -->
+    <!-- Capçalera personalitzada -->
     <Header />
 
-    <!-- Main Content -->
+    <!-- Contingut principal -->
     <div class="flex-grow w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
-      <!-- Action Buttons -->
+      <!-- Botons d'acció -->
       <div class="flex flex-wrap gap-4 justify-center">
         <button @click="navigateToSensors"
           class="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105">
@@ -18,7 +18,7 @@
         </button>
       </div>
 
-      <!-- Search and Filter -->
+      <!-- Cercar i filtrar -->
       <div class="bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-700">
         <div class="flex flex-col md:flex-row gap-4 items-center">
           <div class="relative flex-grow">
@@ -65,7 +65,7 @@
         </div>
       </div>
 
-      <!-- Create Aula Form -->
+      <!-- Formulari per crear aula -->
       <div v-if="showCreateAulaForm" class="bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-700">
         <h2 class="text-2xl font-bold text-white mb-6">Crear Nova Aula</h2>
         <form @submit.prevent="handleCreateAula" class="space-y-4">
@@ -104,9 +104,9 @@
               <label for="turn" class="block text-sm font-medium text-slate-300 mb-2">Torn:</label>
               <select v-model="newAula.turn"
                 class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all">
-                <option value="mati">Mati</option>
+                <option value="mati">Matí</option>
                 <option value="tarda">Tarda</option>
-                <option value="mati i tarda">Mati i tarda</option>
+                <option value="mati i tarda">Matí i tarda</option>
               </select>
             </div>
           </div>
@@ -119,7 +119,7 @@
         </form>
       </div>
 
-      <!-- Aules List -->
+      <!-- Llista d'aules -->
       <div class="space-y-6">
         <div v-for="aula in filteredAulas" :key="aula.id"
           class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 hover:border-teal-500 transition-all duration-300">
@@ -228,9 +228,9 @@
                     <label class="block text-sm font-medium text-slate-300 mb-2">Torn:</label>
                     <select v-model="editData.turn"
                       class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all">
-                      <option value="mati">Mati</option>
+                      <option value="mati">Matí</option>
                       <option value="tarda">Tarda</option>
-                      <option value="mati i tarda">Mati i tarda</option>
+                      <option value="mati i tarda">Matí i tarda</option>
                     </select>
                   </div>
                 </div>
@@ -294,7 +294,7 @@ const etapas = [
   { label: "ALTRES", value: "ALTRES" },
 ];
 
-// Get unique classes from aulas data
+// Obtenir classes úniques de les dades d'aules
 const uniqueClasses = computed(() => {
   const classes = new Set();
   aulas.value.forEach((aula) => {
@@ -314,8 +314,8 @@ const fetchStats = async () => {
 };
 
 const startStatsInterval = () => {
-  fetchStats(); // Primera carga
-  setInterval(fetchStats, 60000); // Actualizar cada minuto
+  fetchStats(); // Primera càrrega
+  setInterval(fetchStats, 60000); // Actualitzar cada minut
 };
 
 onMounted(async () => {
@@ -327,10 +327,10 @@ onMounted(async () => {
       editing: false,
       newClasse: "",
     }));
-    startStatsInterval(); // Iniciar la actualización de estadísticas
+    startStatsInterval(); // Iniciar l'actualització d'estadístiques
   } catch (error) {
-    console.error("Error al cargar las aulas:", error.message);
-    alert("Error al cargar las aulas: " + error.message);
+    console.error("Error en carregar les aules:", error.message);
+    alert("Error en carregar les aules: " + error.message);
   }
 });
 
@@ -374,12 +374,12 @@ const addNewClasse = (aula) => {
 
 const saveEdit = async (aula) => {
   try {
-    // Handle new class if selected
+    // Gestionar nova classe si s'ha seleccionat
     if (editData.value.Classe === "_new" && editData.value.newClasse) {
       editData.value.Classe = editData.value.newClasse;
     }
 
-    // Update the aula object
+    // Actualitzar l'objecte aula
     Object.assign(aula, {
       Curs: editData.value.Curs,
       Classe: editData.value.Classe,
@@ -390,7 +390,7 @@ const saveEdit = async (aula) => {
       activa: editData.value.activa,
     });
 
-    // Send update to server
+    // Enviar actualització al servidor
     await updateAula(aula.id, {
       Curs: editData.value.Curs,
       Classe: editData.value.Classe,
@@ -406,7 +406,7 @@ const saveEdit = async (aula) => {
     alert("Aula actualitzada correctament");
   } catch (error) {
     console.error("Error en actualitzar l'aula:", error.message);
-    alert("Error al actualizar el aula: " + error.message);
+    alert("Error en actualitzar l'aula: " + error.message);
   }
 };
 
@@ -418,7 +418,7 @@ const handleDeleteAula = async (id) => {
       alert("Aula eliminada correctament");
     } catch (error) {
       console.error("Error en eliminar l'aula:", error.message);
-      alert("Ha ocurrido un error al eliminar el aula.");
+      alert("Ha ocorregut un error en eliminar l'aula.");
     }
   }
 };
@@ -463,8 +463,8 @@ const handleCreateAula = async () => {
 
     alert("Aula creada correctament!");
   } catch (error) {
-    console.error("Error al crear el aula:", error.message);
-    alert("Error al crear el aula: " + error.message);
+    console.error("Error en crear l'aula:", error.message);
+    alert("Error en crear l'aula: " + error.message);
   }
 };
 </script>

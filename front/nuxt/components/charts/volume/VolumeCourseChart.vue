@@ -1,7 +1,7 @@
 <template>
     <div class="dashboard-container">
         <div v-if="loading" class="loading-overlay">
-            <div class="loading-message">Loading data...</div>
+            <div class="loading-message">Carregant dades...</div>
         </div>
 
         <div v-else-if="error" class="error-overlay">
@@ -9,7 +9,7 @@
         </div>
 
         <div v-else class="dashboard-content">
-            <!-- Header Section -->
+            <!-- Secció de capçalera -->
             <div class="dashboard-header">
                 <div class="volume-display">
                     <div class="current-volume" :class="volumeColorClass">
@@ -20,33 +20,33 @@
                         <span class="range-separator">-</span>
                         <span class="max-volume">{{ maxVolume !== null ? parseFloat(maxVolume).toFixed(2) : '--' }} dB</span>
                     </div>
-                    <div class="volume-label">Current Course Volume (Avg/Min/Max)</div>
+                    <div class="volume-label">Volum actual del curs (Mitjana / Mínim / Màxim)</div>
                 </div>
 
                 <div class="time-range-info">
-                    <div class="time-range-indicator">Last 4 courses</div>
-                    <div class="update-time">Last update: {{ lastUpdateTime }}</div>
+                    <div class="time-range-indicator">Últims 4 cursos</div>
+                    <div class="update-time">Última actualització: {{ lastUpdateTime }}</div>
                 </div>
             </div>
 
-            <!-- Chart Section -->
+            <!-- Secció del gràfic -->
             <div class="chart-container">
                 <Line :key="chartKey" :data="chartData" :options="chartOptions" class="volume-chart" />
             </div>
 
-            <!-- Legend Section -->
+            <!-- Llegenda del gràfic -->
             <div class="chart-legend">
                 <div class="legend-item">
                     <span class="legend-color avg-color"></span>
-                    <span class="legend-label">Average</span>
+                    <span class="legend-label">Mitjana</span>
                 </div>
                 <div class="legend-item">
                     <span class="legend-color max-color"></span>
-                    <span class="legend-label">Maximum</span>
+                    <span class="legend-label">Màxim</span>
                 </div>
                 <div class="legend-item">
                     <span class="legend-color min-color"></span>
-                    <span class="legend-label">Minimum</span>
+                    <span class="legend-label">Mínim</span>
                 </div>
             </div>
         </div>

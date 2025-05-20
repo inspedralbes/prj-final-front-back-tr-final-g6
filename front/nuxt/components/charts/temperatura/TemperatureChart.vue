@@ -24,7 +24,7 @@ const formattedData = ref({
 watch(props.data, (newData) => {
     if (newData && newData.length > 0) {
         formattedData.value = {
-            labels: newData.map(item => new Date(item.dataIni).toLocaleDateString('es-ES')), // Cambié a 'es-ES' para formato español
+            labels: newData.map(item => new Date(item.dataIni).toLocaleDateString('ca-ES')), // Canviat a 'ca-ES' per format català
             datasets: [
                 {
                     label: "Nivell de CO₂ (ppm)",

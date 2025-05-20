@@ -1,7 +1,7 @@
 <template>
     <div class="dashboard-container">
         <div v-if="loading" class="loading-overlay">
-            <div class="loading-message">Loading data...</div>
+            <div class="loading-message">Carregant dades...</div>
         </div>
 
         <div v-else-if="error" class="error-overlay">
@@ -20,12 +20,12 @@
                         <span class="range-separator">-</span>
                         <span class="max-humidity">{{ maxHumidity !== null ? parseFloat(maxHumidity).toFixed(2) : '--' }}%</span>
                     </div>
-                    <div class="humidity-label">Current Humidity (Avg/Min/Max)</div>
+                    <div class="humidity-label">Humitat Actual (Mitjana/Mínima/Màxima)</div>
                 </div>
 
                 <div class="time-range-info">
-                    <div class="time-range-indicator">Last 12 months</div>
-                    <div class="update-time">Last update: {{ lastUpdateTime }}</div>
+                    <div class="time-range-indicator">Últims 12 mesos</div>
+                    <div class="update-time">Última actualització: {{ lastUpdateTime }}</div>
                 </div>
             </div>
 
@@ -38,15 +38,15 @@
             <div class="chart-legend">
                 <div class="legend-item">
                     <span class="legend-color avg-color"></span>
-                    <span class="legend-label">Average</span>
+                    <span class="legend-label">Mitjana</span>
                 </div>
                 <div class="legend-item">
                     <span class="legend-color max-color"></span>
-                    <span class="legend-label">Maximum</span>
+                    <span class="legend-label">Màxima</span>
                 </div>
                 <div class="legend-item">
                     <span class="legend-color min-color"></span>
-                    <span class="legend-label">Minimum</span>
+                    <span class="legend-label">Mínima</span>
                 </div>
             </div>
         </div>
@@ -91,12 +91,11 @@ const props = defineProps({
     }
 });
 
-// Chart data configuration
 const chartData = ref({
-    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+    labels: ['Gen', 'Feb', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Des'],
     datasets: [
         {
-            label: 'Average Humidity (%)',
+            label: 'Humitat Mitjana (%)',
             data: [],
             fill: {
                 target: 'origin',
@@ -113,7 +112,7 @@ const chartData = ref({
             borderWidth: 2
         },
         {
-            label: 'Maximum Humidity (%)',
+            label: 'Humitat Màxima (%)',
             data: [],
             borderColor: '#ff9f40',
             backgroundColor: 'rgba(255, 159, 64, 0.1)',
@@ -125,7 +124,7 @@ const chartData = ref({
             borderDash: [5, 5]
         },
         {
-            label: 'Minimum Humidity (%)',
+            label: 'Humitat Mínima (%)',
             data: [],
             borderColor: '#9966ff',
             backgroundColor: '#9966ff',
@@ -163,7 +162,7 @@ const chartOptions = ref({
         x: {
             title: {
                 display: true,
-                text: 'Month',
+                text: 'Mes',
                 color: '#9CA3AF',
                 font: {
                     size: 12
@@ -181,7 +180,7 @@ const chartOptions = ref({
         y: {
             title: {
                 display: true,
-                text: 'Humidity (%)',
+                text: 'Humitat (%)',
                 color: '#9CA3AF',
                 font: {
                     size: 12

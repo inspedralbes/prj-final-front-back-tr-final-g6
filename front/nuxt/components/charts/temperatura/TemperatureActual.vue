@@ -1,7 +1,7 @@
 <template>
     <div class="dashboard-container">
         <div v-if="loading" class="loading-overlay">
-            <div class="loading-message">Loading data...</div>
+            <div class="loading-message">Carregant dades...</div>
         </div>
 
         <div v-else-if="error" class="error-overlay">
@@ -15,12 +15,12 @@
                     <div class="current-temperature" :class="temperatureColorClass">
                         {{ currentTemperature }}°C
                     </div>
-                    <div class="temperature-label">Current Temperature</div>
+                    <div class="temperature-label">Temperatura actual</div>
                 </div>
 
                 <div class="sensor-info">
-                    <span class="sensor-id">Sensor ID: {{ sensorId || 'Not available' }}</span>
-                    <span class="update-time">Last update: {{ lastUpdate }}</span>
+                    <span class="sensor-id">ID del sensor: {{ sensorId || 'No disponible' }}</span>
+                    <span class="update-time">Última actualització: {{ lastUpdate }}</span>
                 </div>
             </div>
 
@@ -96,7 +96,7 @@ const chartData = ref({
     labels: [],
     datasets: [
         {
-            label: 'Temperature (°C)',
+            label: 'Temperatura (°C)',
             data: [],
             borderColor: '#9CA3AF',
             backgroundColor: 'rgba(0, 0, 0, 0.1)',
@@ -130,7 +130,7 @@ const chartOptions = ref({
             titleColor: '#E5E7EB',
             bodyColor: '#E5E7EB',
             callbacks: {
-                label: (context) => `Temperature: ${context.raw}°C`
+                label: (context) => `Temperatura: ${context.raw}°C`
             }
         }
     },
@@ -159,7 +159,7 @@ const chartOptions = ref({
             },
             title: {
                 display: true,
-                text: 'Temperature (°C)',
+                text: 'Temperatura (°C)',
                 color: '#9CA3AF'
             }
         }
