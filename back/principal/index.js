@@ -404,11 +404,9 @@ app.get('/api/sensors', (req, res) => {
   const query = 'SELECT * FROM sensor';
   connexioBD.execute(query, (err, results) => {
     if (err) {
-      console.error('Error en la consulta a la base de dades: ' + err.stack);
-      res.status(500).send('Error en la consulta a la base de dades');
-      return;
+      console.error('Error en la consulta a la base de datos:', err.stack);
+      return res.status(500).send({ message: 'Error en la consulta a la base de datos' });
     }
-    console.log('Resultados obtenidos:', results); // Log para depuración
     res.status(200).send(results);
   });
 });

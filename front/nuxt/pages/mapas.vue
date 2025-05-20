@@ -385,17 +385,11 @@ const availableSensors = ref([]);
 
 const loadAvailableSensors = async () => {
   try {
-    const data = await getAllSensors();
+    const data = await getAllSensors(); // Obtener todos los sensores de la base de datos
     console.log("Sensores recibidos:", data);
 
-    const placedIds = activeSensors.value.map((s) => s.idSensor || s.id);
-    console.log("Sensores colocados (placedIds):", placedIds); // Depuración
-
-    availableSensors.value = data.filter((sensor) => {
-      const isPlaced = placedIds.includes(sensor.idSensor || sensor.id);
-      console.log(`Sensor ${sensor.idSensor || sensor.id} colocado:`, isPlaced); // Depuración
-      return sensor.mac && !isPlaced;
-    });
+    // Mostrar todos los sensores sin filtrar
+    availableSensors.value = data.filter((sensor) => sensor.mac); // Solo filtrar por sensores con MAC válida
 
     console.log("Sensores disponibles:", availableSensors.value); // Depuración
   } catch (error) {
