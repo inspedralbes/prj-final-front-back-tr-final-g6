@@ -1,159 +1,93 @@
 <template>
-    <div 
-      class="info-card" 
-      :style="{ top: position.y + 'px', left: position.x + 'px' }"
-    >
-      <div class="info-card-content">
-        <div class="info-card-header">
-          <h3 class="info-card-title">{{ title || 'Informació del Sensor' }}</h3>
-          <button @click="$emit('close')" class="close-btn">
-            <i class="fas fa-times"></i>
-          </button>
+    <div class="info-card" :style="{ top: position.y + 'px', left: position.x + 'px', transform: 'translate(-50%, -100%)' }">
+        <div class="info-content">
+            <div v-for="(item, index) in parsedInfo" :key="index" class="info-item">
+                <i v-if="item.icon" :class="item.icon"></i>
+                <span>{{ item.text }}</span>
+            </div>
         </div>
-        
-        <div class="info-card-body">
-          <p>{{ info }}</p>
-          
-          <div v-if="sensorData" class="sensor-stats">
-            <div class="sensor-stat">
-              <span class="stat-label">Temperatura:</span>
-              <span class="stat-value">{{ formatValue(sensorData.temperatura, 'temperatura') }}</span>
-            </div>
-            <div class="sensor-stat">
-              <span class="stat-label">Humitat:</span>
-              <span class="stat-value">{{ formatValue(sensorData.humitat, 'humitat') }}</span>
-            </div>
-            <div class="sensor-stat">
-              <span class="stat-label">Volum:</span>
-              <span class="stat-value">{{ formatValue(sensorData.volum, 'volum') }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        <button @click="$emit('close')" class="close-btn">Tanca</button>
     </div>
-  </template>
-  
-  <script setup>
-  import { defineProps, defineEmits } from 'vue';
-  
-  const props = defineProps({
+</template>
+
+<script setup>
+import { defineProps, computed } from 'vue';
+
+const props = defineProps({
     info: {
-      type: String,
-      required: true
+        type: String,
+        required: true,
+        default: 'Informació no disponible'
     },
     position: {
-      type: Object,
-      required: true,
-      default: () => ({ x: 0, y: 0 })
-    },
-    title: {
-      type: String,
-      default: ''
-    },
-    sensorData: {
-      type: Object,
-      default: null
+        type: Object,
+        required: true,
+        default: () => ({ x: 0, y: 0 })
     }
-  });
-  
-  defineEmits(['close']);
-  
-  const formatValue = (value, type) => {
-    if (value === undefined || value === null) return 'N/D';
-    
-    const formattedValue = Number(value).toFixed(2);
-    
-    switch (type) {
-      case 'temperatura':
-        return `${formattedValue}°C`;
-      case 'humitat':
-        return `${formattedValue}ppm`;
-      case 'volum':
-        return `${formattedValue}dB`;
-      default:
-        return formattedValue;
-    }
-  };
-  </script>
-  
-  <style scoped>
-  .info-card {
+});
+
+const parsedInfo = computed(() => {
+    const parts = props.info.split(' - ');
+    return parts.map(part => {
+        if (part.includes('Temperatura')) {
+            return { text: part.replace('Temperatura', 'Temperatura'), icon: 'fas fa-thermometer-half' };
+        } else if (part.includes('Humitat')) {
+            return { text: part.replace('Humitat', 'Humitat'), icon: 'fas fa-tint' };
+        } else if (part.includes('Volum')) {
+            return { text: part.replace('Volum', 'Volum'), icon: 'fas fa-volume-up' };
+        } else if (part.includes('Informació no disponible')) {
+            return { text: 'Informació no disponible' };
+        }
+        return { text: part };
+    });
+});
+</script>
+
+<style scoped>
+.info-card {
     position: absolute;
-    z-index: 10;
-    pointer-events: all;
-  }
-  
-  .info-card-content {
-    min-width: 300px;
     padding: 20px;
     background-color: rgba(0, 0, 0, 0.8);
+    color: white;
     border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(20, 184, 166, 0.5);
-    color: white;
-    backdrop-filter: blur(10px);
-  }
-  
-  .info-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  
-  .info-card-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: rgb(94, 234, 212);
-    margin: 0;
-  }
-  
-  .close-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-    padding: 0;
-    height: 24px;
-    width: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: all 0.2s;
-  }
-  
-  .close-btn:hover {
-    background-color: rgba(239, 68, 68, 0.2);
-    color: rgb(239, 68, 68);
-  }
-  
-  .info-card-body {
-    font-size: 0.95rem;
-  }
-  
-  .sensor-stats {
-    margin-top: 16px;
+    min-width: 200px;
+    max-width: 300px;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.info-content {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    background-color: rgba(51, 65, 85, 0.5);
-    padding: 12px;
-    border-radius: 6px;
-  }
-  
-  .sensor-stat {
+}
+
+.info-item {
     display: flex;
-    justify-content: space-between;
-  }
-  
-  .stat-label {
-    color: rgb(148, 163, 184);
-    font-weight: 500;
-  }
-  
-  .stat-value {
-    font-weight: 600;
-  }
-  </style>
+    align-items: center;
+    gap: 8px;
+}
+
+.info-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.close-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ff4444;
+}
+</style>
