@@ -98,8 +98,8 @@
                 <i class="fas fa-times"></i>
               </button>
               <div class="text-white text-lg font-semibold mb-2 flex items-center justify-between">
-                <span>{{ popup.text }}</span>
-                <span class="text-sm text-gray-400">ID: {{ popup.id }}</span>
+                <span>{{ popup.text || popup.nombre }}</span>
+                <span class="text-sm text-gray-400">ID: {{ popup.id || popup.idSensor }}</span>
               </div>
 
               <div v-if="lastSensorValues[popup.idAula || popup.id]">
@@ -124,44 +124,33 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div v-if="availableSensors.length > 0" class="debug-info p-4 bg-gray-800 text-white">
-      <h3 class="font-bold">Debug Info:</h3>
-      <div>Planta seleccionada: {{ plantaSeleccionada }}</div>
-      <div>Sensores disponibles: {{ availableSensors.length }}</div>
-      <div v-for="sensor in availableSensors" :key="sensor.idSensor">
-        {{ sensor.nombre }} - Planta: {{ sensor.planta }} - Aula: {{ sensor.idAula }}
-      </div>
-    </div>
-
-    <!-- Selector de sensors actius -->
-    <div v-if="showPopupForm">
-      <div v-for="sensor in availableSensors" :key="sensor.idSensor" @click="selectSensor(sensor)">
-        {{ sensor.nombre }} ({{ sensor.mac }}) - {{ sensor.ubicacion }}
-      </div>
-    </div>
-    <!-- Llista de sensors actius -->
-    <div class="space-y-2 max-h-[400px] overflow-y-auto mb-4">
-      <div v-for="sensor in availableSensors" :key="sensor.idSensor" @click="selectSensor(sensor)"
-        class="p-4 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
-        <div class="flex justify-between items-center text-white">
-          <div>
-            <div class="font-semibold">{{ sensor.nombre }}</div>
-            <div class="text-sm text-gray-400">MAC: {{ sensor.mac }}</div>
-            <div class="text-sm text-gray-400">Ubicació: {{ sensor.ubicacion }}</div>
+      <!-- Listado de todos los sensores -->
+      <div v-if="isAddingPopup && availableSensors.length > 0" class="bg-slate-800 rounded-lg p-6 shadow-lg mb-6">
+        <h2 class="text-xl font-semibold text-white mb-4">Tots els sensors disponibles</h2>
+        <div class="space-y-2 max-h-[400px] overflow-y-auto">
+          <div v-for="sensor in availableSensors" :key="sensor.idSensor" @click="selectSensor(sensor)"
+            class="p-4 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
+            <div class="flex justify-between items-center text-white">
+              <div>
+                <div class="font-semibold">{{ sensor.nombre }}</div>
+                <div class="text-sm text-gray-400">MAC: {{ sensor.mac }}</div>
+                <div class="text-sm text-gray-400">Ubicació: {{ sensor.ubicacion }}</div>
+                <div class="text-sm text-gray-400">ID: {{ sensor.idSensor }}</div>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
           </div>
-          <i class="fas fa-chevron-right text-gray-400"></i>
+        </div>
+
+        <!-- Botó per cancel·lar -->
+        <div class="flex justify-end mt-4">
+          <button @click="cancelNewPopup"
+            class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-red-700 hover:scale-[1.02]">
+            <i class="fas fa-times mr-2"></i>Cancel·lar
+          </button>
         </div>
       </div>
-    </div>
-
-    <!-- Botó per cancel·lar -->
-    <div class="flex justify-end">
-      <button @click="cancelNewPopup"
-        class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-red-700 hover:scale-[1.02]">
-        <i class="fas fa-times mr-2"></i>Cancel·lar
-      </button>
     </div>
   </div>
 </template>
@@ -172,7 +161,6 @@ import Header from "../components/header.vue";
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "~/stores/userStore";
-import Dropdown from "primevue/dropdown";
 import { getUltimsSensorsAula } from "~/utils/communicationManager";
 
 import Mapaplanta1 from "~/components/Plantes/MapaPlanta-1.vue";
@@ -184,51 +172,46 @@ import MapaPlantaSubterranea from "~/components/Plantes/MapaPlantaSubterranea.vu
 const plantas = ["PLANTA BAJA", "PLANTA 1", "PLANTA 2", "PLANTA 3", "PLANTA SUBTERRANEA"];
 const plantaSeleccionada = ref("PLANTA 1");
 const aulaData = ref([]);
-const fetchDataText = ref("");
 const selectedSensorType = ref("temperatura");
 
+// Datos de sensores
+const availableSensors = ref([]);
+const activeSensors = ref([]);
+const lastSensorValues = ref({});
+const customPopups = ref([]);
+const showingPopupId = ref(null);
+const isAddingPopup = ref(false);
+const isDeletingPopup = ref(false);
+const tempPopupPosition = ref(null);
+
+// Helper functions
 const getSensorLabel = () => {
   switch (selectedSensorType.value) {
-    case 'temperatura':
-      return 'Temperatura';
-    case 'humitat':
-      return 'Humitat';
-    case 'volum':
-      return 'Volum';
-    default:
-      return '';
+    case 'temperatura': return 'Temperatura';
+    case 'humitat': return 'Humitat';
+    case 'volum': return 'Volum';
+    default: return '';
   }
 };
 
 const getSensorValue = (sensorData) => {
   if (!sensorData) return 'N/D';
-
   const value = sensorData[selectedSensorType.value]?.average;
   if (value === undefined) return 'N/D';
 
   const formattedValue = Number(value).toFixed(2);
   switch (selectedSensorType.value) {
-    case 'temperatura':
-      return `${formattedValue}°C`;
-    case 'humitat':
-      return `${formattedValue}ppm`;
-    case 'volum':
-      return `${formattedValue}dB`;
-    default:
-      return formattedValue;
+    case 'temperatura': return `${formattedValue}°C`;
+    case 'humitat': return `${formattedValue}ppm`;
+    case 'volum': return `${formattedValue}dB`;
+    default: return formattedValue;
   }
 };
 
-const lastSensorValues = ref({}); // Guarda els últims valors per sensor
-
-// Estat per als pop-ups personalitzats
-const activeSensors = ref([]);
-const customPopups = ref([]);
-const showingPopupId = ref(null);
-const isAddingPopup = ref(false);
-const isDeletingPopup = ref(false);
-
+// Cargar sensores al montar el componente
 onMounted(async () => {
+  await fetchData();
+  
   const savedSensors = localStorage.getItem("activeSensors");
   if (savedSensors) {
     try {
@@ -236,57 +219,34 @@ onMounted(async () => {
     } catch (e) {
       activeSensors.value = [];
     }
-  } else {
-    try {
-      const data = await getAllSensors();
-      // Asigna todos los sensores tal cual, sin filtrar
-      activeSensors.value = data;
-    } catch (error) {
-      activeSensors.value = [];
-    }
   }
-});
-
-const showPopupForm = ref(false);
-const newPopupText = ref("");
-const tempPopupPosition = ref(null);
-
-// Carregar pop-ups guardats a l'inici (si uses customPopups)
-onMounted(() => {
+  
   const savedPopups = localStorage.getItem("customMapPopups");
   if (savedPopups) {
     customPopups.value = JSON.parse(savedPopups);
-  } else {
-    customPopups.value = [];
   }
 });
 
-// Guardar sensors actius en localStorage quan canviïn
-watch(
-  activeSensors,
-  (newSensors) => {
-    localStorage.setItem("activeSensors", JSON.stringify(newSensors));
-  },
-  { deep: true }
-);
-
-const filteredPopups = computed(() => {
-  return activeSensors.value.filter((sensor) => {
-    if (!sensor.planta) return false;
-    return sensor.planta.toUpperCase() === plantaSeleccionada.value.toUpperCase();
-  });
-});
-
-const deletePopup = (id) => {
-  activeSensors.value = activeSensors.value.filter(
-    (sensor) => sensor.id !== id && sensor.idSensor !== id
-  );
-  customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
+// Cargar todos los sensores disponibles
+const loadAvailableSensors = async () => {
+  try {
+    const data = await getAllSensors();
+    availableSensors.value = data;
+    console.log("Sensores cargados:", data);
+  } catch (error) {
+    console.error("Error al cargar sensores:", error);
+    availableSensors.value = [];
+  }
 };
 
-const togglePopupMode = () => {
+// Manejo de popups
+const togglePopupMode = async () => {
   isAddingPopup.value = !isAddingPopup.value;
   isDeletingPopup.value = false;
+  
+  if (isAddingPopup.value) {
+    await loadAvailableSensors();
+  }
 };
 
 const toggleDeleteMode = () => {
@@ -294,7 +254,7 @@ const toggleDeleteMode = () => {
   isAddingPopup.value = false;
 };
 
-const handleMapClick = async (event) => {
+const handleMapClick = (event) => {
   if (!isAddingPopup.value) return;
 
   const mapContent = event.currentTarget;
@@ -303,29 +263,6 @@ const handleMapClick = async (event) => {
   const y = event.clientY - rect.top;
 
   tempPopupPosition.value = { x, y };
-  await loadAvailableSensors();
-  showPopupForm.value = true;
-};
-
-const availableSensors = ref([]);
-
-const loadAvailableSensors = async () => {
-  try {
-    const data = await getAllSensors();
-    console.log("Datos de sensores recibidos:", data);
-
-    availableSensors.value = data.map(sensor => ({
-      ...sensor,
-      // Asegúrate de que las coordenadas sean números
-      x: Number(sensor.x),
-      y: Number(sensor.y)
-    }));
-
-    console.log("Sensores disponibles procesados:", availableSensors.value);
-  } catch (error) {
-    console.error("Error al cargar sensores:", error);
-    availableSensors.value = [];
-  }
 };
 
 const selectSensor = (sensor) => {
@@ -335,7 +272,6 @@ const selectSensor = (sensor) => {
     ...sensor,
     x: tempPopupPosition.value.x,
     y: tempPopupPosition.value.y,
-    // Asegúrate de que la planta esté definida
     planta: sensor.planta || plantaSeleccionada.value,
     temperatura: sensor.temperatura || 0,
     humitat: sensor.humitat || 0,
@@ -344,15 +280,26 @@ const selectSensor = (sensor) => {
 
   activeSensors.value.push(newSensor);
   cancelNewPopup();
-  isAddingPopup.value = false;
-  showingPopupId.value = sensor.idSensor || sensor.id;
 };
 
 const cancelNewPopup = () => {
-  showPopupForm.value = false;
-  newPopupText.value = "";
+  isAddingPopup.value = false;
   tempPopupPosition.value = null;
 };
+
+const deletePopup = (id) => {
+  activeSensors.value = activeSensors.value.filter(
+    (sensor) => sensor.id !== id && sensor.idSensor !== id
+  );
+  customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
+};
+
+const filteredPopups = computed(() => {
+  return activeSensors.value.filter((sensor) => {
+    if (!sensor.planta) return false;
+    return sensor.planta.toUpperCase() === plantaSeleccionada.value.toUpperCase();
+  });
+});
 
 const getMarkerColor = (popup) => {
   if (!lastSensorValues.value[popup.idAula || popup.id]) {
@@ -374,77 +321,26 @@ const getMarkerColor = (popup) => {
       if (value > 25) return "bg-red-500";
       if (value > 20) return "bg-yellow-500";
       return "bg-green-500";
-
     case 'humitat':
       if (value > 800) return "bg-red-500";
       if (value > 600) return "bg-yellow-500";
       return "bg-green-500";
-
     case 'volum':
       if (value > 80) return "bg-red-500";
       if (value > 60) return "bg-yellow-500";
       return "bg-green-500";
-
     default:
       return "bg-gray-500";
   }
-};
-
-const getSensorRange = (type) => {
-  switch (type) {
-    case "temperature":
-      return { low: 15, medium: 25, high: 30 };
-    case "humetat":
-      return { low: 400, medium: 1000, high: 2000 };
-    case "volume":
-      return { low: 40, medium: 60, high: 80 };
-    default:
-      return { low: 0, medium: 50, high: 100 };
-  }
-};
-
-const getSensorStatusColorByValue = (value, type) => {
-  const range = getSensorRange(type);
-
-  if (value >= range.high) {
-    return "bg-red-500";
-  } else if (value >= range.medium) {
-    return "bg-yellow-500";
-  } else {
-    return "bg-green-500";
-  }
-};
-
-const getSensorStatusColorByType = (popup) => {
-  const value = popup[selectedSensorType.value];
-  return getSensorStatusColorByValue(value, selectedSensorType.value);
-};
-
-const getPopupPosition = (popup) => {
-  const mapContainer = document.querySelector(".map-content");
-  if (!mapContainer) return { class: "" };
-
-  const mapRect = mapContainer.getBoundingClientRect();
-  const centerX = mapRect.width / 2;
-  const centerY = mapRect.height / 2;
-
-  const isLeft = popup.x < centerX;
-  const isTop = popup.y < centerY;
-
-  return {
-    class: `popup-${isTop ? "bottom" : "top"}-${isLeft ? "right" : "left"}`,
-  };
 };
 
 const handlePopupClick = async (popup) => {
   if (isDeletingPopup.value) {
     deletePopup(popup.id);
   } else {
-    showingPopupId.value = popup.id;
-    // Carregar últims valors només si no estan ja carregats
+    showingPopupId.value = popup.id || popup.idSensor;
     if (!lastSensorValues.value[popup.idAula || popup.id]) {
       try {
-        // popup.idAula o popup.id segons la teva estructura
         const data = await getUltimsSensorsAula(popup.idAula || popup.id);
         lastSensorValues.value[popup.idAula || popup.id] = data;
       } catch (e) {
@@ -453,6 +349,7 @@ const handlePopupClick = async (popup) => {
     }
   }
 };
+
 const fetchData = async () => {
   try {
     const bodyRequest = {
@@ -460,11 +357,10 @@ const fetchData = async () => {
       data: "2025-02-10",
       tipus: "volum",
     };
-
     const response = await getMapa(bodyRequest);
     aulaData.value = response;
   } catch (error) {
-    // Gestió d'error
+    console.error("Error al cargar datos del mapa:", error);
   }
 };
 
@@ -472,14 +368,13 @@ const seleccionarPlanta = (planta) => {
   plantaSeleccionada.value = planta;
 };
 
+// Persistencia
+watch(activeSensors, (newSensors) => {
+  localStorage.setItem("activeSensors", JSON.stringify(newSensors));
+}, { deep: true });
+
 const router = useRouter();
 const userStore = useUserStore();
-
-const isAdmin = computed(() => userStore.user?.admin === 1);
-
-onMounted(async () => {
-  await fetchData();
-});
 </script>
 
 <style scoped>

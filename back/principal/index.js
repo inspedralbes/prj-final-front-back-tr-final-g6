@@ -401,32 +401,14 @@ app.get('/api/aules/:id/grafic', (req, res) => {
 });
 
 app.get('/api/sensors', (req, res) => {
-  const query = `
-    SELECT s.*, a.planta 
-    FROM sensor s 
-    LEFT JOIN aula a ON s.idAula = a.id
-  `;
+  const query = 'SELECT * FROM sensor'; // Consulta simple sin JOINs ni filtros
   
   connexioBD.execute(query, (err, results) => {
     if (err) {
-      console.error('Error en la consulta a la base de datos:', err.stack);
-      return res.status(500).send({ message: 'Error en la consulta a la base de datos' });
+      console.error('Error en la consulta:', err);
+      return res.status(500).send({ message: 'Error al obtener sensores' });
     }
-    
-    const plantaMapping = {
-      0: 'PLANTA BAJA',
-      1: 'PLANTA 1',
-      2: 'PLANTA 2',
-      3: 'PLANTA 3',
-      4: 'PLANTA SUBTERRANEA'
-    };
-    
-    const sensorsWithPlanta = results.map(row => ({
-      ...row,
-      planta: plantaMapping[row.planta] || 'PLANTA DESCONOCIDA'
-    }));
-    
-    res.status(200).send(sensorsWithPlanta);
+    res.status(200).send(results);
   });
 });
 
