@@ -401,13 +401,32 @@ app.get('/api/aules/:id/grafic', (req, res) => {
 });
 
 app.get('/api/sensors', (req, res) => {
-  const query = 'SELECT s.*, a.planta FROM sensor s LEFT JOIN aula a ON s.idAula = a.id';
+  const query = `
+    SELECT s.*, a.planta 
+    FROM sensor s 
+    LEFT JOIN aula a ON s.idAula = a.id
+  `;
+  
   connexioBD.execute(query, (err, results) => {
     if (err) {
       console.error('Error en la consulta a la base de datos:', err.stack);
       return res.status(500).send({ message: 'Error en la consulta a la base de datos' });
     }
-    res.status(200).send(results);
+    
+    // Asegúrate de mapear los resultados correctamente
+    const sensorsWithPlanta = results.map(row => ({
+      idSensor: row.idSensor,
+      mac: row.mac,
+      api_key: row.api_key,
+      nombre: row.nombre,
+      ubicacion: row.ubicacion,
+      x: row.x,
+      y: row.y,
+      idAula: row.idAula,
+      planta: row.planta || 'PLANTA 1' // Valor por defecto si es NULL
+    }));
+    
+    res.status(200).send(sensorsWithPlanta);
   });
 });
 

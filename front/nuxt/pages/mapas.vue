@@ -261,10 +261,14 @@ watch(
   { deep: true }
 );
 
-// Filtrar pop-ups per planta seleccionada
 const filteredPopups = computed(() => {
   return activeSensors.value.filter((sensor) => {
-    return sensor.planta === plantaSeleccionada.value;
+    // Convierte ambas a mayúsculas para comparación insensible a mayúsculas/minúsculas
+    const sensorPlanta = (sensor.planta || '').toUpperCase();
+    const selectedPlanta = plantaSeleccionada.value.toUpperCase();
+
+    return sensorPlanta.includes(selectedPlanta) ||
+      selectedPlanta.includes(sensorPlanta);
   });
 });
 
@@ -303,17 +307,20 @@ const availableSensors = ref([]);
 const loadAvailableSensors = async () => {
   try {
     const data = await getAllSensors();
-    console.log("Raw sensors data:", data); // Depuración
+    console.log("Datos de sensores recibidos:", data); // Para depuración
+    
     availableSensors.value = data.map(sensor => ({
       ...sensor,
-      planta: sensor.planta || 'PLANTA 1' // Valor por defecto si no tiene planta
+      planta: sensor.planta || 'PLANTA 1' // Valor por defecto si no existe
     }));
-    console.log("Processed sensors:", availableSensors.value); // Depuración
+    
+    console.log("Sensores disponibles procesados:", availableSensors.value);
   } catch (error) {
     console.error("Error al cargar sensores:", error);
     availableSensors.value = [];
   }
 };
+
 const selectSensor = (sensor) => {
   if (!tempPopupPosition.value) return;
 
