@@ -19,67 +19,45 @@
       <div class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg text-center">
         <h2 class="text-xl font-semibold text-white mb-4">Selecciona una Planta</h2>
         <div class="flex flex-wrap gap-3 justify-center">
-          <button
-            v-for="planta in plantas"
-            :key="planta"
-            @click="seleccionarPlanta(planta)"
-            :class="[
-              'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02]',
-              plantaSeleccionada === planta
-                ? 'bg-teal-600 border-teal-600 text-white'
-                : 'bg-slate-700 border-slate-600 text-white',
-            ]"
-          >
+          <button v-for="planta in plantas" :key="planta" @click="seleccionarPlanta(planta)" :class="[
+            'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02]',
+            plantaSeleccionada === planta
+              ? 'bg-teal-600 border-teal-600 text-white'
+              : 'bg-slate-700 border-slate-600 text-white',
+          ]">
             {{ planta }}
           </button>
         </div>
       </div>
 
-      <div
-        v-if="userStore.user?.admin === 1"
-        class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg"
-      >
+      <div v-if="userStore.user?.admin === 1" class="bg-slate-800 rounded-lg p-6 mb-6 shadow-lg">
         <div class="flex flex-col md:flex-row items-center justify-between gap-4">
           <!-- Botones a la izquierda -->
           <div class="flex flex-wrap gap-3 w-full md:w-auto">
-            <button
-              @click="togglePopupMode"
-              :class="[
-                'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2 shadow-md hover:shadow-teal-500/20',
-                isAddingPopup
-                  ? 'bg-red-600 border-red-600 text-white hover:shadow-red-500/20'
-                  : 'bg-teal-600 border-teal-600 text-white',
-              ]"
-            >
+            <button @click="togglePopupMode" :class="[
+              'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2 shadow-md hover:shadow-teal-500/20',
+              isAddingPopup
+                ? 'bg-red-600 border-red-600 text-white hover:shadow-red-500/20'
+                : 'bg-teal-600 border-teal-600 text-white',
+            ]">
               <i :class="isAddingPopup ? 'fas fa-times' : 'fas fa-microchip'"></i>
               <span>{{ isAddingPopup ? "Cancel·lar" : "Afegir Sensor" }}</span>
             </button>
-            <button
-              v-if="customPopups.length > 0"
-              @click="toggleDeleteMode"
-              :class="[
-                'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2 shadow-md hover:shadow-amber-500/20',
-                isDeletingPopup
-                  ? 'bg-emerald-600 border-emerald-600 text-white hover:shadow-emerald-500/20'
-                  : 'bg-amber-600 border-amber-600 text-white',
-              ]"
-            >
+            <button v-if="customPopups.length > 0" @click="toggleDeleteMode" :class="[
+              'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2 shadow-md hover:shadow-amber-500/20',
+              isDeletingPopup
+                ? 'bg-emerald-600 border-emerald-600 text-white hover:shadow-emerald-500/20'
+                : 'bg-amber-600 border-amber-600 text-white',
+            ]">
               <i :class="isDeletingPopup ? 'fas fa-check' : 'fas fa-trash'"></i>
               <span>{{ isDeletingPopup ? "Finalitzar Esborrat" : "Esborrar Sensor" }}</span>
             </button>
           </div>
 
           <div class="flex items-center gap-4 rounded-lg px-5 py-3 w-full md:w-auto">
-            <label
-              for="dataType"
-              class="text-white whitespace-nowrap text-base font-semibold"
-              >Tipus de dada:</label
-            >
-            <select
-              id="dataType"
-              v-model="selectedSensorType"
-              class="bg-slate-800 border-2 border-slate-600 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-base hover:border-slate-500 transition-colors"
-            >
+            <label for="dataType" class="text-white whitespace-nowrap text-base font-semibold">Tipus de dada:</label>
+            <select id="dataType" v-model="selectedSensorType"
+              class="bg-slate-800 border-2 border-slate-600 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-base hover:border-slate-500 transition-colors">
               <option value="temperatura">Temperatura</option>
               <option value="humitat">Humitat</option>
               <option value="volum">Volum</option>
@@ -90,82 +68,43 @@
 
       <!-- Map Container -->
       <div class="bg-slate-800 rounded-lg p-2 shadow-lg mb-6">
-        <div
-          class="relative w-full h-[65vh] min-h-[600px] rounded-xl overflow-hidden border-2 border-slate-700"
-          @click="handleMapClick"
-          :style="{ cursor: isAddingPopup ? 'crosshair' : 'default' }"
-        >
-          <Mapaplanta1
-            v-if="plantaSeleccionada === 'PLANTA 1'"
-            :aulaData="aulaData"
-            imageUrl="/planos/planta1.png"
-          />
-          <Mapaplanta2
-            v-if="plantaSeleccionada === 'PLANTA 2'"
-            :aulaData="aulaData"
-            imageUrl="/planos/planta2.png"
-          />
-          <Mapaplanta3
-            v-if="plantaSeleccionada === 'PLANTA 3'"
-            :aulaData="aulaData"
-            imageUrl="/planos/planta3.png"
-          />
-          <MapaPlantaBaixa
-            v-if="plantaSeleccionada === 'PLANTA BAJA'"
-            :aulaData="aulaData"
-            imageUrl="/planos/plantabaja.png"
-          />
-          <MapaPlantaSubterranea
-            v-if="plantaSeleccionada === 'PLANTA SUBTERRANEA'"
-            :aulaData="aulaData"
-            imageUrl="/planos/plantasubterranea.png"
-          />
+        <div class="relative w-full h-[65vh] min-h-[600px] rounded-xl overflow-hidden border-2 border-slate-700"
+          @click="handleMapClick" :style="{ cursor: isAddingPopup ? 'crosshair' : 'default' }">
+          <Mapaplanta1 v-if="plantaSeleccionada === 'PLANTA 1'" :aulaData="aulaData" imageUrl="/planos/planta1.png" />
+          <Mapaplanta2 v-if="plantaSeleccionada === 'PLANTA 2'" :aulaData="aulaData" imageUrl="/planos/planta2.png" />
+          <Mapaplanta3 v-if="plantaSeleccionada === 'PLANTA 3'" :aulaData="aulaData" imageUrl="/planos/planta3.png" />
+          <MapaPlantaBaixa v-if="plantaSeleccionada === 'PLANTA BAJA'" :aulaData="aulaData"
+            imageUrl="/planos/plantabaja.png" />
+          <MapaPlantaSubterranea v-if="plantaSeleccionada === 'PLANTA SUBTERRANEA'" :aulaData="aulaData"
+            imageUrl="/planos/plantasubterranea.png" />
 
           <!-- Pop-ups personalitzats -->
-          <div
-            v-for="popup in filteredPopups"
-            :key="popup.id"
-            :style="{ left: popup.x + 'px', top: popup.y + 'px' }"
-            class="custom-popup absolute"
-          >
+          <div v-for="popup in filteredPopups" :key="popup.id" :style="{ left: popup.x + 'px', top: popup.y + 'px' }"
+            class="custom-popup absolute">
             <!-- Punt indicador -->
-            <div
-              :class="[
-                'marker-point w-8 h-8 rounded-full absolute -top-4 -left-4 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200 bg-gradient-to-r',
-                getMarkerColor(popup),
-              ]"
-              @click.stop="
-                isDeletingPopup ? deletePopup(popup.id) : handlePopupClick(popup)
-              "
-            >
+            <div :class="[
+              'marker-point w-8 h-8 rounded-full absolute -top-4 -left-4 border-4 border-white cursor-pointer flex items-center justify-center text-xl shadow-xl hover:scale-110 transition-transform duration-200 bg-gradient-to-r',
+              getMarkerColor(popup),
+            ]" @click.stop="
+              isDeletingPopup ? deletePopup(popup.id) : handlePopupClick(popup)
+              ">
               <i class="fas fa-map-marker-alt text-white"></i>
             </div>
             <!-- Contingut del popup -->
-            <div
-              v-if="showingPopupId === popup.id"
-              class="popup-content bg-slate-700/90 border-2 border-teal-500 rounded-xl p-8 shadow-2xl min-w-[400px] relative animate-fadeIn overflow-hidden"
-            >
-              <button
-                @click="showingPopupId = null"
-                class="delete-btn absolute -top-4 -right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-lg hover:bg-red-700 transition-all"
-              >
+            <div v-if="showingPopupId === popup.id"
+              class="popup-content bg-slate-700/90 border-2 border-teal-500 rounded-xl p-8 shadow-2xl min-w-[400px] relative animate-fadeIn overflow-hidden">
+              <button @click="showingPopupId = null"
+                class="delete-btn absolute -top-4 -right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-lg hover:bg-red-700 transition-all">
                 <i class="fas fa-times"></i>
               </button>
-              <div
-                class="text-white text-lg font-semibold mb-2 flex items-center justify-between"
-              >
+              <div class="text-white text-lg font-semibold mb-2 flex items-center justify-between">
                 <span>{{ popup.text }}</span>
                 <span class="text-sm text-gray-400">ID: {{ popup.id }}</span>
               </div>
 
               <div v-if="lastSensorValues[popup.idAula || popup.id]">
-                <div
-                  v-if="!lastSensorValues[popup.idAula || popup.id].error"
-                  class="mt-4"
-                >
-                  <div
-                    class="flex items-center justify-between p-4 bg-slate-800/70 rounded-lg"
-                  >
+                <div v-if="!lastSensorValues[popup.idAula || popup.id].error" class="mt-4">
+                  <div class="flex items-center justify-between p-4 bg-slate-800/70 rounded-lg">
                     <span class="text-sm text-white">{{ getSensorLabel() }}</span>
                     <span class="text-2xl font-bold text-white">
                       {{
@@ -177,11 +116,8 @@
                 <div v-else class="mt-4 text-red-500">Error en carregar les dades</div>
               </div>
 
-              <button
-                v-if="isDeletingPopup"
-                @click.stop="deletePopup(popup.id)"
-                class="delete-btn absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
-              >
+              <button v-if="isDeletingPopup" @click.stop="deletePopup(popup.id)"
+                class="delete-btn absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600">
                 <i class="fas fa-times text-xs"></i>
               </button>
             </div>
@@ -191,44 +127,32 @@
     </div>
 
     <!-- Selector de sensors actius -->
-    <div
-      v-if="showPopupForm"
-      class="popup-form fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-    >
-      <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 max-w-md w-full">
-        <div class="form-header text-xl font-bold text-white mb-4">
-          Selecciona Sensor
-        </div>
-
-        <!-- Llista de sensors actius -->
-        <div class="space-y-2 max-h-[400px] overflow-y-auto mb-4">
-          <div
-            v-for="sensor in availableSensors"
-            :key="sensor.idSensor"
-            @click="selectSensor(sensor)"
-            class="p-4 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors"
-          >
-            <div class="flex justify-between items-center text-white">
-              <div>
-                <div class="font-semibold">{{ sensor.nombre }}</div>
-                <div class="text-sm text-gray-400">MAC: {{ sensor.mac }}</div>
-                <div class="text-sm text-gray-400">Ubicació: {{ sensor.ubicacion }}</div>
-              </div>
-              <i class="fas fa-chevron-right text-gray-400"></i>
-            </div>
+    <div v-if="showPopupForm">
+      <div v-for="sensor in availableSensors" :key="sensor.idSensor" @click="selectSensor(sensor)">
+        {{ sensor.nombre }} ({{ sensor.mac }}) - {{ sensor.ubicacion }}
+      </div>
+    </div>
+    <!-- Llista de sensors actius -->
+    <div class="space-y-2 max-h-[400px] overflow-y-auto mb-4">
+      <div v-for="sensor in availableSensors" :key="sensor.idSensor" @click="selectSensor(sensor)"
+        class="p-4 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
+        <div class="flex justify-between items-center text-white">
+          <div>
+            <div class="font-semibold">{{ sensor.nombre }}</div>
+            <div class="text-sm text-gray-400">MAC: {{ sensor.mac }}</div>
+            <div class="text-sm text-gray-400">Ubicació: {{ sensor.ubicacion }}</div>
           </div>
-        </div>
-
-        <!-- Botó per cancel·lar -->
-        <div class="flex justify-end">
-          <button
-            @click="cancelNewPopup"
-            class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-red-700 hover:scale-[1.02]"
-          >
-            <i class="fas fa-times mr-2"></i>Cancel·lar
-          </button>
+          <i class="fas fa-chevron-right text-gray-400"></i>
         </div>
       </div>
+    </div>
+
+    <!-- Botó per cancel·lar -->
+    <div class="flex justify-end">
+      <button @click="cancelNewPopup"
+        class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-red-700 hover:scale-[1.02]">
+        <i class="fas fa-times mr-2"></i>Cancel·lar
+      </button>
     </div>
   </div>
 </template>
@@ -269,10 +193,10 @@ const getSensorLabel = () => {
 
 const getSensorValue = (sensorData) => {
   if (!sensorData) return 'N/D';
-  
+
   const value = sensorData[selectedSensorType.value]?.average;
   if (value === undefined) return 'N/D';
-  
+
   const formattedValue = Number(value).toFixed(2);
   switch (selectedSensorType.value) {
     case 'temperatura':
@@ -306,13 +230,8 @@ onMounted(async () => {
   } else {
     try {
       const data = await getAllSensors();
-      // Quita el filtro aquí:
-      activeSensors.value = data.map((sensor) => ({
-        ...sensor,
-        temperatura: sensor.temperatura || 0,
-        humitat: sensor.humatat || 0,
-        volum: sensor.volum || 0,
-      }));
+      // Asigna todos los sensores tal cual, sin filtrar
+      activeSensors.value = data;
     } catch (error) {
       activeSensors.value = [];
     }
@@ -383,13 +302,9 @@ const availableSensors = ref([]);
 
 const loadAvailableSensors = async () => {
   try {
-    const data = await getAllSensors(); // Obtener todos los sensores de la base de datos
-    console.log("Sensores recibidos:", data);
-
-    // Mostrar todos los sensores sin filtrar
-    availableSensors.value = data; // Elimina cualquier filtro
-
-    console.log("Sensores disponibles:", availableSensors.value); // Depuración
+    const data = await getAllSensors();
+    availableSensors.value = data; // Sin filtro
+    console.log("Sensores disponibles:", availableSensors.value);
   } catch (error) {
     console.error("Error al cargar sensores:", error);
     availableSensors.value = [];
@@ -441,17 +356,17 @@ const getMarkerColor = (popup) => {
       if (value > 25) return "bg-red-500";
       if (value > 20) return "bg-yellow-500";
       return "bg-green-500";
-    
+
     case 'humitat':
       if (value > 800) return "bg-red-500";
       if (value > 600) return "bg-yellow-500";
       return "bg-green-500";
-    
+
     case 'volum':
       if (value > 80) return "bg-red-500";
       if (value > 60) return "bg-yellow-500";
       return "bg-green-500";
-    
+
     default:
       return "bg-gray-500";
   }
@@ -624,7 +539,7 @@ onMounted(async () => {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(45deg, rgba(0,255,0,0.1), rgba(255,0,0,0.1));
+  background: linear-gradient(45deg, rgba(0, 255, 0, 0.1), rgba(255, 0, 0, 0.1));
   opacity: 0.6;
   z-index: 0;
   filter: blur(20px);
@@ -633,20 +548,22 @@ onMounted(async () => {
 
 @keyframes temperatureGradient {
   0% {
-    background: linear-gradient(45deg, rgba(0,255,0,0.2), rgba(255,255,0,0.2));
+    background: linear-gradient(45deg, rgba(0, 255, 0, 0.2), rgba(255, 255, 0, 0.2));
     transform: scale(1);
   }
+
   50% {
-    background: linear-gradient(45deg, rgba(255,255,0,0.2), rgba(255,0,0,0.2));
+    background: linear-gradient(45deg, rgba(255, 255, 0, 0.2), rgba(255, 0, 0, 0.2));
     transform: scale(1.05);
   }
+
   100% {
-    background: linear-gradient(45deg, rgba(0,255,0,0.2), rgba(255,255,0,0.2));
+    background: linear-gradient(45deg, rgba(0, 255, 0, 0.2), rgba(255, 255, 0, 0.2));
     transform: scale(1);
   }
 }
 
-.popup-content > * {
+.popup-content>* {
   position: relative;
   z-index: 1;
 }
@@ -679,45 +596,141 @@ onMounted(async () => {
 }
 
 @keyframes markerGradientHot {
-  0% { background: linear-gradient(0deg, #ef4444, #dc2626); }
-  10% { background: linear-gradient(36deg, #ef4444, #b91c1c); }
-  20% { background: linear-gradient(72deg, #dc2626, #ef4444); }
-  30% { background: linear-gradient(108deg, #b91c1c, #dc2626); }
-  40% { background: linear-gradient(144deg, #ef4444, #b91c1c); }
-  50% { background: linear-gradient(180deg, #dc2626, #ef4444); }
-  60% { background: linear-gradient(216deg, #b91c1c, #dc2626); }
-  70% { background: linear-gradient(252deg, #ef4444, #b91c1c); }
-  80% { background: linear-gradient(288deg, #dc2626, #ef4444); }
-  90% { background: linear-gradient(324deg, #b91c1c, #dc2626); }
-  100% { background: linear-gradient(360deg, #ef4444, #dc2626); }
+  0% {
+    background: linear-gradient(0deg, #ef4444, #dc2626);
+  }
+
+  10% {
+    background: linear-gradient(36deg, #ef4444, #b91c1c);
+  }
+
+  20% {
+    background: linear-gradient(72deg, #dc2626, #ef4444);
+  }
+
+  30% {
+    background: linear-gradient(108deg, #b91c1c, #dc2626);
+  }
+
+  40% {
+    background: linear-gradient(144deg, #ef4444, #b91c1c);
+  }
+
+  50% {
+    background: linear-gradient(180deg, #dc2626, #ef4444);
+  }
+
+  60% {
+    background: linear-gradient(216deg, #b91c1c, #dc2626);
+  }
+
+  70% {
+    background: linear-gradient(252deg, #ef4444, #b91c1c);
+  }
+
+  80% {
+    background: linear-gradient(288deg, #dc2626, #ef4444);
+  }
+
+  90% {
+    background: linear-gradient(324deg, #b91c1c, #dc2626);
+  }
+
+  100% {
+    background: linear-gradient(360deg, #ef4444, #dc2626);
+  }
 }
 
 @keyframes markerGradientWarm {
-  0% { background: linear-gradient(0deg, #eab308, #f59e0b); }
-  10% { background: linear-gradient(36deg, #f59e0b, #d97706); }
-  20% { background: linear-gradient(72deg, #d97706, #eab308); }
-  30% { background: linear-gradient(108deg, #eab308, #f59e0b); }
-  40% { background: linear-gradient(144deg, #f59e0b, #d97706); }
-  50% { background: linear-gradient(180deg, #d97706, #eab308); }
-  60% { background: linear-gradient(216deg, #eab308, #f59e0b); }
-  70% { background: linear-gradient(252deg, #f59e0b, #d97706); }
-  80% { background: linear-gradient(288deg, #d97706, #eab308); }
-  90% { background: linear-gradient(324deg, #eab308, #f59e0b); }
-  100% { background: linear-gradient(360deg, #f59e0b, #d97706); }
+  0% {
+    background: linear-gradient(0deg, #eab308, #f59e0b);
+  }
+
+  10% {
+    background: linear-gradient(36deg, #f59e0b, #d97706);
+  }
+
+  20% {
+    background: linear-gradient(72deg, #d97706, #eab308);
+  }
+
+  30% {
+    background: linear-gradient(108deg, #eab308, #f59e0b);
+  }
+
+  40% {
+    background: linear-gradient(144deg, #f59e0b, #d97706);
+  }
+
+  50% {
+    background: linear-gradient(180deg, #d97706, #eab308);
+  }
+
+  60% {
+    background: linear-gradient(216deg, #eab308, #f59e0b);
+  }
+
+  70% {
+    background: linear-gradient(252deg, #f59e0b, #d97706);
+  }
+
+  80% {
+    background: linear-gradient(288deg, #d97706, #eab308);
+  }
+
+  90% {
+    background: linear-gradient(324deg, #eab308, #f59e0b);
+  }
+
+  100% {
+    background: linear-gradient(360deg, #f59e0b, #d97706);
+  }
 }
 
 @keyframes markerGradientCool {
-  0% { background: linear-gradient(0deg, #22c55e, #15803d); }
-  10% { background: linear-gradient(36deg, #15803d, #16a34a); }
-  20% { background: linear-gradient(72deg, #16a34a, #22c55e); }
-  30% { background: linear-gradient(108deg, #22c55e, #15803d); }
-  40% { background: linear-gradient(144deg, #15803d, #16a34a); }
-  50% { background: linear-gradient(180deg, #16a34a, #22c55e); }
-  60% { background: linear-gradient(216deg, #22c55e, #15803d); }
-  70% { background: linear-gradient(252deg, #15803d, #16a34a); }
-  80% { background: linear-gradient(288deg, #16a34a, #22c55e); }
-  90% { background: linear-gradient(324deg, #22c55e, #15803d); }
-  100% { background: linear-gradient(360deg, #15803d, #16a34a); }
+  0% {
+    background: linear-gradient(0deg, #22c55e, #15803d);
+  }
+
+  10% {
+    background: linear-gradient(36deg, #15803d, #16a34a);
+  }
+
+  20% {
+    background: linear-gradient(72deg, #16a34a, #22c55e);
+  }
+
+  30% {
+    background: linear-gradient(108deg, #22c55e, #15803d);
+  }
+
+  40% {
+    background: linear-gradient(144deg, #15803d, #16a34a);
+  }
+
+  50% {
+    background: linear-gradient(180deg, #16a34a, #22c55e);
+  }
+
+  60% {
+    background: linear-gradient(216deg, #22c55e, #15803d);
+  }
+
+  70% {
+    background: linear-gradient(252deg, #15803d, #16a34a);
+  }
+
+  80% {
+    background: linear-gradient(288deg, #16a34a, #22c55e);
+  }
+
+  90% {
+    background: linear-gradient(324deg, #22c55e, #15803d);
+  }
+
+  100% {
+    background: linear-gradient(360deg, #15803d, #16a34a);
+  }
 }
 
 .marker-point::before {
@@ -732,22 +745,22 @@ onMounted(async () => {
 }
 
 .bg-red-500::before {
-  background: radial-gradient(circle at center, rgba(255,0,0,0.4), transparent 70%);
+  background: radial-gradient(circle at center, rgba(255, 0, 0, 0.4), transparent 70%);
 }
 
 .bg-yellow-500::before {
-  background: radial-gradient(circle at center, rgba(255,200,0,0.4), transparent 70%);
+  background: radial-gradient(circle at center, rgba(255, 200, 0, 0.4), transparent 70%);
 }
 
 .bg-green-500::before {
-  background: radial-gradient(circle at center, rgba(0,255,0,0.4), transparent 70%);
+  background: radial-gradient(circle at center, rgba(0, 255, 0, 0.4), transparent 70%);
 }
 
 .marker-point::after {
   content: '';
   position: absolute;
   inset: -4px;
-  background: radial-gradient(circle at center, rgba(255,255,255,0.3), transparent 70%);
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.3), transparent 70%);
   border-radius: 50%;
   filter: blur(4px);
   opacity: 0.4;
@@ -760,10 +773,12 @@ onMounted(async () => {
     transform: scale(1);
     opacity: 0.8;
   }
+
   50% {
     transform: scale(1.8);
     opacity: 0.3;
   }
+
   100% {
     transform: scale(1);
     opacity: 0.8;
