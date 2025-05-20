@@ -303,14 +303,17 @@ const availableSensors = ref([]);
 const loadAvailableSensors = async () => {
   try {
     const data = await getAllSensors();
-    availableSensors.value = data; // Sin filtro
-    console.log("Sensores disponibles:", availableSensors.value);
+    console.log("Raw sensors data:", data); // Depuración
+    availableSensors.value = data.map(sensor => ({
+      ...sensor,
+      planta: sensor.planta || 'PLANTA 1' // Valor por defecto si no tiene planta
+    }));
+    console.log("Processed sensors:", availableSensors.value); // Depuración
   } catch (error) {
     console.error("Error al cargar sensores:", error);
     availableSensors.value = [];
   }
 };
-
 const selectSensor = (sensor) => {
   if (!tempPopupPosition.value) return;
 
@@ -318,7 +321,7 @@ const selectSensor = (sensor) => {
     ...sensor,
     x: tempPopupPosition.value.x,
     y: tempPopupPosition.value.y,
-    planta: plantaSeleccionada.value,
+    planta: sensor.planta || plantaSeleccionada.value, // Usa la planta del sensor o la actual
     temperatura: sensor.temperatura || 0,
     humitat: sensor.humatat || 0,
     volum: sensor.volum || 0,

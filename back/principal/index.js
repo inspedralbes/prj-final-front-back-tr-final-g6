@@ -401,7 +401,7 @@ app.get('/api/aules/:id/grafic', (req, res) => {
 });
 
 app.get('/api/sensors', (req, res) => {
-  const query = 'SELECT * FROM sensor';
+  const query = 'SELECT s.*, a.planta FROM sensor s LEFT JOIN aula a ON s.idAula = a.id';
   connexioBD.execute(query, (err, results) => {
     if (err) {
       console.error('Error en la consulta a la base de datos:', err.stack);
