@@ -1,7 +1,6 @@
-<template>
+<!--<template>
   <div class="min-h-screen bg-slate-900">
     <Header />
-    <!-- Header con gradiente -->
     <div class="bg-gradient-to-r from-teal-800 to-blue-900 py-8">
       <div class="container mx-auto px-4 text-center">
         <div class="w-16 h-16 bg-white/10 rounded-full mx-auto mb-4 flex items-center justify-center">
@@ -12,7 +11,7 @@
       </div>
     </div>
 
-    <!-- Contenido principal -->
+
     <div class="container mx-auto px-4 py-8">
       <v-card class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
         <div class="retro-tabs-container bg-slate-750 border-b border-slate-700 px-4 py-2">
@@ -33,7 +32,7 @@
         </div>
 
         <v-window v-model="activeTab" class="bg-slate-800 pa-6">
-          <!-- Panel de Sonido -->
+
           <v-window-item value="so">
             <v-list class="bg-transparent pa-0 space-y-2">
               <v-list-item
@@ -61,7 +60,6 @@
             </v-list>
           </v-window-item>
 
-          <!-- Panel de Temperatura -->
           <v-window-item value="temperatura">
             <v-list class="bg-transparent pa-0 space-y-2">
               <v-list-item
@@ -84,7 +82,6 @@
             </v-list>
           </v-window-item>
 
-          <!-- Panel de Humedad -->
           <v-window-item value="humitat">
             <v-list class="bg-transparent pa-0 space-y-2">
               <v-list-item
@@ -116,7 +113,6 @@
         </v-window>
       </v-card>
 
-      <!-- Info de actualización -->
       <div class="mt-6 text-center">
         <v-chip
           class="ma-2 pa-4"
@@ -341,3 +337,4 @@ onMounted(async () => {
   animation: glow 3s ease-in-out infinite;
 }
 </style>
+-->
