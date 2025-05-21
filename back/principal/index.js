@@ -401,14 +401,13 @@ app.get('/api/aules/:id/grafic', (req, res) => {
 });
 
 app.get('/api/sensors', (req, res) => {
-  const query = 'SELECT * FROM sensor';
+  const query = 'SELECT * FROM sensor'; // Consulta simple sin JOINs ni filtros
+  
   connexioBD.execute(query, (err, results) => {
     if (err) {
-      console.error('Error en la consulta a la base de dades: ' + err.stack);
-      res.status(500).send('Error en la consulta a la base de dades');
-      return;
+      console.error('Error en la consulta:', err);
+      return res.status(500).send({ message: 'Error al obtener sensores' });
     }
-    console.log('Resultados obtenidos:', results); // Log para depuración
     res.status(200).send(results);
   });
 });

@@ -93,10 +93,10 @@ const props = defineProps({
 
 // Chart data configuration
 const chartData = ref({
-    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+    labels: ['Gen', 'Feb', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Des'],
     datasets: [
         {
-            label: 'Average Volume (dB)',
+            label: 'Volum Mitjà (dB)',
             data: [],
             fill: {
                 target: 'origin',
@@ -113,7 +113,7 @@ const chartData = ref({
             borderWidth: 2
         },
         {
-            label: 'Maximum Volume (dB)',
+            label: 'Volum Màxim (dB)',
             data: [],
             borderColor: '#EF4444',
             backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -125,7 +125,7 @@ const chartData = ref({
             borderDash: [5, 5]
         },
         {
-            label: 'Minimum Volume (dB)',
+            label: 'Volum Mínim (dB)',
             data: [],
             borderColor: '#2196F3',
             backgroundColor: '#2196F3',
@@ -163,7 +163,7 @@ const chartOptions = ref({
         x: {
             title: {
                 display: true,
-                text: 'Month',
+                text: 'Mes',
                 color: '#9CA3AF',
                 font: {
                     size: 12
@@ -181,7 +181,7 @@ const chartOptions = ref({
         y: {
             title: {
                 display: true,
-                text: 'Volume (dB)',
+                text: 'Volum (dB)',
                 color: '#9CA3AF',
                 font: {
                     size: 12

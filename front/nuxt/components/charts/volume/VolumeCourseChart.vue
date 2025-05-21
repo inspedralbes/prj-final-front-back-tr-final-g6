@@ -97,7 +97,7 @@ const chartData = ref({
     labels: [],
     datasets: [
         {
-            label: 'Average Volume (dB)',
+            label: 'Mitjana (dB)',
             data: [],
             fill: {
                 target: 'origin',
@@ -114,7 +114,7 @@ const chartData = ref({
             borderWidth: 2
         },
         {
-            label: 'Maximum Volume (dB)',
+            label: 'Màxim (dB)',
             data: [],
             borderColor: '#EF4444',
             backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -126,7 +126,7 @@ const chartData = ref({
             borderDash: [5, 5]
         },
         {
-            label: 'Minimum Volume (dB)',
+            label: 'Mínim (dB)',
             data: [],
             borderColor: '#2196F3',
             backgroundColor: 'rgba(33, 150, 243, 0.1)',
@@ -164,7 +164,7 @@ const chartOptions = ref({
         x: {
             title: {
                 display: true,
-                text: 'Academic Course',
+                text: 'Curs acadèmic',
                 color: '#9CA3AF',
                 font: {
                     size: 12
@@ -182,7 +182,7 @@ const chartOptions = ref({
         y: {
             title: {
                 display: true,
-                text: 'Volume (dB)',
+                text: 'Volum (dB)',
                 color: '#9CA3AF',
                 font: {
                     size: 12

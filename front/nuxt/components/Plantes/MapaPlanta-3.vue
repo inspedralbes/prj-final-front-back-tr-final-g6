@@ -101,15 +101,19 @@ onMounted(async () => {
 
 <template>
   <div ref="stageRef" class="canvas-container"></div>
-
-  <div
+  
+  <InfoCard
     v-if="mostrarPopup"
-    class="popup"
-    :style="{ top: posicioPopup.y + 'px', left: posicioPopup.x + 'px' }"
-  >
-    <p>{{ infoPopup }}</p>
-    <button @click="tancarPopup" class="close-btn">X</button>
-  </div>
+    :info="infoPopup"
+    :position="posicioPopup"
+    :title="puntActual ? puntActual.info : 'Sensor'"
+    :sensorData="{
+      temperatura: puntActual ? puntActual.temperatura : null,
+      humitat: puntActual ? puntActual.humitat : null,
+      volum: puntActual ? puntActual.volumen : null
+    }"
+    @close="tancarPopup"
+  />
 </template>
 
 <style scoped>
