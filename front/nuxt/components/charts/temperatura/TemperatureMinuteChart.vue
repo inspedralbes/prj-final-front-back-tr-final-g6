@@ -96,7 +96,7 @@ const chartData = ref({
     ],
 });
 
-// Chart options
+// Opcions del gràfic
 const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,

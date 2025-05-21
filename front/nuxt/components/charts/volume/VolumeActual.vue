@@ -109,7 +109,7 @@ const chartData = ref({
     labels: [],
     datasets: [
         {
-            label: 'Volume (dB)', // Updated label to decibels
+            label: 'Volum (dB)', // Updated label to Catalan
             data: [],
             borderColor: '#9CA3AF',
             backgroundColor: 'rgba(0, 0, 0, 0.1)',
@@ -143,7 +143,7 @@ const chartOptions = ref({
             titleColor: '#E5E7EB',
             bodyColor: '#E5E7EB',
             callbacks: {
-                label: (context) => `Volume: ${context.raw} dB` // Updated tooltip to show decibels
+                label: (context) => `Volum: ${context.raw} dB` // Tooltip in Catalan
             }
         }
     },
@@ -172,7 +172,7 @@ const chartOptions = ref({
             },
             title: {
                 display: true,
-                text: 'Volume (dB)', // Updated axis title to decibels
+                text: 'Volum (dB)', // Axis title in Catalan
                 color: '#9CA3AF'
             }
         }

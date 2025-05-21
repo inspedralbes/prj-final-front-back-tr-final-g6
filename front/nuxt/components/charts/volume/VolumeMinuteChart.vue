@@ -77,7 +77,7 @@ const chartData = ref({
     labels: [],
     datasets: [
         {
-            label: 'Volume (dB)',
+            label: 'Volum (dB)',
             data: [],
             fill: {
                 target: 'origin',
@@ -96,7 +96,7 @@ const chartData = ref({
     ],
 });
 
-// Chart options
+// Opcions del gràfic
 const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
@@ -110,7 +110,7 @@ const chartOptions = ref({
             titleColor: '#E5E7EB',
             bodyColor: '#E5E7EB',
             callbacks: {
-                label: (context) => `Volume: ${parseFloat(context.raw).toFixed(2)} dB`
+                label: (context) => `Volum: ${parseFloat(context.raw).toFixed(2)} dB`
             }
         }
     },
@@ -118,7 +118,7 @@ const chartOptions = ref({
         x: {
             title: {
                 display: true,
-                text: 'Time',
+                text: 'Hora',
                 color: '#9CA3AF',
                 font: {
                     size: 12
@@ -130,11 +130,11 @@ const chartOptions = ref({
                 minRotation: 45,
                 autoSkip: false,
                 callback: function (value, index, values) {
-                    // Show only every 5th minute and the last value
+                    // Mostra només cada 5 minuts i l'últim valor
                     const time = this.getLabelForValue(value);
                     const minutes = parseInt(time.split(':')[1], 10);
                     if (index === values.length - 1) {
-                        // Ensure the last value shows the full hour (e.g., 13:00 instead of 12:59)
+                        // Assegura que l'últim valor mostri l'hora completa (ex: 13:00 en comptes de 12:59)
                         const lastHour = parseInt(time.split(':')[0], 10) + (minutes === 59 ? 1 : 0);
                         return `${lastHour.toString().padStart(2, '0')}:00`;
                     }
@@ -148,7 +148,7 @@ const chartOptions = ref({
         y: {
             title: {
                 display: true,
-                text: 'Volume (dB)',
+                text: 'Volum (dB)',
                 color: '#9CA3AF',
                 font: {
                     size: 12

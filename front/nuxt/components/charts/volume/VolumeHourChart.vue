@@ -95,7 +95,7 @@ const chartData = ref({
     labels: [],
     datasets: [
         {
-            label: 'Average Volume (dB)',
+            label: 'Volum Mitjà (dB)',
             data: [],
             fill: {
                 target: 'origin',
@@ -112,7 +112,7 @@ const chartData = ref({
             borderWidth: 2
         },
         {
-            label: 'Maximum Volume (dB)',
+            label: 'Volum Màxim (dB)',
             data: [],
             borderColor: '#e74c3c',
             backgroundColor: 'rgba(231, 76, 60, 0.1)',
@@ -124,7 +124,7 @@ const chartData = ref({
             borderDash: [5, 5]
         },
         {
-            label: 'Minimum Volume (dB)',
+            label: 'Volum Mínim (dB)',
             data: [],
             borderColor: '#2196F3',
             backgroundColor: '#2196F3',
@@ -163,7 +163,7 @@ const chartOptions = ref({
         x: {
             title: {
                 display: true,
-                text: 'Time',
+                text: 'Hora',
                 color: '#9CA3AF',
                 font: {
                     size: 12
@@ -188,14 +188,14 @@ const chartOptions = ref({
         y: {
             title: {
                 display: true,
-                text: 'Volume (dB)',
+                text: 'Volum (dB)',
                 color: '#9CA3AF',
                 font: {
                     size: 12
                 }
             },
             min: 0,
-            max: 100,
+            max: 150,
             ticks: {
                 color: '#9CA3AF',
                 stepSize: 10

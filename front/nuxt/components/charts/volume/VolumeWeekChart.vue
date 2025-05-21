@@ -89,26 +89,26 @@ const props = defineProps({
     }
 });
 
-// Chart data configuration
+ // Configuració de dades del gràfic
 const chartData = ref({
     labels: [],
     datasets: [
         {
-            label: 'Average Volume (dB)',
+            label: 'Volum mitjà (dB)',
             data: [],
             backgroundColor: '#10B981',
             borderColor: '#10B981',
             borderWidth: 1,
         },
         {
-            label: 'Maximum Volume (dB)',
+            label: 'Volum màxim (dB)',
             data: [],
             backgroundColor: 'rgba(239, 68, 68, 0.8)',
             borderColor: '#EF4444',
             borderWidth: 1,
         },
         {
-            label: 'Minimum Volume (dB)',
+            label: 'Volum mínim (dB)',
             data: [],
             backgroundColor: '#2196F3',
             borderColor: '#2196F3',
@@ -117,12 +117,12 @@ const chartData = ref({
     ],
 });
 
-// Chart options
+// Opcions del gràfic
 const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
     animation: false,
-    indexAxis: 'y', // Horizontal bars
+    indexAxis: 'y', // Barres horitzontals
     plugins: {
         legend: {
             display: false
@@ -143,7 +143,7 @@ const chartOptions = ref({
         x: {
             title: {
                 display: true,
-                text: 'Volume (dB)',
+                text: 'Volum (dB)',
                 color: '#9CA3AF',
                 font: {
                     size: 12
@@ -162,7 +162,7 @@ const chartOptions = ref({
         y: {
             title: {
                 display: true,
-                text: 'Weeks',
+                text: 'Setmanes',
                 color: '#9CA3AF',
                 font: {
                     size: 12

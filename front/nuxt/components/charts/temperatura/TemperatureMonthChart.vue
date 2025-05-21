@@ -93,10 +93,10 @@ const props = defineProps({
 
 // Chart data configuration
 const chartData = ref({
-    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+    labels: ['Gen', 'Feb', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Des'],
     datasets: [
-    {
-            label: 'Average Temperature (°C)',
+        {
+            label: 'Temperatura mitjana (°C)',
             data: [],
             fill: {
                 target: 'origin',
@@ -104,7 +104,7 @@ const chartData = ref({
                 below: 'rgba(33, 150, 243, 0.1)'
             },
             borderColor: '#10B981',
-            backgroundColor: '10B981',
+            backgroundColor: '#10B981',
             pointBackgroundColor: '#10B981',
             pointBorderColor: '#fff',
             pointRadius: 3,
@@ -113,7 +113,7 @@ const chartData = ref({
             borderWidth: 2
         },
         {
-            label: 'Maximum Temperature (°C)',
+            label: 'Temperatura màxima (°C)',
             data: [],
             borderColor: '#EF4444',
             backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -125,10 +125,10 @@ const chartData = ref({
             borderDash: [5, 5]
         },
         {
-            label: 'Minimum Temperature (°C)',
+            label: 'Temperatura mínima (°C)',
             data: [],
             borderColor: '#2196F3',
-            backgroundColor: '2196F3',
+            backgroundColor: '#2196F3',
             pointBackgroundColor: '#2196F3',
             pointBorderColor: '#fff',
             pointRadius: 2,
@@ -163,7 +163,7 @@ const chartOptions = ref({
         x: {
             title: {
                 display: true,
-                text: 'Month',
+                text: 'Mes',
                 color: '#9CA3AF',
                 font: {
                     size: 12
@@ -181,7 +181,7 @@ const chartOptions = ref({
         y: {
             title: {
                 display: true,
-                text: 'Temperature (°C)',
+                text: 'Temperatura (°C)',
                 color: '#9CA3AF',
                 font: {
                     size: 12
