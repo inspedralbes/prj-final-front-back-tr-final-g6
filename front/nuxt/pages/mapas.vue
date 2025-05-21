@@ -102,6 +102,15 @@
                 <span class="text-sm text-gray-400">ID: {{ popup.id || popup.idSensor }}</span>
               </div>
 
+              <!-- Añadir botón de eliminar -->
+              <div class="absolute top-2 right-2">
+                <button @click.stop="confirmDeletePopup(popup)" 
+                  class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-md transition-colors flex items-center gap-1 text-sm">
+                  <i class="fas fa-trash-alt"></i>
+                  <span>Eliminar</span>
+                </button>
+              </div>
+
               <div v-if="lastSensorValues[popup.idAula || popup.idSensor]">
                 <div v-if="!lastSensorValues[popup.idAula || popup.idSensor].error" class="mt-4 space-y-3">
                   <!-- Temperatura -->
@@ -227,7 +236,7 @@ const getSensorValue = (sensorData, tipo) => {
   const formattedValue = Number(value).toFixed(1);
   switch (tipo) {
     case 'temperatura': return `${formattedValue}°C`;
-    case 'humitat': return `${formattedValue}ppm`;
+    case 'humitat': return `${formattedValue}%`;
     case 'volum': return `${formattedValue}dB`;
     default: return formattedValue;
   }
@@ -468,6 +477,15 @@ const fetchData = async () => {
     
   } catch (error) {
     console.error("Error al cargar datos:", error);
+  }
+};
+
+const confirmDeletePopup = (popup) => {
+  const id = popup.id || popup.idSensor;
+  
+  if (confirm(`¿Estás seguro de que deseas eliminar este sensor (ID: ${id})?`)) {
+    deletePopup(id);
+    showingPopupId.value = null; // Cerrar el popup después de eliminar
   }
 };
 
@@ -879,6 +897,19 @@ select:focus {
   width: 24px;
   height: 24px;
   animation: spin 1s linear infinite;
+}
+
+.popup-content button.bg-red-500 {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.popup-content button.bg-red-500:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 @keyframes spin {
