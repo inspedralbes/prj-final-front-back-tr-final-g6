@@ -102,24 +102,51 @@
                 <span class="text-sm text-gray-400">ID: {{ popup.id || popup.idSensor }}</span>
               </div>
 
-              <div v-if="lastSensorValues[popup.idAula || popup.id]">
-                <div v-if="!lastSensorValues[popup.idAula || popup.id].error" class="mt-4">
+              <div v-if="lastSensorValues[popup.idAula || popup.idSensor]">
+                <div v-if="!lastSensorValues[popup.idAula || popup.idSensor].error" class="mt-4 space-y-3">
+                  <!-- Temperatura -->
                   <div class="flex items-center justify-between p-4 bg-slate-800/70 rounded-lg">
-                    <span class="text-sm text-white">{{ getSensorLabel() }}</span>
+                    <span class="text-sm text-white flex items-center">
+                      <i class="fas fa-temperature-high mr-2"></i>Temperatura
+                    </span>
                     <span class="text-2xl font-bold text-white">
-                      {{
-                        getSensorValue(lastSensorValues[popup.idAula || popup.idSensor])
-                      }}
+                      {{ getSensorValue(lastSensorValues[popup.idAula || popup.idSensor], 'temperatura') }}
                     </span>
                   </div>
+                  
+                  <!-- Humitat -->
+                  <div class="flex items-center justify-between p-4 bg-slate-800/70 rounded-lg">
+                    <span class="text-sm text-white flex items-center">
+                      <i class="fas fa-tint mr-2"></i>Humitat
+                    </span>
+                    <span class="text-2xl font-bold text-white">
+                      {{ getSensorValue(lastSensorValues[popup.idAula || popup.idSensor], 'humitat') }}
+                    </span>
+                  </div>
+                  
+                  <!-- Volum -->
+                  <div class="flex items-center justify-between p-4 bg-slate-800/70 rounded-lg">
+                    <span class="text-sm text-white flex items-center">
+                      <i class="fas fa-volume-up mr-2"></i>Volum
+                    </span>
+                    <span class="text-2xl font-bold text-white">
+                      {{ getSensorValue(lastSensorValues[popup.idAula || popup.idSensor], 'volum') }}
+                    </span>
+                  </div>
+                  
+                  <!-- Última actualización -->
+                  <div class="text-xs text-gray-400 text-center mt-2">
+                    Última act: {{ formatDate(lastSensorValues[popup.idAula || popup.idSensor].temperatura?.dataIni) }}
+                  </div>
                 </div>
-                <div v-else class="mt-4 text-red-500">Error en carregar les dades</div>
+                <div v-else class="mt-4 p-4 bg-red-900/30 rounded-lg text-center">
+                  <i class="fas fa-exclamation-triangle mr-1 text-red-400"></i>
+                  <span class="text-red-300">Error en carregar les dades</span>
+                </div>
               </div>
-
-              <button v-if="isDeletingPopup" @click.stop="deletePopup(popup.id)"
-                class="delete-btn absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600">
-                <i class="fas fa-times text-xs"></i>
-              </button>
+              <div v-else class="mt-4 p-4 bg-slate-800/70 rounded-lg flex justify-center">
+                <div class="loader"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -191,18 +218,30 @@ const getSensorLabel = () => {
     default: return '';
   }
 };
-const getSensorValue = (sensorData) => {
-  if (!sensorData) return 'N/D';
-  const value = sensorData[selectedSensorType.value]?.average;
+const getSensorValue = (sensorData, tipo) => {
+  if (!sensorData || !sensorData[tipo]) return 'N/D';
+  
+  const value = sensorData[tipo]?.average;
   if (value === undefined) return 'N/D';
 
-  const formattedValue = Number(value).toFixed(2);
-  switch (selectedSensorType.value) {
+  const formattedValue = Number(value).toFixed(1);
+  switch (tipo) {
     case 'temperatura': return `${formattedValue}°C`;
     case 'humitat': return `${formattedValue}ppm`;
     case 'volum': return `${formattedValue}dB`;
     default: return formattedValue;
   }
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/D';
+  const date = new Date(dateString);
+  return date.toLocaleString('ca-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 };
 
 // Cargar sensores al montar el componente
@@ -262,21 +301,38 @@ const handleMapClick = (event) => {
   tempPopupPosition.value = { x, y };
 };
 
-const selectSensor = (sensor) => {
+// Modificar la función selectSensor para guardar la posición en la base de datos
+const selectSensor = async (sensor) => {
   if (!tempPopupPosition.value) return;
 
-  const newSensor = {
-    ...sensor,
-    x: tempPopupPosition.value.x,
-    y: tempPopupPosition.value.y,
-    planta: sensor.planta || plantaSeleccionada.value,
-    temperatura: sensor.temperatura || 0,
-    humitat: sensor.humitat || 0,
-    volum: sensor.volum || 0,
-  };
+  try {
+    // Actualizar el sensor en la base de datos con las coordenadas y planta
+    await updateSensorById(sensor.idSensor, {
+      nombre: sensor.nombre,
+      ubicacion: sensor.ubicacion,
+      x: tempPopupPosition.value.x,
+      y: tempPopupPosition.value.y,
+      idAula: sensor.idAula,
+      planta: plantaSeleccionada.value
+    });
 
-  activeSensors.value.push(newSensor);
-  cancelNewPopup();
+    // Añadimos el sensor a la lista activa con su nueva posición
+    const newSensor = {
+      ...sensor,
+      x: tempPopupPosition.value.x,
+      y: tempPopupPosition.value.y,
+      planta: plantaSeleccionada.value
+    };
+
+    activeSensors.value.push(newSensor);
+    cancelNewPopup();
+    
+    // Opcional: mostrar mensaje de éxito
+    alert("Sensor añadido correctamente y guardado en la base de datos");
+  } catch (error) {
+    console.error("Error al guardar la posición del sensor:", error);
+    alert("Error al guardar la posición del sensor");
+  }
 };
 
 const cancelNewPopup = () => {
@@ -284,17 +340,50 @@ const cancelNewPopup = () => {
   tempPopupPosition.value = null;
 };
 
-const deletePopup = (id) => {
-  activeSensors.value = activeSensors.value.filter(
-    (sensor) => sensor.id !== id && sensor.idSensor !== id
-  );
-  customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
+const deletePopup = async (id) => {
+  try {
+    // Verificar si es un sensor de la base de datos
+    const sensorToDelete = activeSensors.value.find(
+      sensor => sensor.id === id || sensor.idSensor === id
+    );
+    
+    if (sensorToDelete && sensorToDelete.idSensor) {
+      // Es un sensor de la base de datos, actualizamos para resetear coordenadas
+      await updateSensorById(sensorToDelete.idSensor, {
+        x: 0,
+        y: 0,
+        planta: ""
+      });
+    }
+    
+    // Eliminar de la lista local
+    activeSensors.value = activeSensors.value.filter(
+      (sensor) => sensor.id !== id && sensor.idSensor !== id
+    );
+    customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
+    
+    // Cerrar el popup si está abierto
+    if (showingPopupId.value === id) {
+      showingPopupId.value = null;
+    }
+    
+  } catch (error) {
+    console.error("Error al eliminar el sensor:", error);
+  }
 };
 
 const filteredPopups = computed(() => {
   return activeSensors.value.filter((sensor) => {
+    // Verificar que el sensor tiene planta definida
     if (!sensor.planta) return false;
-    return sensor.planta.toUpperCase() === plantaSeleccionada.value.toUpperCase();
+    
+    // Normalizar el formato de la planta para comparación
+    const sensorPlanta = sensor.planta.toUpperCase().trim();
+    const selectedPlanta = plantaSeleccionada.value.toUpperCase().trim();
+    
+    return sensorPlanta === selectedPlanta ||
+           sensorPlanta.includes(selectedPlanta) ||
+           selectedPlanta.includes(sensorPlanta);
   });
 });
 
@@ -333,19 +422,27 @@ const handlePopupClick = async (popup) => {
     deletePopup(popup.id);
   } else {
     showingPopupId.value = popup.id || popup.idSensor;
-    if (!lastSensorValues.value[popup.idAula || popup.id]) {
-      try {
-        const data = await getUltimsSensorsAula(popup.idAula || popup.id);
-        lastSensorValues.value[popup.idAula || popup.id] = data;
-      } catch (e) {
-        lastSensorValues.value[popup.idAula || popup.id] = { error: true };
-      }
+    
+    // Limpiar datos antiguos para mostrar indicador de carga
+    if (lastSensorValues.value[popup.idAula || popup.idSensor]) {
+      delete lastSensorValues.value[popup.idAula || popup.idSensor];
+    }
+    
+    try {
+      // Obtener los datos más recientes del sensor
+      const data = await getUltimsSensorsAula(popup.idAula || popup.idSensor);
+      lastSensorValues.value[popup.idAula || popup.idSensor] = data;
+      console.log("Datos recientes obtenidos:", data);
+    } catch (e) {
+      console.error("Error al cargar datos recientes:", e);
+      lastSensorValues.value[popup.idAula || popup.idSensor] = { error: true };
     }
   }
 };
 
 const fetchData = async () => {
   try {
+    // Cargar datos del mapa
     const bodyRequest = {
       aules: [8, 10, 12, 9, 11, 13, 42, 49, 43, 54, 44, 45, 46],
       data: "2025-02-10",
@@ -353,8 +450,24 @@ const fetchData = async () => {
     };
     const response = await getMapa(bodyRequest);
     aulaData.value = response;
+    
+    // Cargar sensores desde la base de datos
+    const sensoresFromDB = await getAllSensors();
+    
+    // Establecer los sensores activos desde la base de datos
+    activeSensors.value = sensoresFromDB.map(sensor => ({
+      id: sensor.idSensor,
+      idSensor: sensor.idSensor,
+      x: sensor.x,
+      y: sensor.y,
+      planta: sensor.ubicacion.includes("PLANTA") ? sensor.ubicacion : plantaSeleccionada.value,
+      nombre: sensor.nombre,
+      idAula: sensor.idAula,
+      mac: sensor.mac
+    }));
+    
   } catch (error) {
-    console.error("Error al cargar datos del mapa:", error);
+    console.error("Error al cargar datos:", error);
   }
 };
 
@@ -757,5 +870,19 @@ select:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2);
   border-color: rgb(45, 212, 191);
+}
+
+.loader {
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top: 3px solid #10b981;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
