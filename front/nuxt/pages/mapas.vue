@@ -218,6 +218,7 @@ const showingPopupId = ref(null);
 const isAddingPopup = ref(false);
 const isDeletingPopup = ref(false);
 const tempPopupPosition = ref(null);
+const hiddenSensors = ref([]);
 
 // Helper functions
 const getSensorLabel = () => {
@@ -258,12 +259,12 @@ const formatDate = (dateString) => {
 onMounted(async () => {
   await fetchData();
 
-  const savedSensors = localStorage.getItem("activeSensors");
-  if (savedSensors) {
+  const savedHiddenSensors = localStorage.getItem("hiddenSensors");
+  if (savedHiddenSensors) {
     try {
-      activeSensors.value = JSON.parse(savedSensors);
+      hiddenSensors.value = JSON.parse(savedHiddenSensors);
     } catch (e) {
-      activeSensors.value = [];
+      hiddenSensors.value = [];
     }
   }
 
@@ -352,30 +353,33 @@ const cancelNewPopup = () => {
 
 const deletePopup = async (id) => {
   try {
-    // Simplemente eliminar de la lista local sin actualizar la base de datos
-    activeSensors.value = activeSensors.value.filter(
-      (sensor) => sensor.id !== id && sensor.idSensor !== id
-    );
-    customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
-
+    // Add to hidden sensors list instead of removing from activeSensors
+    hiddenSensors.value.push(id);
+    
+    // Save to localStorage
+    localStorage.setItem("hiddenSensors", JSON.stringify(hiddenSensors.value));
+    
     // Cerrar el popup si está abierto
     if (showingPopupId.value === id) {
       showingPopupId.value = null;
     }
 
-    // Mensaje opcional de confirmación
-    console.log(`Sensor (ID: ${id}) quitado del mapa`);
+    console.log(`Sensor (ID: ${id}) ocultado permanentemente`);
   } catch (error) {
-    console.error("Error al quitar el sensor del mapa:", error);
+    console.error("Error al ocultar el sensor:", error);
   }
 };
 
 const filteredPopups = computed(() => {
   return activeSensors.value.filter((sensor) => {
-    // Verificar que el sensor tiene planta definida
+    // Filter out hidden sensors
+    if (hiddenSensors.value.includes(sensor.id || sensor.idSensor)) {
+      return false;
+    }
+    
+    // Existing filter logic
     if (!sensor.planta) return false;
 
-    // Normalizar el formato de la planta para comparación
     const sensorPlanta = sensor.planta.toUpperCase().trim();
     const selectedPlanta = plantaSeleccionada.value.toUpperCase().trim();
 
@@ -472,9 +476,9 @@ const fetchData = async () => {
 const confirmDeletePopup = (popup) => {
   const id = popup.id || popup.idSensor;
 
-  if (confirm(`¿Estás seguro de que deseas quitar este sensor del mapa (ID: ${id})? No se eliminará de la base de datos.`)) {
+  if (confirm(`¿Estás seguro de que deseas ocultar permanentemente este sensor del mapa (ID: ${id})? Puedes recuperarlo desde la sección de administración.`)) {
     deletePopup(id);
-    showingPopupId.value = null; // Cerrar el popup después de quitar
+    showingPopupId.value = null;
   }
 };
 
@@ -482,9 +486,8 @@ const seleccionarPlanta = (planta) => {
   plantaSeleccionada.value = planta;
 };
 
-// Persistencia
-watch(activeSensors, (newSensors) => {
-  localStorage.setItem("activeSensors", JSON.stringify(newSensors));
+watch(hiddenSensors, (newHiddenSensors) => {
+  localStorage.setItem("hiddenSensors", JSON.stringify(newHiddenSensors));
 }, { deep: true });
 
 const router = useRouter();
