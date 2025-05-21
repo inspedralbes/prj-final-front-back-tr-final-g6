@@ -93,7 +93,8 @@
             </div>
             <!-- Contingut del popup -->
             <div v-if="showingPopupId === popup.id"
-              class="popup-content bg-slate-700/90 border-2 border-teal-500 rounded-xl p-8 shadow-2xl min-w-[400px] relative animate-fadeIn overflow-hidden">
+              class="popup-content bg-slate-700/90 border-2 border-teal-500 rounded-xl p-8 shadow-2xl min-w-[300px] max-w-[90vw] sm:max-w-[450px] relative animate-fadeIn overflow-hidden"
+              :class="getPopupPositionClass(popup)">
               <button @click="showingPopupId = null"
                 class="delete-btn absolute -top-4 -right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-lg hover:bg-red-700 transition-all">
                 <i class="fas fa-times"></i>
@@ -101,15 +102,6 @@
               <div class="text-white text-lg font-semibold mb-2 flex items-center justify-between">
                 <span>{{ popup.text || popup.nombre }}</span>
                 <span class="text-sm text-gray-400">ID: {{ popup.id || popup.idSensor }}</span>
-              </div>
-
-              <!-- Añadir botón de eliminar -->
-              <div class="absolute top-2 right-2">
-                <button @click.stop="confirmDeletePopup(popup)"
-                  class="bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-md transition-colors flex items-center gap-1 text-sm">
-                  <i class="fas fa-eye-slash"></i>
-                  <span>Ocultar</span>
-                </button>
               </div>
 
               <div v-if="lastSensorValues[popup.idAula || popup.idSensor]">
@@ -195,7 +187,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import { useUserStore } from "~/stores/userStore";
-import { getUltimsSensorsAula } from "~/utils/communicationManager";
+import { getUltimsSensorsAula, getAllSensors, updateSensorById, getMapa } from "~/utils/communicationManager";
 import { getBaseUrl } from "~/utils/communicationManager";
 import Header from "../components/header.vue";
 import Mapaplanta1 from "~/components/Plantes/MapaPlanta-1.vue";
@@ -219,6 +211,7 @@ const isAddingPopup = ref(false);
 const isDeletingPopup = ref(false);
 const tempPopupPosition = ref(null);
 const hiddenSensors = ref([]);
+const sensorPlantaMap = ref({});
 
 // Helper functions
 const getSensorLabel = () => {
@@ -229,6 +222,7 @@ const getSensorLabel = () => {
     default: return '';
   }
 };
+
 const getSensorValue = (sensorData, tipo) => {
   if (!sensorData || !sensorData[tipo]) return 'N/D';
 
@@ -255,10 +249,36 @@ const formatDate = (dateString) => {
   });
 };
 
+// Función para determinar la posición del popup
+const getPopupPositionClass = (popup) => {
+  // Verificar primero si hay elemento del mapa
+  const mapEl = document.querySelector('.relative.w-full.h-\\[65vh\\]');
+  if (!mapEl || !popup.x || !popup.y) return '';
+  
+  const mapWidth = mapEl.offsetWidth;
+  const mapHeight = mapEl.offsetHeight;
+  
+  // Determinar si el popup debe ir arriba/abajo o izquierda/derecha
+  const isRight = popup.x > mapWidth / 2;
+  const isBottom = popup.y > mapHeight / 2;
+  
+  // Asignar la clase correspondiente
+  if (isRight && isBottom) {
+    return 'popup-top-left'; // Arriba a la izquierda
+  } else if (!isRight && isBottom) {
+    return 'popup-top-right'; // Arriba a la derecha
+  } else if (isRight && !isBottom) {
+    return 'popup-bottom-left'; // Abajo a la izquierda 
+  } else {
+    return 'popup-bottom-right'; // Abajo a la derecha
+  }
+};
+
 // Cargar sensores al montar el componente
 onMounted(async () => {
   await fetchData();
 
+  // Cargar sensores ocultos
   const savedHiddenSensors = localStorage.getItem("hiddenSensors");
   if (savedHiddenSensors) {
     try {
@@ -268,9 +288,23 @@ onMounted(async () => {
     }
   }
 
+  // Cargar popups personalizados
   const savedPopups = localStorage.getItem("customMapPopups");
   if (savedPopups) {
     customPopups.value = JSON.parse(savedPopups);
+  }
+  
+  // Cargar el mapa de plantas por sensor
+  const savedSensorPlantaMap = localStorage.getItem('sensorPlantaMap');
+  if (savedSensorPlantaMap) {
+    sensorPlantaMap.value = JSON.parse(savedSensorPlantaMap);
+    
+    // Actualizar las plantas de los sensores según el mapa guardado
+    activeSensors.value.forEach(sensor => {
+      if (sensorPlantaMap.value[sensor.idSensor]) {
+        sensor.planta = sensorPlantaMap.value[sensor.idSensor];
+      }
+    });
   }
 });
 
@@ -319,7 +353,7 @@ const selectSensor = async (sensor) => {
     // Actualizar el sensor en la base de datos con las coordenadas y planta
     await updateSensorById(sensor.idSensor, {
       nombre: sensor.nombre,
-      ubicacion: sensor.ubicacion,
+      ubicacion: plantaSeleccionada.value, // Guardamos la planta actual
       x: tempPopupPosition.value.x,
       y: tempPopupPosition.value.y,
       idAula: sensor.idAula,
@@ -328,15 +362,19 @@ const selectSensor = async (sensor) => {
 
     // Añadimos el sensor a la lista activa con su nueva posición
     const newSensor = {
-      id: sensor.idSensor, // Importante: asegurar que id está correctamente asignado
+      id: sensor.idSensor,
       idSensor: sensor.idSensor,
       x: tempPopupPosition.value.x,
       y: tempPopupPosition.value.y,
-      planta: plantaSeleccionada.value,
+      planta: plantaSeleccionada.value, // Importante: usamos la planta seleccionada
       nombre: sensor.nombre,
       idAula: sensor.idAula,
       mac: sensor.mac
     };
+
+    // También guardamos la planta en localStorage como respaldo
+    sensorPlantaMap.value[sensor.idSensor] = plantaSeleccionada.value;
+    localStorage.setItem('sensorPlantaMap', JSON.stringify(sensorPlantaMap.value));
 
     // Verificar si sensor ya existe en activeSensors para evitar duplicados
     const existingIndex = activeSensors.value.findIndex(s => 
@@ -394,7 +432,7 @@ const deletePopup = async (id) => {
 const filteredPopups = computed(() => {
   const filtered = activeSensors.value.filter((sensor) => {
     // Filter out hidden sensors
-    if (hiddenSensors.value.includes(sensor.id || sensor.idSensor)) {
+    if (hiddenSensors.value.includes(sensor.id) || hiddenSensors.value.includes(sensor.idSensor)) {
       return false;
     }
     
@@ -487,7 +525,8 @@ const fetchData = async () => {
       idSensor: sensor.idSensor,
       x: sensor.x,
       y: sensor.y,
-      planta: sensor.ubicacion.includes("PLANTA") ? sensor.ubicacion : plantaSeleccionada.value,
+      // Conservar la planta exactamente como se guardó
+      planta: sensor.planta || sensor.ubicacion || plantaSeleccionada.value,
       nombre: sensor.nombre,
       idAula: sensor.idAula,
       mac: sensor.mac
@@ -517,6 +556,10 @@ watch(hiddenSensors, (newHiddenSensors) => {
   localStorage.setItem("hiddenSensors", JSON.stringify(newHiddenSensors));
 }, { deep: true });
 
+watch(sensorPlantaMap, (newSensorPlantaMap) => {
+  localStorage.setItem("sensorPlantaMap", JSON.stringify(newSensorPlantaMap));
+}, { deep: true });
+
 const router = useRouter();
 const userStore = useUserStore();
 </script>
@@ -543,53 +586,39 @@ const userStore = useUserStore();
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(100, 116, 139, 0.5);
   z-index: 50;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
-/* Orientaciones del popup */
+/* Orientaciones del popup actualizadas */
 .popup-top-left {
-  transform: translate(-100%, -100%) translate(32px, 32px);
-  left: -16px;
-  top: -16px;
+  transform: translate(-100%, -100%) translate(10px, -10px);
+  left: 0;
+  top: 0;
 }
 
 .popup-top-right {
-  transform: translate(0%, -100%) translate(-32px, 32px);
-  left: 16px;
-  top: -16px;
+  transform: translate(0%, -100%) translate(-10px, -10px);
+  left: 0;
+  top: 0;
 }
 
 .popup-bottom-left {
-  transform: translate(-100%, 0%) translate(32px, -32px);
-  left: -16px;
-  top: 16px;
+  transform: translate(-100%, 0%) translate(10px, 10px);
+  left: 0;
+  top: 0;
 }
 
 .popup-bottom-right {
-  transform: translate(0%, 0%) translate(-32px, -32px);
-  left: 16px;
-  top: 16px;
+  transform: translate(0%, 0%) translate(-10px, 10px);
+  left: 0;
+  top: 0;
 }
 
 .custom-popup .marker-point,
 .custom-popup .popup-content,
 .custom-popup .delete-btn {
   pointer-events: auto;
-}
-
-.popup-content {
-  position: absolute;
-  transform: translate(-50%, 10px);
-  left: 50%;
-  max-width: 450px;
-  width: max-content;
-  z-index: 9999;
-  background: rgba(51, 65, 85, 0.95);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border-radius: 0.5rem;
-  border: 1px solid rgba(100, 116, 139, 0.5);
-  will-change: transform;
-  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
 }
 
 .popup-content::before {
