@@ -345,7 +345,7 @@ const handleNewAggregatedData = (data) => {
     if (sensorCount > 0) {
         const avgVolume = totalVolume / sensorCount;
 
-        if (avgVolume >= 0 && avgVolume <= 100) {
+        if (avgVolume >= 0 && avgVolume <= 150) {
             const hourIndex = volumeData.value.findIndex(item => item.time === timeString);
             if (hourIndex !== -1) {
                 volumeData.value[hourIndex].value = {
