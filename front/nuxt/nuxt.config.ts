@@ -36,7 +36,7 @@ export default defineNuxtConfig({
     head: {
       title: 'Acubox',
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: './public/favicon.ico' }
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
       ]
     }
   }
