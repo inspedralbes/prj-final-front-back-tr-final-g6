@@ -51,7 +51,7 @@
                 : 'bg-amber-600 border-amber-600 text-white',
             ]">
               <i :class="isDeletingPopup ? 'fas fa-check' : 'fas fa-eye-slash'"></i>
-              <span>{{ isDeletingPopup ? "Finalitzar" : "Ocultar Sensors" }}</span>
+              <span>{{ isDeletingPopup ? "Finalitzar" : "Esborrar sensors" }}</span>
             </button>
           </div>
 
@@ -312,7 +312,6 @@ const handleMapClick = (event) => {
   tempPopupPosition.value = { x, y };
 };
 
-// Modificar la función selectSensor para guardar la posición en la base de datos
 const selectSensor = async (sensor) => {
   if (!tempPopupPosition.value) return;
 
@@ -329,13 +328,35 @@ const selectSensor = async (sensor) => {
 
     // Añadimos el sensor a la lista activa con su nueva posición
     const newSensor = {
-      ...sensor,
+      id: sensor.idSensor, // Importante: asegurar que id está correctamente asignado
+      idSensor: sensor.idSensor,
       x: tempPopupPosition.value.x,
       y: tempPopupPosition.value.y,
-      planta: plantaSeleccionada.value
+      planta: plantaSeleccionada.value,
+      nombre: sensor.nombre,
+      idAula: sensor.idAula,
+      mac: sensor.mac
     };
 
-    activeSensors.value.push(newSensor);
+    // Verificar si sensor ya existe en activeSensors para evitar duplicados
+    const existingIndex = activeSensors.value.findIndex(s => 
+      s.id === sensor.idSensor || s.idSensor === sensor.idSensor
+    );
+    
+    if (existingIndex >= 0) {
+      // Actualizar el sensor existente
+      activeSensors.value[existingIndex] = newSensor;
+    } else {
+      // Añadir nuevo sensor
+      activeSensors.value.push(newSensor);
+    }
+
+    // Asegurarse de que el sensor no está en la lista de ocultos
+    hiddenSensors.value = hiddenSensors.value.filter(id => 
+      id !== sensor.idSensor && id !== sensor.id
+    );
+    localStorage.setItem("hiddenSensors", JSON.stringify(hiddenSensors.value));
+
     cancelNewPopup();
 
     // Opcional: mostrar mensaje de éxito
@@ -371,7 +392,7 @@ const deletePopup = async (id) => {
 };
 
 const filteredPopups = computed(() => {
-  return activeSensors.value.filter((sensor) => {
+  const filtered = activeSensors.value.filter((sensor) => {
     // Filter out hidden sensors
     if (hiddenSensors.value.includes(sensor.id || sensor.idSensor)) {
       return false;
@@ -387,6 +408,9 @@ const filteredPopups = computed(() => {
       sensorPlanta.includes(selectedPlanta) ||
       selectedPlanta.includes(sensorPlanta);
   });
+  
+  console.log("Popups filtrados para planta", plantaSeleccionada.value, ":", filtered);
+  return filtered;
 });
 
 const getMarkerColor = (popup) => {
@@ -455,6 +479,7 @@ const fetchData = async () => {
 
     // Cargar sensores desde la base de datos
     const sensoresFromDB = await getAllSensors();
+    console.log("Sensores cargados desde DB:", sensoresFromDB);
 
     // Establecer los sensores activos desde la base de datos
     activeSensors.value = sensoresFromDB.map(sensor => ({
@@ -467,6 +492,8 @@ const fetchData = async () => {
       idAula: sensor.idAula,
       mac: sensor.mac
     }));
+    
+    console.log("Sensores activos después de la carga:", activeSensors.value);
 
   } catch (error) {
     console.error("Error al cargar datos:", error);
