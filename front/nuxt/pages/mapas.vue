@@ -43,16 +43,15 @@
               <i :class="isAddingPopup ? 'fas fa-times' : 'fas fa-microchip'"></i>
               <span>{{ isAddingPopup ? "Cancel·lar" : "Afegir Sensor" }}</span>
             </button>
-            
-            <!-- Nuevo botón de eliminar sensor -->
+
             <button @click="toggleDeleteMode" :class="[
-              'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2 shadow-md hover:shadow-red-500/20',
+              'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2 shadow-md hover:shadow-amber-500/20',
               isDeletingPopup
                 ? 'bg-green-600 border-green-600 text-white hover:shadow-green-500/20'
-                : 'bg-red-600 border-red-600 text-white',
+                : 'bg-amber-600 border-amber-600 text-white',
             ]">
-              <i :class="isDeletingPopup ? 'fas fa-check' : 'fas fa-trash-alt'"></i>
-              <span>{{ isDeletingPopup ? "Finalitzar" : "Eliminar Sensor" }}</span>
+              <i :class="isDeletingPopup ? 'fas fa-check' : 'fas fa-eye-slash'"></i>
+              <span>{{ isDeletingPopup ? "Finalitzar" : "Ocultar Sensors" }}</span>
             </button>
           </div>
 
@@ -106,10 +105,10 @@
 
               <!-- Añadir botón de eliminar -->
               <div class="absolute top-2 right-2">
-                <button @click.stop="confirmDeletePopup(popup)" 
-                  class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-md transition-colors flex items-center gap-1 text-sm">
-                  <i class="fas fa-trash-alt"></i>
-                  <span>Eliminar</span>
+                <button @click.stop="confirmDeletePopup(popup)"
+                  class="bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-md transition-colors flex items-center gap-1 text-sm">
+                  <i class="fas fa-eye-slash"></i>
+                  <span>Ocultar</span>
                 </button>
               </div>
 
@@ -124,7 +123,7 @@
                       {{ getSensorValue(lastSensorValues[popup.idAula || popup.idSensor], 'temperatura') }}
                     </span>
                   </div>
-                  
+
                   <!-- Humitat -->
                   <div class="flex items-center justify-between p-4 bg-slate-800/70 rounded-lg">
                     <span class="text-sm text-white flex items-center">
@@ -134,7 +133,7 @@
                       {{ getSensorValue(lastSensorValues[popup.idAula || popup.idSensor], 'humitat') }}
                     </span>
                   </div>
-                  
+
                   <!-- Volum -->
                   <div class="flex items-center justify-between p-4 bg-slate-800/70 rounded-lg">
                     <span class="text-sm text-white flex items-center">
@@ -144,7 +143,7 @@
                       {{ getSensorValue(lastSensorValues[popup.idAula || popup.idSensor], 'volum') }}
                     </span>
                   </div>
-                  
+
                   <!-- Última actualización -->
                   <div class="text-xs text-gray-400 text-center mt-2">
                     Última act: {{ formatDate(lastSensorValues[popup.idAula || popup.idSensor].temperatura?.dataIni) }}
@@ -231,7 +230,7 @@ const getSensorLabel = () => {
 };
 const getSensorValue = (sensorData, tipo) => {
   if (!sensorData || !sensorData[tipo]) return 'N/D';
-  
+
   const value = sensorData[tipo]?.average;
   if (value === undefined) return 'N/D';
 
@@ -258,7 +257,7 @@ const formatDate = (dateString) => {
 // Cargar sensores al montar el componente
 onMounted(async () => {
   await fetchData();
-  
+
   const savedSensors = localStorage.getItem("activeSensors");
   if (savedSensors) {
     try {
@@ -267,7 +266,7 @@ onMounted(async () => {
       activeSensors.value = [];
     }
   }
-  
+
   const savedPopups = localStorage.getItem("customMapPopups");
   if (savedPopups) {
     customPopups.value = JSON.parse(savedPopups);
@@ -290,7 +289,7 @@ const loadAvailableSensors = async () => {
 const togglePopupMode = async () => {
   isAddingPopup.value = !isAddingPopup.value;
   isDeletingPopup.value = false;
-  
+
   if (isAddingPopup.value) {
     await loadAvailableSensors();
   }
@@ -337,7 +336,7 @@ const selectSensor = async (sensor) => {
 
     activeSensors.value.push(newSensor);
     cancelNewPopup();
-    
+
     // Opcional: mostrar mensaje de éxito
     alert("Sensor añadido correctamente y guardado en la base de datos");
   } catch (error) {
@@ -353,33 +352,21 @@ const cancelNewPopup = () => {
 
 const deletePopup = async (id) => {
   try {
-    // Verificar si es un sensor de la base de datos
-    const sensorToDelete = activeSensors.value.find(
-      sensor => sensor.id === id || sensor.idSensor === id
-    );
-    
-    if (sensorToDelete && sensorToDelete.idSensor) {
-      // Es un sensor de la base de datos, actualizamos para resetear coordenadas
-      await updateSensorById(sensorToDelete.idSensor, {
-        x: 0,
-        y: 0,
-        planta: ""
-      });
-    }
-    
-    // Eliminar de la lista local
+    // Simplemente eliminar de la lista local sin actualizar la base de datos
     activeSensors.value = activeSensors.value.filter(
       (sensor) => sensor.id !== id && sensor.idSensor !== id
     );
     customPopups.value = customPopups.value.filter((popup) => popup.id !== id);
-    
+
     // Cerrar el popup si está abierto
     if (showingPopupId.value === id) {
       showingPopupId.value = null;
     }
-    
+
+    // Mensaje opcional de confirmación
+    console.log(`Sensor (ID: ${id}) quitado del mapa`);
   } catch (error) {
-    console.error("Error al eliminar el sensor:", error);
+    console.error("Error al quitar el sensor del mapa:", error);
   }
 };
 
@@ -387,14 +374,14 @@ const filteredPopups = computed(() => {
   return activeSensors.value.filter((sensor) => {
     // Verificar que el sensor tiene planta definida
     if (!sensor.planta) return false;
-    
+
     // Normalizar el formato de la planta para comparación
     const sensorPlanta = sensor.planta.toUpperCase().trim();
     const selectedPlanta = plantaSeleccionada.value.toUpperCase().trim();
-    
+
     return sensorPlanta === selectedPlanta ||
-           sensorPlanta.includes(selectedPlanta) ||
-           selectedPlanta.includes(sensorPlanta);
+      sensorPlanta.includes(selectedPlanta) ||
+      selectedPlanta.includes(sensorPlanta);
   });
 });
 
@@ -433,12 +420,12 @@ const handlePopupClick = async (popup) => {
     deletePopup(popup.id);
   } else {
     showingPopupId.value = popup.id || popup.idSensor;
-    
+
     // Limpiar datos antiguos para mostrar indicador de carga
     if (lastSensorValues.value[popup.idAula || popup.idSensor]) {
       delete lastSensorValues.value[popup.idAula || popup.idSensor];
     }
-    
+
     try {
       // Obtener los datos más recientes del sensor
       const data = await getUltimsSensorsAula(popup.idAula || popup.idSensor);
@@ -461,10 +448,10 @@ const fetchData = async () => {
     };
     const response = await getMapa(bodyRequest);
     aulaData.value = response;
-    
+
     // Cargar sensores desde la base de datos
     const sensoresFromDB = await getAllSensors();
-    
+
     // Establecer los sensores activos desde la base de datos
     activeSensors.value = sensoresFromDB.map(sensor => ({
       id: sensor.idSensor,
@@ -476,7 +463,7 @@ const fetchData = async () => {
       idAula: sensor.idAula,
       mac: sensor.mac
     }));
-    
+
   } catch (error) {
     console.error("Error al cargar datos:", error);
   }
@@ -484,10 +471,10 @@ const fetchData = async () => {
 
 const confirmDeletePopup = (popup) => {
   const id = popup.id || popup.idSensor;
-  
-  if (confirm(`¿Estás seguro de que deseas eliminar este sensor (ID: ${id})?`)) {
+
+  if (confirm(`¿Estás seguro de que deseas quitar este sensor del mapa (ID: ${id})? No se eliminará de la base de datos.`)) {
     deletePopup(id);
-    showingPopupId.value = null; // Cerrar el popup después de eliminar
+    showingPopupId.value = null; // Cerrar el popup después de quitar
   }
 };
 
@@ -915,7 +902,12 @@ select:focus {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
