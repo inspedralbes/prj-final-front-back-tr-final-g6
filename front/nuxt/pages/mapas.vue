@@ -43,14 +43,16 @@
               <i :class="isAddingPopup ? 'fas fa-times' : 'fas fa-microchip'"></i>
               <span>{{ isAddingPopup ? "Cancel·lar" : "Afegir Sensor" }}</span>
             </button>
-            <button v-if="customPopups.length > 0" @click="toggleDeleteMode" :class="[
-              'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2 shadow-md hover:shadow-amber-500/20',
+            
+            <!-- Nuevo botón de eliminar sensor -->
+            <button @click="toggleDeleteMode" :class="[
+              'px-5 py-2.5 font-medium rounded-lg border transition-all duration-300 hover:scale-[1.02] flex items-center gap-2 shadow-md hover:shadow-red-500/20',
               isDeletingPopup
-                ? 'bg-emerald-600 border-emerald-600 text-white hover:shadow-emerald-500/20'
-                : 'bg-amber-600 border-amber-600 text-white',
+                ? 'bg-green-600 border-green-600 text-white hover:shadow-green-500/20'
+                : 'bg-red-600 border-red-600 text-white',
             ]">
-              <i :class="isDeletingPopup ? 'fas fa-check' : 'fas fa-trash'"></i>
-              <span>{{ isDeletingPopup ? "Finalitzar Esborrat" : "Esborrar Sensor" }}</span>
+              <i :class="isDeletingPopup ? 'fas fa-check' : 'fas fa-trash-alt'"></i>
+              <span>{{ isDeletingPopup ? "Finalitzar" : "Eliminar Sensor" }}</span>
             </button>
           </div>
 
