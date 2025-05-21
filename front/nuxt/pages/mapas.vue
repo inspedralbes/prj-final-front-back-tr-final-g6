@@ -154,30 +154,59 @@
         </div>
       </div>
 
-      <!-- Listado de todos los sensores -->
-      <div v-if="isAddingPopup && availableSensors.length > 0" class="bg-slate-800 rounded-lg p-6 shadow-lg mb-6">
-        <h2 class="text-xl font-semibold text-white mb-4">Tots els sensors disponibles</h2>
-        <div class="space-y-2 max-h-[400px] overflow-y-auto">
-          <div v-for="sensor in availableSensors" :key="sensor.idSensor" @click="selectSensor(sensor)"
-            class="p-4 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
-            <div class="flex justify-between items-center text-white">
-              <div>
-                <div class="font-semibold">{{ sensor.nombre }}</div>
-                <div class="text-sm text-gray-400">MAC: {{ sensor.mac }}</div>
-                <div class="text-sm text-gray-400">Ubicació: {{ sensor.ubicacion }}</div>
-                <div class="text-sm text-gray-400">ID: {{ sensor.idSensor }}</div>
+      <!-- Modal de selección de sensor -->
+      <div v-if="isAddingPopup && availableSensors.length > 0" 
+          class="fixed inset-0 bg-slate-900/80 flex items-center justify-center z-[100] overflow-hidden backdrop-blur-sm"
+          @click.self="cancelNewPopup">
+        <div class="bg-slate-800 rounded-xl p-6 shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col animate-fadeIn">
+          <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-700">
+            <h2 class="text-2xl font-bold text-white">Selecciona un sensor</h2>
+            <button @click="cancelNewPopup"
+              class="bg-slate-700 hover:bg-slate-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div class="overflow-y-auto flex-grow pr-2" style="scrollbar-width: thin; scrollbar-color: #475569 #1e293b;">
+            <!-- Filtro de búsqueda -->
+            <div class="mb-4 sticky top-0 z-10 bg-slate-800 pb-2 pt-1">
+              <div class="relative">
+                <input type="text" v-model="sensorSearchQuery" placeholder="Cerca per nom o ID..."
+                      class="w-full bg-slate-700 text-white px-4 py-3 rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                <button v-if="sensorSearchQuery" @click="sensorSearchQuery = ''" class="absolute right-3 top-3 text-gray-400 hover:text-white">
+                  <i class="fas fa-times"></i>
+                </button>
               </div>
-              <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+            
+            <div class="space-y-2">
+              <div v-for="sensor in filteredAvailableSensors" :key="sensor.idSensor" @click="selectSensor(sensor)"
+                class="p-4 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
+                <div class="flex justify-between items-center text-white">
+                  <div>
+                    <div class="font-semibold">{{ sensor.nombre }}</div>
+                    <div class="text-sm text-gray-400">MAC: {{ sensor.mac }}</div>
+                    <div class="text-sm text-gray-400">Ubicació: {{ sensor.ubicacion }}</div>
+                    <div class="text-sm text-gray-400">ID: {{ sensor.idSensor }}</div>
+                  </div>
+                  <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+              </div>
+            </div>
+            
+            <div v-if="filteredAvailableSensors.length === 0" class="text-center text-gray-400 py-8">
+              <i class="fas fa-search text-4xl mb-3"></i>
+              <p>No s'han trobat sensors que coincideixin amb "{{ sensorSearchQuery }}"</p>
             </div>
           </div>
-        </div>
-
-        <!-- Botó per cancel·lar -->
-        <div class="flex justify-end mt-4">
-          <button @click="cancelNewPopup"
-            class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-red-700 hover:scale-[1.02]">
-            <i class="fas fa-times mr-2"></i>Cancel·lar
-          </button>
+          
+          <div class="mt-4 pt-4 border-t border-slate-700 flex justify-end">
+            <button @click="cancelNewPopup"
+              class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium transition-colors border border-red-700 hover:scale-[1.02]">
+              <i class="fas fa-times mr-2"></i>Cancel·lar
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -212,6 +241,22 @@ const isDeletingPopup = ref(false);
 const tempPopupPosition = ref(null);
 const hiddenSensors = ref([]);
 const sensorPlantaMap = ref({});
+const sensorSearchQuery = ref('');
+
+// Computed para filtrar sensores por búsqueda
+const filteredAvailableSensors = computed(() => {
+  if (!sensorSearchQuery.value) return availableSensors.value;
+  
+  const query = sensorSearchQuery.value.toLowerCase().trim();
+  return availableSensors.value.filter(sensor => {
+    return (
+      (sensor.nombre && sensor.nombre.toLowerCase().includes(query)) ||
+      (sensor.idSensor && sensor.idSensor.toString().includes(query)) ||
+      (sensor.mac && sensor.mac.toLowerCase().includes(query)) ||
+      (sensor.ubicacion && sensor.ubicacion.toLowerCase().includes(query))
+    );
+  });
+});
 
 // Helper functions
 const getSensorLabel = () => {
@@ -325,8 +370,15 @@ const togglePopupMode = async () => {
   isAddingPopup.value = !isAddingPopup.value;
   isDeletingPopup.value = false;
 
+  // Resetear búsqueda cuando se abre
   if (isAddingPopup.value) {
+    sensorSearchQuery.value = '';
     await loadAvailableSensors();
+    // Bloquear el scroll del body cuando el modal está abierto
+    document.body.style.overflow = 'hidden';
+  } else {
+    // Restaurar scroll cuando se cierra
+    document.body.style.overflow = 'auto';
   }
 };
 
@@ -408,6 +460,7 @@ const selectSensor = async (sensor) => {
 const cancelNewPopup = () => {
   isAddingPopup.value = false;
   tempPopupPosition.value = null;
+  document.body.style.overflow = 'auto'; // Restaurar scroll
 };
 
 const deletePopup = async (id) => {
@@ -958,6 +1011,41 @@ select:focus {
 .popup-content button.bg-red-500:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Estilos para el modal de selección de sensores */
+.animate-fadeIn {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Personalizar scrollbar */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #1e293b;
+  border-radius: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: #475569;
+  border-radius: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background-color: #64748b;
 }
 
 @keyframes spin {
