@@ -198,10 +198,15 @@ const chartOptions = ref({
             max: 150,
             ticks: {
                 color: '#9CA3AF',
-                stepSize: 10
+                stepSize: 10,
+                precision: 0
             },
             grid: {
                 color: 'rgba(255, 255, 255, 0.05)'
+            },
+            suggestedMax: 150,
+            afterDataLimits: (scale) => {
+                scale.max = 150;
             }
         }
     }
