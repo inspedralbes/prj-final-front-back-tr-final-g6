@@ -1,7 +1,7 @@
 <template>
     <div class="dashboard-container">
         <div v-if="loading" class="loading-overlay">
-            <div class="loading-message">Loading data...</div>
+            <div class="loading-message">Carregant dades...</div>
         </div>
 
         <div v-else-if="error" class="error-overlay">
@@ -22,12 +22,12 @@
                         <span class="max-temp">{{ maxTemperature !== null ? parseFloat(maxTemperature).toFixed(2) : '--'
                             }}°C</span>
                     </div>
-                    <div class="temperature-label">Current Temperature (Avg/Min/Max)</div>
+                    <div class="temperature-label">Temperatura actual (Mitjana/Mínima/Màxima)</div>
                 </div>
 
                 <div class="time-range-info">
-                    <div class="time-range-indicator">Last 24 hours</div>
-                    <div class="update-time">Last update: {{ lastUpdateTime }}</div>
+                    <div class="time-range-indicator">Últimes 24 hores</div>
+                    <div class="update-time">Última actualització: {{ lastUpdateTime }}</div>
                 </div>
             </div>
 
@@ -40,15 +40,15 @@
             <div class="chart-legend">
                 <div class="legend-item">
                     <span class="legend-color avg-color"></span>
-                    <span class="legend-label">Average</span>
+                    <span class="legend-label">Mitjana</span>
                 </div>
                 <div class="legend-item">
                     <span class="legend-color max-color"></span>
-                    <span class="legend-label">Maximum</span>
+                    <span class="legend-label">Màxima</span>
                 </div>
                 <div class="legend-item">
                     <span class="legend-color min-color"></span>
-                    <span class="legend-label">Minimum</span>
+                    <span class="legend-label">Mínima</span>
                 </div>
             </div>
         </div>
@@ -92,12 +92,12 @@ const props = defineProps({
     }
 });
 
-// Chart data configuration
+// Configuració de les dades del gràfic
 const chartData = ref({
     labels: [],
     datasets: [
         {
-            label: 'Average Temperature (°C)',
+            label: 'Temperatura Mitjana (°C)',
             data: [],
             fill: {
                 target: 'origin',
@@ -114,7 +114,7 @@ const chartData = ref({
             borderWidth: 2
         },
         {
-            label: 'Maximum Temperature (°C)',
+            label: 'Temperatura Màxima (°C)',
             data: [],
             borderColor: '#EF4444',
             backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -126,7 +126,7 @@ const chartData = ref({
             borderDash: [5, 5]
         },
         {
-            label: 'Minimum Temperature (°C)',
+            label: 'Temperatura Mínima (°C)',
             data: [],
             borderColor: '#2196F3',
             backgroundColor: '#2196F3',
@@ -164,7 +164,7 @@ const chartOptions = ref({
         x: {
             title: {
                 display: true,
-                text: 'Time',
+                text: 'Hora',
                 color: '#9CA3AF',
                 font: {
                     size: 12
@@ -189,7 +189,7 @@ const chartOptions = ref({
         y: {
             title: {
                 display: true,
-                text: 'Temperature (°C)',
+                text: 'Temperatura (°C)',
                 color: '#9CA3AF',
                 font: {
                     size: 12

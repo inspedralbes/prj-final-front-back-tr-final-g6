@@ -2,7 +2,7 @@
 import { onMounted, ref, defineProps, nextTick } from "vue";
 import Konva from "konva";
 import { getMapa } from "@/utils/communicationManager";
-import InfoCard from "../InfoCard.vue"; // Opcional: usar el mismo InfoCard si quieres.
+import InfoCard from "../InfoCard.vue"; // Opcional: utilitza el mateix InfoCard si vols.
 
 const props = defineProps({
   imageUrl: {
@@ -12,69 +12,69 @@ const props = defineProps({
 });
 
 const stageRef = ref(null);
-const showPopup = ref(false);
-const popupInfo = ref("");
-const popupPosition = ref({ x: 0, y: 0 });
+const mostrarPopup = ref(false);
+const infoPopup = ref("");
+const posicioPopup = ref({ x: 0, y: 0 });
 
-const closePopup = () => {
-  showPopup.value = false;
+const tancarPopup = () => {
+  mostrarPopup.value = false;
 };
 
-const getInterpolatedColor = (value, min, max) => {
-  const ratio = (value - min) / (max - min);
-  const red = Math.round(255 * ratio);
-  const blue = Math.round(255 * (1 - ratio));
-  return `rgb(${red}, 0, ${blue})`;
+const obtenirColorInterpolat = (valor, min, max) => {
+  const proporcio = (valor - min) / (max - min);
+  const vermell = Math.round(255 * proporcio);
+  const blau = Math.round(255 * (1 - proporcio));
+  return `rgb(${vermell}, 0, ${blau})`;
 };
 
 onMounted(async () => {
-  await nextTick(); // Asegurarse que todo esté montado
+  await nextTick(); // Assegura't que tot estigui muntat
 
-  const image = "./PLANTA 3.png";
-  const imageObj = new Image();
+  const imatge = "./PLANTA 3.png";
+  const imatgeObj = new Image();
 
-  imageObj.onload = function () {
-    const imgWidth = imageObj.width;
-    const imgHeight = imageObj.height;
+  imatgeObj.onload = function () {
+    const ampladaImg = imatgeObj.width;
+    const alcadaImg = imatgeObj.height;
 
-    const canvasWidth = stageRef.value.offsetWidth;
-    const canvasHeight = stageRef.value.offsetHeight;
-    const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight);
-    const scaledWidth = imgWidth * scaleFactor;
-    const scaledHeight = imgHeight * scaleFactor;
-    const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 2 - 200; // ← Imagen más arriba
+    const ampladaCanvas = stageRef.value.offsetWidth;
+    const alcadaCanvas = stageRef.value.offsetHeight;
+    const factorEscala = Math.min(ampladaCanvas / ampladaImg, alcadaCanvas / alcadaImg);
+    const ampladaEscalada = ampladaImg * factorEscala;
+    const alcadaEscalada = alcadaImg * factorEscala;
+    const x = (ampladaCanvas - ampladaEscalada) / 2;
+    const y = (alcadaCanvas - alcadaEscalada) / 2 - 200; // ← Imatge més amunt
 
-    const stage = new Konva.Stage({
+    const escenari = new Konva.Stage({
       container: stageRef.value,
-      width: canvasWidth,
-      height: canvasHeight,
+      width: ampladaCanvas,
+      height: alcadaCanvas,
     });
 
-    const layer = new Konva.Layer();
-    stage.add(layer);
+    const capa = new Konva.Layer();
+    escenari.add(capa);
 
     const konvaImage = new Konva.Image({
       x: x,
       y: y,
-      image: imageObj,
-      width: scaledWidth,
-      height: scaledHeight,
+      image: imatgeObj,
+      width: ampladaEscalada,
+      height: alcadaEscalada,
     });
 
-    layer.add(konvaImage);
+    capa.add(konvaImage);
 
-    const minVolumen = Math.min(...points.map((p) => p.volumen));
-    const maxVolumen = Math.max(...points.map((p) => p.volumen));
+    const volumMinim = Math.min(...punts.map((p) => p.volumen));
+    const volumMaxim = Math.max(...punts.map((p) => p.volumen));
 
-    points.forEach((point) => {
-      const color = point.enabled
-        ? getInterpolatedColor(point.volumen, minVolumen, maxVolumen)
+    punts.forEach((punt) => {
+      const color = punt.enabled
+        ? obtenirColorInterpolat(punt.volumen, volumMinim, volumMaxim)
         : "gray";
 
-      const circle = new Konva.Circle({
-        x: x + point.x * scaleFactor,
-        y: y + point.y * scaleFactor,
+      const cercle = new Konva.Circle({
+        x: x + punt.x * factorEscala,
+        y: y + punt.y * factorEscala,
         radius: 10,
         fill: color,
         stroke: "black",
@@ -82,20 +82,20 @@ onMounted(async () => {
         draggable: false,
       });
 
-      circle.on("click", () => {
-        if (!point.enabled) return;
-        popupInfo.value = `${point.info} - Volumen: ${point.volumen.toFixed(2)}`;
-        showPopup.value = true;
-        popupPosition.value = { x: point.popupX, y: point.popupY };
+      cercle.on("click", () => {
+        if (!punt.enabled) return;
+        infoPopup.value = `${punt.info} - Volum: ${punt.volumen.toFixed(2)}`;
+        mostrarPopup.value = true;
+        posicioPopup.value = { x: punt.popupX, y: punt.popupY };
       });
 
-      layer.add(circle);
+      capa.add(cercle);
     });
 
-    layer.batchDraw();
+    capa.batchDraw();
   };
 
-  imageObj.src = image;
+  imatgeObj.src = imatge;
 });
 </script>
 
@@ -103,12 +103,12 @@ onMounted(async () => {
   <div ref="stageRef" class="canvas-container"></div>
 
   <div
-    v-if="showPopup"
+    v-if="mostrarPopup"
     class="popup"
-    :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }"
+    :style="{ top: posicioPopup.y + 'px', left: posicioPopup.x + 'px' }"
   >
-    <p>{{ popupInfo }}</p>
-    <button @click="closePopup" class="close-btn">X</button>
+    <p>{{ infoPopup }}</p>
+    <button @click="tancarPopup" class="close-btn">X</button>
   </div>
 </template>
 

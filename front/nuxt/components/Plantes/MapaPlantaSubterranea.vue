@@ -42,7 +42,7 @@ onMounted(async () => {
     const scaledWidth = imgWidth * scaleFactor;
     const scaledHeight = imgHeight * scaleFactor;
     const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 2 - 200; // ← Imagen más arriba
+    const y = (canvasHeight - scaledHeight) / 2 - 200; // ← Imatge més amunt
 
     const stage = new Konva.Stage({
       container: stageRef.value,
@@ -83,7 +83,7 @@ onMounted(async () => {
 
       circle.on("click", () => {
         if (!point.enabled) return;
-        popupInfo.value = `${point.info} - Volumen: ${point.volumen.toFixed(2)}`;
+        popupInfo.value = `${point.info} - Volum: ${point.volumen.toFixed(2)}`;
         showPopup.value = true;
         popupPosition.value = { x: point.popupX, y: point.popupY };
       });

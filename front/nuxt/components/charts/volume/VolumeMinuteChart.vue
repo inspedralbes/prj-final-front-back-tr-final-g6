@@ -1,7 +1,7 @@
 <template>
     <div class="dashboard-container">
         <div v-if="loading" class="loading-overlay">
-            <div class="loading-message">Loading data...</div>
+            <div class="loading-message">Carregant dades...</div>
         </div>
 
         <div v-else-if="error" class="error-overlay">
@@ -9,18 +9,18 @@
         </div>
 
         <div v-else class="dashboard-content">
-            <!-- Header Section -->
+            <!-- Secció de capçalera -->
             <div class="dashboard-header">
                 <div class="volume-display">
                     <div class="current-volume" :class="volumeColorClass">
                         {{ currentVolume !== null ? parseFloat(currentVolume).toFixed(2) : '--' }} dB
                     </div>
-                    <div class="volume-label">Current Volume</div>
+                    <div class="volume-label">Volum actual</div>
                 </div>
 
                 <div class="time-range-info">
-                    <div class="time-range-indicator">Last 60 minutes</div>
-                    <div class="update-time">Last update: {{ new Date().toLocaleTimeString('es-ES', {
+                    <div class="time-range-indicator">Últims 60 minuts</div>
+                    <div class="update-time">Última actualització: {{ new Date().toLocaleTimeString('es-ES', {
                         hour: '2-digit',
                         minute: '2-digit'
                     }) }}
@@ -28,7 +28,7 @@
                 </div>
             </div>
 
-            <!-- Chart Section -->
+            <!-- Secció del gràfic -->
             <div class="chart-container">
                 <Line :key="chartKey" :data="chartData" :options="chartOptions" class="volume-chart" />
             </div>

@@ -39,13 +39,13 @@ onMounted(async () => {
     const canvasWidth = stageRef.value.offsetWidth;
     const canvasHeight = stageRef.value.offsetHeight;
 
-    // Reducir el zoom (factor 1.0)
+    // Reduir el zoom (factor 1.0)
     const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight) * 1.0;
     const scaledWidth = imgWidth * scaleFactor;
     const scaledHeight = imgHeight * scaleFactor;
 
     const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 2 - 200; // ← Imagen más arriba
+    const y = (canvasHeight - scaledHeight) / 2 - 200; // ← Imatge més amunt
 
     const stage = new Konva.Stage({
       container: stageRef.value,
@@ -86,7 +86,7 @@ onMounted(async () => {
 
       circle.on("click", () => {
         if (!point.enabled) return;
-        popupInfo.value = `${point.info} - Volumen: ${point.volumen.toFixed(2)}`;
+        popupInfo.value = `${point.info} - Volum: ${point.volumen.toFixed(2)}`;
         showPopup.value = true;
         popupPosition.value = { x: point.popupX, y: point.popupY };
       });
@@ -110,7 +110,7 @@ onMounted(async () => {
     :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }"
   >
     <p>{{ popupInfo }}</p>
-    <button @click="closePopup" class="close-btn">X</button>
+    <button @click="closePopup" class="close-btn">Tancar</button>
   </div>
 </template>
 

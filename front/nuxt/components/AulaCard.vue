@@ -16,7 +16,7 @@
     <div class="w-full max-w-7xl mx-auto px-4 py-6">
       <div class="flex flex-col sm:flex-row items-center gap-4 w-full">
         <div class="relative flex-grow">
-          <input v-model="searchQuery" type="text" placeholder="Buscar Aula..."
+          <input v-model="searchQuery" type="text" placeholder="Cercar aula..."
             class="w-full p-3 pl-10 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all" />
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 absolute left-3 top-3.5" fill="none"
             viewBox="0 0 24 24" stroke="currentColor">
@@ -105,7 +105,7 @@
                   :style="getHumitatStyle(sensorValues[aula.id]?.humitat)"
                 >
                   <i class="fas fa-tint text-emerald-400 mb-1"></i>
-                  <span class="text-xs text-slate-300">Humetat</span>
+                  <span class="text-xs text-slate-300">Humitat</span>
                   <span class="text-sm font-medium text-white">
                     {{ sensorValues[aula.id]?.humitat != null
                       ? sensorValues[aula.id].humitat.toFixed(1) + '%'
@@ -118,7 +118,7 @@
                   :style="getVolumStyle(sensorValues[aula.id]?.volum)"
                 >
                   <i class="fas fa-volume-up text-blue-400 mb-1"></i>
-                  <span class="text-xs text-slate-300">Vol.</span>
+                  <span class="text-xs text-slate-300">Volum</span>
                   <span class="text-sm font-medium text-white">
                     {{ sensorValues[aula.id]?.volum != null
                       ? sensorValues[aula.id].volum.toFixed(0) + 'dB'
@@ -191,7 +191,7 @@ async function loadAulasAndSensors() {
       };
     }
   } catch (error) {
-    console.error("Error al cargar las aules o sensores:", error.message);
+    console.error("Error en carregar les aules o sensors:", error.message);
   }
 }
 
@@ -213,9 +213,9 @@ const toggleSensor = (aulaId) => {
   const aula = aulas.value.find((a) => a.id === aulaId);
   if (aula) {
     aula.sensorActivo = !aula.sensorActivo;
-    // Aquí podrías hacer una llamada a la API para actualizar el estado en el backend
+    // Aquí podries fer una crida a l'API per actualitzar l'estat al backend
     console.log(
-      `Sensor del aula ${aulaId} ${aula.sensorActivo ? "activado" : "desactivado"}`
+      `Sensor de l'aula ${aulaId} ${aula.sensorActivo ? "activat" : "desactivat"}`
     );
   }
 };
@@ -240,18 +240,18 @@ const clearFilters = () => {
   selectedEtapa.value = null;
 };
 
-// --- COLORES DINÁMICOS PARA LOS INDICADORES ---
+// --- COLORS DINÀMICS PER ALS INDICADORS ---
 
 const tempColorRanges = [
-  { max: 20, border: '#60a5fa', background: 'rgba(96, 165, 250, 0.5)' }, // azul
-  { max: 30, border: '#34d399', background: 'rgba(52, 211, 153, 0.5)' }, // verde
-  { max: Infinity, border: '#f87171', background: 'rgba(248, 113, 113, 0.5)' } // rojo
+  { max: 20, border: '#60a5fa', background: 'rgba(96, 165, 250, 0.5)' }, // blau
+  { max: 30, border: '#34d399', background: 'rgba(52, 211, 153, 0.5)' }, // verd
+  { max: Infinity, border: '#f87171', background: 'rgba(248, 113, 113, 0.5)' } // vermell
 ];
 
 const volumColorRanges = [
-  { max: 70, border: '#2ecc71', background: 'rgba(46, 204, 113, 0.5)' }, // verde
-  { max: 80, border: '#f1c40f', background: 'rgba(241, 196, 15, 0.5)' }, // amarillo
-  { max: Infinity, border: '#e73c3c', background: 'rgba(231, 60, 60, 0.5)' } // rojo
+  { max: 70, border: '#2ecc71', background: 'rgba(46, 204, 113, 0.5)' }, // verd
+  { max: 80, border: '#f1c40f', background: 'rgba(241, 196, 15, 0.5)' }, // groc
+  { max: Infinity, border: '#e73c3c', background: 'rgba(231, 60, 60, 0.5)' } // vermell
 ];
 
 function getTempStyle(temp) {
@@ -275,12 +275,12 @@ function getVolumStyle(volum) {
 function getHumitatStyle(humitat) {
   if (humitat == null) return {};
   if (humitat < 30) {
-    return { borderColor: '#60a5fa', background: 'rgba(96, 165, 250, 0.5)' }; // azul
+    return { borderColor: '#60a5fa', background: 'rgba(96, 165, 250, 0.5)' }; // blau
   }
   if (humitat < 60) {
-    return { borderColor: '#34d399', background: 'rgba(52, 211, 153, 0.5)' }; // verde
+    return { borderColor: '#34d399', background: 'rgba(52, 211, 153, 0.5)' }; // verd
   }
-  return { borderColor: '#f87171', background: 'rgba(248, 113, 113, 0.5)' }; // rojo
+  return { borderColor: '#f87171', background: 'rgba(248, 113, 113, 0.5)' }; // vermell
 }
 </script>
 
