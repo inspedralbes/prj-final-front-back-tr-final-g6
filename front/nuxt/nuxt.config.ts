@@ -31,5 +31,13 @@ export default defineNuxtConfig({
         preset: Aura
       }
     }
+  },
+  app: {
+    head: {
+      title: 'Acubox',
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      ]
+    }
   }
 });

@@ -1,0 +1,718 @@
+[
+    {
+        "endpoint": "/api/login",
+        "method": "POST",
+        "description": "Authenticate a user",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "correu": "string",
+                "contrasenya": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Login successful",
+                "body": {
+                    "message": "Login successful",
+                    "user": "object"
+                }
+            },
+            "400": {
+                "description": "Missing required fields"
+            },
+            "401": {
+                "description": "Invalid credentials"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules",
+        "method": "GET",
+        "description": "Get all classrooms",
+        "response": {
+            "200": {
+                "description": "List of all classrooms",
+                "body": "array"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules/actives",
+        "method": "GET",
+        "description": "Get all active classrooms",
+        "response": {
+            "200": {
+                "description": "List of active classrooms",
+                "body": "array"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules/:id",
+        "method": "GET",
+        "description": "Get a specific classroom by ID",
+        "request": {
+            "params": {
+                "id": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Classroom details",
+                "body": "object"
+            },
+            "404": {
+                "description": "Classroom not found"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules",
+        "method": "POST",
+        "description": "Create a new classroom",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "curs": "string",
+                "classe": "string",
+                "etapa": "string"
+            }
+        },
+        "response": {
+            "201": {
+                "description": "Classroom created successfully",
+                "body": {
+                    "message": "Aula creada correctament",
+                    "id": "number"
+                }
+            },
+            "400": {
+                "description": "Missing required fields"
+            },
+            "500": {
+                "description": "Database insertion error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules/:id",
+        "method": "PUT",
+        "description": "Update a classroom",
+        "request": {
+            "params": {
+                "id": "number"
+            },
+            "contentType": "application/json",
+            "body": {
+                "Curs": "string",
+                "Classe": "string",
+                "Etapa": "string",
+                "Planta": "string",
+                "Aula": "string",
+                "activa": "boolean",
+                "turn": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Classroom updated successfully",
+                "body": {
+                    "message": "Aula actualizada con éxito"
+                }
+            },
+            "500": {
+                "description": "Database update error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules/:id",
+        "method": "DELETE",
+        "description": "Delete a classroom",
+        "request": {
+            "params": {
+                "id": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Classroom deleted successfully",
+                "body": {
+                    "message": "aula esborrada correctament"
+                }
+            },
+            "404": {
+                "description": "Classroom not found"
+            },
+            "500": {
+                "description": "Database deletion error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules/:id/activa",
+        "method": "PUT",
+        "description": "Update classroom active status",
+        "request": {
+            "params": {
+                "id": "number"
+            },
+            "contentType": "application/json",
+            "body": {
+                "activa": "boolean"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Classroom status updated successfully",
+                "body": {
+                    "message": "string"
+                }
+            },
+            "400": {
+                "description": "Missing required fields"
+            },
+            "404": {
+                "description": "Classroom not found"
+            },
+            "500": {
+                "description": "Database update error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/mapa",
+        "method": "POST",
+        "description": "Get average data for multiple classrooms",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "aules": "array",
+                "tipus": "string",
+                "data": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "List of classroom averages",
+                "body": "array"
+            },
+            "400": {
+                "description": "Missing required fields"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/aules/:id/grafic",
+        "method": "POST",
+        "description": "Get data for charts",
+        "request": {
+            "params": {
+                "id": "number"
+            },
+            "contentType": "application/json",
+            "body": {
+                "taula": "string",
+                "tipus": "string",
+                "dataIni": "string",
+                "dataFi": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Chart data",
+                "body": "array"
+            },
+            "400": {
+                "description": "Missing required fields"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sensors",
+        "method": "GET",
+        "description": "Get all sensors",
+        "response": {
+            "200": {
+                "description": "List of all sensors",
+                "body": "array"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sensors",
+        "method": "PUT",
+        "description": "Update a sensor",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "MAC": "string",
+                "nombre": "string",
+                "ubicacion": "string",
+                "x": "number",
+                "y": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor updated successfully",
+                "body": {
+                    "message": "Sensor actualitzat correctament"
+                }
+            },
+            "404": {
+                "description": "Sensor not found"
+            },
+            "500": {
+                "description": "Database update error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors",
+        "method": "GET",
+        "description": "Get all new sensors",
+        "response": {
+            "200": {
+                "description": "List of all new sensors",
+                "body": "array"
+            },
+            "500": {
+                "description": "Database query error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors",
+        "method": "POST",
+        "description": "Add a new sensor",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "MAC": "string"
+            }
+        },
+        "response": {
+            "201": {
+                "description": "New sensor created successfully",
+                "body": {
+                    "message": "Sensor creat correctament",
+                    "id": "number"
+                }
+            },
+            "400": {
+                "description": "Sensor not accepted"
+            },
+            "500": {
+                "description": "Database insertion error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/data/mongodb",
+        "method": "GET",
+        "description": "Get data from MongoDB within a date range",
+        "request": {
+            "query": {
+                "startDate": "string",
+                "endDate": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Data retrieved successfully",
+                "body": "array"
+            },
+            "400": {
+                "description": "Missing or invalid date range"
+            },
+            "500": {
+                "description": "Error retrieving data from MongoDB"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/data/mongodb",
+        "method": "POST",
+        "description": "Insert data into MongoDB",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "volume": "number",
+                "temperature": "number",
+                "date": "string",
+                "MAC": "string",
+                "api_key": "string"
+            }
+        },
+        "response": {
+            "201": {
+                "description": "Data inserted successfully",
+                "body": {
+                    "message": "Dades inserides correctament",
+                    "id": "string"
+                }
+            },
+            "400": {
+                "description": "Incomplete data"
+            },
+            "403": {
+                "description": "Invalid API key"
+            },
+            "500": {
+                "description": "Error inserting data into MongoDB"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/data/mysql",
+        "method": "POST",
+        "description": "Insert aggregated data into MySQL",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "timeSpan": "string",
+                "sensors": "object"
+            }
+        },
+        "response": {
+            "201": {
+                "description": "Data inserted successfully",
+                "body": {
+                    "message": "Dades inserides correctament",
+                    "affectedRows": "number"
+                }
+            },
+            "400": {
+                "description": "Missing or invalid timeSpan or sensors data"
+            },
+            "500": {
+                "description": "Database insertion error"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sensors/:id",
+        "method": "DELETE",
+        "description": "Delete a sensor by ID",
+        "request": {
+            "params": {
+                "id": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor eliminado correctamente",
+                "body": {
+                    "message": "Sensor eliminado correctamente"
+                }
+            },
+            "404": {
+                "description": "Sensor no encontrado"
+            },
+            "500": {
+                "description": "Error en la eliminación del sensor"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sensors/:id",
+        "method": "PUT",
+        "description": "Update a sensor by ID",
+        "request": {
+            "params": {
+                "id": "number"
+            },
+            "contentType": "application/json",
+            "body": {
+                "nombre": "string",
+                "ubicacion": "string",
+                "x": "number",
+                "y": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor actualizado correctamente",
+                "body": {
+                    "message": "Sensor actualizado correctamente"
+                }
+            },
+            "404": {
+                "description": "Sensor no encontrado"
+            },
+            "500": {
+                "description": "Error en la actualización del sensor"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors/:id/accept",
+        "method": "PUT",
+        "description": "Accept a new sensor",
+        "request": {
+            "params": {
+                "id": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor acceptat correctament",
+                "body": {
+                    "message": "Sensor acceptat correctament"
+                }
+            },
+            "500": {
+                "description": "Error en la consulta a la base de dades"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors/:id/reject",
+        "method": "PUT",
+        "description": "Reject a new sensor",
+        "request": {
+            "params": {
+                "id": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor rebutjat correctament",
+                "body": {
+                    "message": "Sensor rebutjat correctament"
+                }
+            },
+            "500": {
+                "description": "Error en la consulta a la base de dades"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors/:id/status",
+        "method": "PUT",
+        "description": "Update new sensor status (accept/reject)",
+        "request": {
+            "params": {
+                "id": "number"
+            },
+            "contentType": "application/json",
+            "body": {
+                "status": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor acceptat o rebutjat correctament",
+                "body": {
+                    "message": "string"
+                }
+            },
+            "400": {
+                "description": "El estado debe ser \"accept\" o \"reject\""
+            },
+            "404": {
+                "description": "Sensor no trobat"
+            },
+            "500": {
+                "description": "Error en la consulta a la base de dades"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors/:id/unban",
+        "method": "PUT",
+        "description": "Unban a new sensor",
+        "request": {
+            "params": {
+                "id": "number"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Sensor desbannejat correctament",
+                "body": {
+                    "message": "Sensor desbannejat correctament"
+                }
+            },
+            "404": {
+                "description": "Sensor no trobat"
+            },
+            "500": {
+                "description": "Error en la consulta a la base de dades"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/newsensors/banned",
+        "method": "GET",
+        "description": "Get all banned new sensors",
+        "response": {
+            "200": {
+                "description": "List of banned new sensors",
+                "body": "array"
+            },
+            "500": {
+                "description": "Error en la consulta a la base de dades"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sensors/banned",
+        "method": "GET",
+        "description": "Get all banned sensors",
+        "response": {
+            "200": {
+                "description": "List of banned sensors",
+                "body": "array"
+            },
+            "500": {
+                "description": "Error en la consulta a la base de dades"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sendMessage",
+        "method": "POST",
+        "description": "Send a message to RabbitMQ",
+        "request": {
+            "contentType": "application/json",
+            "body": {
+                "api_key": "string",
+                "volume": "number",
+                "temperature": "number",
+                "humidity": "number",
+                "date": "string",
+                "MAC": "string"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Missatge enviat correctament",
+                "body": {
+                    "message": "Missatge enviat correctament",
+                    "date": "string"
+                }
+            },
+            "400": {
+                "description": "Falten dades necessàries"
+            },
+            "500": {
+                "description": "Error al enviar el missatge"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sensor/config",
+        "method": "GET",
+        "description": "Obté la configuració del sensor (config.json)",
+        "response": {
+            "200": {
+                "description": "Configuració retornada correctament",
+                "body": "object"
+            },
+            "500": {
+                "description": "Error llegint o parsejant la configuració"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sensor/config",
+        "method": "PUT",
+        "description": "Actualitza la configuració del sensor (config.json)",
+        "request": {
+            "contentType": "application/json",
+            "body": "object"
+        },
+        "response": {
+            "200": {
+                "description": "Configuració guardada correctament",
+                "body": {
+                    "message": "Configuració guardada correctament",
+                    "config": "object"
+                }
+            },
+            "500": {
+                "description": "Error llegint, parsejant o guardant la configuració"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/sensor/images",
+        "method": "POST",
+        "description": "Puja una imatge per al sensor",
+        "request": {
+            "contentType": "multipart/form-data",
+            "body": {
+                "image": "file"
+            }
+        },
+        "response": {
+            "200": {
+                "description": "Imatge pujada correctament",
+                "body": {
+                    "url": "string"
+                }
+            },
+            "400": {
+                "description": "No s'ha pujat cap fitxer"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/fileSensor/*",
+        "method": "GET",
+        "description": "Serveix fitxers estàtics de la carpeta 'sensor' (imatges, config, etc.)",
+        "response": {
+            "200": {
+                "description": "Fitxer servit correctament"
+            },
+            "404": {
+                "description": "Fitxer no trobat"
+            }
+        }
+    },
+    {
+        "endpoint": "/api/mongodb/dades",
+        "method": "DELETE",
+        "description": "Esborra totes les dades de la col·lecció 'dades' de MongoDB",
+        "response": {
+            "200": {
+                "description": "Totes les dades han estat esborrades",
+                "body": {
+                    "message": "Totes les dades han estat esborrades",
+                    "deletedCount": "number"
+                }
+            },
+            "500": {
+                "description": "Error esborrant les dades de MongoDB",
+                "body": {
+                    "message": "Error esborrant les dades de MongoDB",
+                    "error": "string"
+                }
+            }
+        }
+    }
+]

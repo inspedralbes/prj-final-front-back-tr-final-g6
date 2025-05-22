@@ -1,99 +1,80 @@
 <script setup>
-import { onMounted, ref, defineProps } from "vue";
+import { onMounted, ref, defineProps, nextTick } from "vue";
 import Konva from "konva";
 import { getMapa } from "@/utils/communicationManager";
+import InfoCard from "../InfoCard.vue"; // Opcional: utilitza el mateix InfoCard si vols.
 
-// Recibe la URL de la imagen como prop
 const props = defineProps({
   imageUrl: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 const stageRef = ref(null);
-const showPopup = ref(false);
-const popupInfo = ref("");
-const popupPosition = ref({ x: 0, y: 0 });
+const mostrarPopup = ref(false);
+const infoPopup = ref("");
+const posicioPopup = ref({ x: 0, y: 0 });
 
-const closePopup = () => {
-  showPopup.value = false;
+const tancarPopup = () => {
+  mostrarPopup.value = false;
 };
 
-const getInterpolatedColor = (value, min, max) => {
-  const ratio = (value - min) / (max - min);
-  const red = Math.round(255 * ratio);
-  const blue = Math.round(255 * (1 - ratio));
-  return `rgb(${red}, 0, ${blue})`;
+const obtenirColorInterpolat = (valor, min, max) => {
+  const proporcio = (valor - min) / (max - min);
+  const vermell = Math.round(255 * proporcio);
+  const blau = Math.round(255 * (1 - proporcio));
+  return `rgb(${vermell}, 0, ${blau})`;
 };
 
-onMounted(() => {
-const image = './PLANTA 3.png';
-  const imageObj = new Image();
+onMounted(async () => {
+  await nextTick(); // Assegura't que tot estigui muntat
 
-  imageObj.onload = function() {
-    const imgWidth = imageObj.width;
-    const imgHeight = imageObj.height;
+  const imatge = "./PLANTA 3.png";
+  const imatgeObj = new Image();
 
-    const canvasWidth = stageRef.value.offsetWidth;
-    const canvasHeight = stageRef.value.offsetHeight;
-    const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight)* 1.3;
-    const scaledWidth = imgWidth * scaleFactor;
-    const scaledHeight = imgHeight * scaleFactor;
-    const x = (canvasWidth - scaledWidth) / 1.9;
-    const y = (canvasHeight - scaledHeight) / 1.6;
+  imatgeObj.onload = function () {
+    const ampladaImg = imatgeObj.width;
+    const alcadaImg = imatgeObj.height;
 
-    const stage = new Konva.Stage({
+    const ampladaCanvas = stageRef.value.offsetWidth;
+    const alcadaCanvas = stageRef.value.offsetHeight;
+    const factorEscala = Math.min(ampladaCanvas / ampladaImg, alcadaCanvas / alcadaImg);
+    const ampladaEscalada = ampladaImg * factorEscala;
+    const alcadaEscalada = alcadaImg * factorEscala;
+    const x = (ampladaCanvas - ampladaEscalada) / 2;
+    const y = (alcadaCanvas - alcadaEscalada) / 2 - 200; // ← Imatge més amunt
+
+    const escenari = new Konva.Stage({
       container: stageRef.value,
-      width: canvasWidth,
-      height: canvasHeight,
+      width: ampladaCanvas,
+      height: alcadaCanvas,
     });
 
-    const layer = new Konva.Layer();
-    stage.add(layer);
+    const capa = new Konva.Layer();
+    escenari.add(capa);
 
     const konvaImage = new Konva.Image({
       x: x,
       y: y,
-      image: imageObj,
-      width: scaledWidth,
-      height: scaledHeight,
+      image: imatgeObj,
+      width: ampladaEscalada,
+      height: alcadaEscalada,
     });
 
-    layer.add(konvaImage);
+    capa.add(konvaImage);
 
-    const points = [
-      { x: 342, y: 315, info: "2N BTX A", popupX: 175, popupY: 350 },
-      { x: 418, y: 307, info: "2N BTX B", popupX: 320, popupY: 350 },
-      { x: 495, y: 301, info: "2N BTX C", popupX: 599, popupY: 350 },
-      { x: 569, y: 294, info: "2N BTX E", popupX: 180, popupY: 550 },
-      { x: 645, y: 287, info: "1 BTX IB", popupX: 299, popupY: 540 },
-      { x: 487, y: 408, info: "2N BTX D", popupX: 540, popupY: 530 },
-      { x: 570, y: 400, info: "2N BTX IB", popupX: 920, popupY: 490 },
+    const volumMinim = Math.min(...punts.map((p) => p.volumen));
+    const volumMaxim = Math.max(...punts.map((p) => p.volumen));
 
-      { x: 811, y: 392, info: "2 DAW / 2DAM-VI", popupX: 1100, popupY: 500 },
-      { x: 886, y: 398, info: "2SMX-A2 / 2 ASX-B2", popupX: 1190, popupY: 490 },
-      { x: 840, y: 288, info: "2SMX-A1 / 2ASX-B1", popupX: 1290, popupY: 490 },
-      { x: 1046, y: 305, info: "1DAW / 1ASX-B2", popupX: 1300, popupY: 350 },
-      { x: 1122, y: 310, info: "2DAM / CERV", popupX: 1440, popupY: 360 },
-
-    ].map(point => ({
-      ...point,
-      enabled: Math.random() > 0.5,
-      volumen: Math.random() * 100
-    }));
-
-    const minVolumen = Math.min(...points.map(p => p.volumen));
-    const maxVolumen = Math.max(...points.map(p => p.volumen));
-
-    points.forEach(point => {
-      const color = point.enabled
-        ? getInterpolatedColor(point.volumen, minVolumen, maxVolumen)
+    punts.forEach((punt) => {
+      const color = punt.enabled
+        ? obtenirColorInterpolat(punt.volumen, volumMinim, volumMaxim)
         : "gray";
 
-      const circle = new Konva.Circle({
-        x: x + point.x * scaleFactor,
-        y: y + point.y * scaleFactor,
+      const cercle = new Konva.Circle({
+        x: x + punt.x * factorEscala,
+        y: y + punt.y * factorEscala,
         radius: 10,
         fill: color,
         stroke: "black",
@@ -101,30 +82,38 @@ const image = './PLANTA 3.png';
         draggable: false,
       });
 
-      circle.on('click', () => {
-        if (!point.enabled) return;
-        popupInfo.value = `${point.info} - Volumen: ${point.volumen.toFixed(2)}`;
-        showPopup.value = true;
-        popupPosition.value = { x: point.popupX, y: point.popupY };
+      cercle.on("click", () => {
+        if (!punt.enabled) return;
+        infoPopup.value = `${punt.info} - Volum: ${punt.volumen.toFixed(2)}`;
+        mostrarPopup.value = true;
+        posicioPopup.value = { x: punt.popupX, y: punt.popupY };
       });
 
-      layer.add(circle);
+      capa.add(cercle);
     });
 
-    layer.batchDraw();
+    capa.batchDraw();
   };
 
-  imageObj.src = image
+  imatgeObj.src = imatge;
 });
 </script>
 
 <template>
   <div ref="stageRef" class="canvas-container"></div>
-
-  <div v-if="showPopup" class="popup" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
-    <p>{{ popupInfo }}</p>
-    <button @click="closePopup" class="close-btn">X</button>
-  </div>
+  
+  <InfoCard
+    v-if="mostrarPopup"
+    :info="infoPopup"
+    :position="posicioPopup"
+    :title="puntActual ? puntActual.info : 'Sensor'"
+    :sensorData="{
+      temperatura: puntActual ? puntActual.temperatura : null,
+      humitat: puntActual ? puntActual.humitat : null,
+      volum: puntActual ? puntActual.volumen : null
+    }"
+    @close="tancarPopup"
+  />
 </template>
 
 <style scoped>

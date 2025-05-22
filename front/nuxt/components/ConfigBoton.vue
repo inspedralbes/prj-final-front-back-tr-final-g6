@@ -1,8 +1,8 @@
 <template>
     <div class="mt-6">
-        <nuxt-link to="/configuracion" aria-label="Ir a la configuración" class="button-container">
+        <nuxt-link to="/configuracion" aria-label="Vés a la configuració" class="button-container">
             <Button
-                label="Configuración"
+                label="Configuració"
                 icon="pi pi-cog"
                 class="bg-white text-black font-bold py-3 px-8 rounded-full shadow-lg border border-transparent transition-all duration-300 custom-button"
             />

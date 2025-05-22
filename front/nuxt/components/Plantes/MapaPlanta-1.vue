@@ -2,139 +2,120 @@
 import { onMounted, ref, defineProps, nextTick } from "vue";
 import Konva from "konva";
 import { getMapa } from "@/utils/communicationManager";
-import InfoCard from '../InfoCard.vue';
+import InfoCard from "../InfoCard.vue";
 
 const props = defineProps({
   imageUrl: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 const stageRef = ref(null);
-const aulaData = ref([]); // Aquí almacenamos los datos de la base de datos
-const popups = ref([]); // Lista de popups
-const fetchDataText = ref(""); // Esta variable se usará para mostrar la información completa debajo del mapa
+const dadesAules = ref([]);
+const finestres = ref([]);
+const textDades = ref("");
 
-// Obtener los datos desde el backend
-const fetchData = async () => {
+const obtenirDades = async () => {
   try {
-    const bodyRequest = {
-      "aules": [
-        8, 10, 12, 9, 11, 13,
-        42, 49, 43, 54, 44, 45,
-        46
-      ],
-      "data": "2025-02-10",
-      "tipus": "volum"
+    const cosPeticio = {
+      aules: [8, 10, 12, 9, 11, 13, 42, 49, 43, 54, 44, 45, 46],
+      data: "2025-02-10",
+      tipus: "volum",
     };
 
-    const response = await getMapa(bodyRequest);
-    aulaData.value = response;
+    const resposta = await getMapa(cosPeticio);
+    dadesAules.value = resposta;
 
-    // Crear una cadena con la información para mostrar debajo del mapa
-    fetchDataText.value = response.map(aula => {
-      return `Aula: ${aula.Curs}, Volumen: ${aula.average}`;
-    }).join("\n");
+    textDades.value = resposta
+      .map((aula) => {
+        return `Aula: ${aula.Curs}, Volum: ${aula.average}`;
+      })
+      .join("\n");
 
-    console.log("Datos recibidos:", aulaData.value);
+    console.log("Dades rebudes:", dadesAules.value);
   } catch (error) {
-    console.error("Error al obtener datos:", error);
+    console.error("Error en obtenir les dades:", error);
   }
 };
 
-const closePopup = (index) => {
-  popups.value.splice(index, 1); // Eliminar el popup de la lista
+const tancarFinestra = (index) => {
+  finestres.value.splice(index, 1);
 };
 
-const getInterpolatedColor = (value, min, max) => {
-  const ratio = (value - min) / (max - min);
-  const red = Math.round(255 * ratio);
-  const blue = Math.round(255 * (1 - ratio));
-  return `rgb(${red}, 0, ${blue})`;
+const obtenirColorInterpolat = (valor, min, max) => {
+  const proporcio = (valor - min) / (max - min);
+  const vermell = Math.round(255 * proporcio);
+  const blau = Math.round(255 * (1 - proporcio));
+  return `rgb(${vermell}, 0, ${blau})`;
 };
 
 onMounted(async () => {
-  await fetchData();
+  await obtenirDades();
   await nextTick();
 
   if (!stageRef.value) {
-    console.error("stageRef is null");
+    console.error("stageRef és nul");
     return;
   }
 
-  const image = './PLANTA 1.png';
-  const imageObj = new Image();
+  const imatge = "./PLANTA 1.png";
+  const objecteImatge = new Image();
 
-  imageObj.onload = function () {
-    const imgWidth = imageObj.width;
-    const imgHeight = imageObj.height;
+  objecteImatge.onload = function () {
+    const ampleImg = objecteImatge.width;
+    const altImg = objecteImatge.height;
 
-    const canvasWidth = stageRef.value.offsetWidth;
-    const canvasHeight = stageRef.value.offsetHeight;
-    const scaleFactor = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight);
-    const scaledWidth = imgWidth * scaleFactor;
-    const scaledHeight = imgHeight * scaleFactor;
-    const x = (canvasWidth - scaledWidth) / 2;
-    const y = (canvasHeight - scaledHeight) / 2;
+    const ampleCanvas = stageRef.value.offsetWidth;
+    const altCanvas = stageRef.value.offsetHeight;
+    const factorEscala = Math.min(ampleCanvas / ampleImg, altCanvas / altImg);
+    const ampleEscalat = ampleImg * factorEscala;
+    const altEscalat = altImg * factorEscala;
+    const x = (ampleCanvas - ampleEscalat) / 2;
+    const y = (altCanvas - altEscalat) / 2 - 200; // ← Imatge més amunt
 
     const stage = new Konva.Stage({
       container: stageRef.value,
-      width: canvasWidth,
-      height: canvasHeight,
+      width: ampleCanvas,
+      height: altCanvas,
     });
 
-    const layer = new Konva.Layer();
-    stage.add(layer);
+    const capa = new Konva.Layer();
+    stage.add(capa);
 
     const konvaImage = new Konva.Image({
       x: x,
       y: y,
-      image: imageObj,
-      width: scaledWidth,
-      height: scaledHeight,
+      image: objecteImatge,
+      width: ampleEscalat,
+      height: altEscalat,
     });
 
-    layer.add(konvaImage);
+    capa.add(konvaImage);
 
-    const points = [
-      { x: 179, y: 164, idAula: "8", popupX: 175, popupY: 350 },
-      { x: 268, y: 156, idAula: "10", popupX: 320, popupY: 350 },
-      { x: 494, y: 135, idAula: "12", popupX: 599, popupY: 350 },
-      { x: 189, y: 288, idAula: "9", popupX: 180, popupY: 550 },
-      { x: 279, y: 280, idAula: "11", popupX: 299, popupY: 540 },
-      { x: 458, y: 265, idAula: "13", popupX: 540, popupY: 530 },
-      { x: 735, y: 260, idAula: "42", popupX: 920, popupY: 490 },
-      { x: 824, y: 268, idAula: "49", popupX: 1100, popupY: 500 },
-      { x: 915, y: 274, idAula: "43", popupX: 1190, popupY: 490 },
-      { x: 1003, y: 283, idAula: "54", popupX: 1290, popupY: 490 },
-      { x: 1016, y: 160, idAula: "44", popupX: 1300, popupY: 350 },
-      { x: 1103, y: 168, idAula: "45", popupX: 1440, popupY: 360 },
-      { x: 1095, y: 294, idAula: "46", popupX: 1430, popupY: 530 },
-    ].map(point => {
-      const aula = aulaData.value.find(a => a.idAula == point.idAula);
-      const volumen = aula ? aula.average : 0;
+    const punts = dadesAules.value.map((aula) => ({
+      x: aula.x,
+      y: aula.y,
+      popupX: aula.popupX,
+      popupY: aula.popupY,
+      idAula: aula.idAula,
+      volum: aula.average,
+      activat: true,
+    }));
 
-      return {
-        ...point,
-        enabled: true,
-        volumen: volumen,
-      };
-    });
+    console.log("Punts processats:", punts);
 
-    console.log("Puntos procesados:", points);
+    const volumMin = Math.min(...punts.map((p) => p.volum));
+    const volumMax = Math.max(...punts.map((p) => p.volum));
 
-    const minVolumen = Math.min(...points.map(p => p.volumen));
-    const maxVolumen = Math.max(...points.map(p => p.volumen));
-
-    points.forEach(point => {
-      const color = point.enabled
-        ? getInterpolatedColor(point.volumen, minVolumen, maxVolumen)
+    punts.forEach((punt) => {
+      const color = punt.activat
+        ? obtenirColorInterpolat(punt.volum, volumMin, volumMax)
         : "gray";
 
-      const circle = new Konva.Circle({
-        x: x + point.x * scaleFactor,
-        y: y + point.y * scaleFactor,
+      const cercle = new Konva.Circle({
+        x: x + punt.x * factorEscala,
+        y: y + punt.y * factorEscala,
         radius: 10,
         fill: color,
         stroke: "black",
@@ -142,47 +123,42 @@ onMounted(async () => {
         draggable: false,
       });
 
-      circle.on('click', () => {
-        if (!point.enabled) return;
+      cercle.on("click", () => {
+        if (!punt.activat) return;
 
-        // Agregar nuevo popup a la lista
-        popups.value.push({
-          idAula: point.idAula,
-          Curs: aulaData.value.find(a => a.idAula == point.idAula)?.Curs || '',
-          volumen: point.volumen.toFixed(2),
-          position: { x: point.popupX, y: point.popupY }
+        finestres.value.push({
+          idAula: punt.idAula,
+          Curs: dadesAules.value.find((a) => a.idAula == punt.idAula)?.Curs || "",
+          volum: punt.volum.toFixed(2),
+          position: { x: punt.popupX, y: punt.popupY },
         });
       });
 
-      layer.add(circle);
+      capa.add(cercle);
     });
 
-    layer.batchDraw();
+    capa.batchDraw();
   };
 
-  imageObj.src = image;
+  objecteImatge.src = imatge;
 });
 </script>
 
 <template>
   <div ref="stageRef" class="canvas-container">
-    <!-- Mostrar múltiples InfoCard dependiendo de la lista popups -->
-    <InfoCard 
-      v-for="(popup, index) in popups" 
-      :key="index" 
-      :info="`Aula: ${popup.Curs} - Volum: ${popup.volumen}`" 
-      :position="popup.position" 
-      @close="closePopup(index)" 
-    />
-    
-    <!-- Mostrar la información de la base de datos debajo del mapa -->
+    <InfoCard v-for="(popup, index) in popups" :key="index" :info="`Aula: ${popup.Curs} - Volum: ${popup.volumen}`"
+      :position="popup.position" :title="popup.Curs || 'Sensor'" :sensorData="{
+        temperatura: popup.temperatura,
+        humitat: popup.humitat,
+        volum: popup.volumen
+      }" @close="closePopup(index)" />
+
     <div class="info-text">
-      <h3>Información de Aulas</h3>
-      <pre>{{ fetchDataText }}</pre>
+      <h3>Informació de les Aules</h3>
+      <pre>{{ textDades }}</pre>
     </div>
   </div>
 </template>
-
 
 <style scoped>
 .canvas-container {
@@ -201,7 +177,7 @@ onMounted(async () => {
   color: white;
   padding: 10px;
   max-width: 100%;
-  white-space: pre-wrap; /* Esto asegura que el texto se ajuste correctamente */
+  white-space: pre-wrap;
   z-index: 10;
 }
 

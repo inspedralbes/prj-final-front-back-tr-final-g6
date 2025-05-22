@@ -177,12 +177,23 @@ CREATE TABLE `usuari` (
 -- Crear tabla `sensor` (si aún no existe)
 CREATE TABLE `sensor` (
   `idSensor` INT(10) AUTO_INCREMENT PRIMARY KEY,
+  `mac` VARCHAR(100) NOT NULL UNIQUE,
+  `api_key` VARCHAR(255),
   `nombre` VARCHAR(100) NOT NULL,  -- Ejemplo de columna adicional
   `ubicacion` VARCHAR(100) NOT NULL,  -- Ejemplo de columna adicional
   `x` INT NOT NULL,  -- Coordenada x del sensor
   `y` INT NOT NULL,  -- Coordenada y del sensor
-  `idAula` INT NOT NULL,
+  `idAula` INT,
   FOREIGN KEY (`idAula`) REFERENCES `aula`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Crear tabla `newsensor` (si aún no existe)
+CREATE TABLE `newsensor` (
+  `idSensor` INT(10) AUTO_INCREMENT PRIMARY KEY,
+  `mac` VARCHAR(100) NOT NULL,
+  `ip_sensor` VARCHAR(255),
+  `accepted` BOOLEAN NOT NULL DEFAULT 0,
+  `banned` BOOLEAN NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Crear tabla `minuto`
@@ -190,7 +201,7 @@ CREATE TABLE `minut` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `idAula` INT NOT NULL,
   `idSensor` INT NOT NULL,
-  `tipus` ENUM('volum', 'temperatura', 'co2') NOT NULL,
+  `tipus` ENUM('volum', 'temperatura', 'humitat') NOT NULL,
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
@@ -205,7 +216,7 @@ CREATE TABLE `hora` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `idAula` INT NOT NULL,
   `idSensor` INT NOT NULL,
-  `tipus` ENUM('volum', 'temperatura', 'co2') NOT NULL,
+  `tipus` ENUM('volum', 'temperatura', 'humitat') NOT NULL,
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
@@ -220,7 +231,7 @@ CREATE TABLE `dia` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `idAula` INT NOT NULL,
   `idSensor` INT NOT NULL,
-  `tipus` ENUM('volum', 'temperatura', 'co2') NOT NULL,
+  `tipus` ENUM('volum', 'temperatura', 'humitat') NOT NULL,
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
@@ -235,7 +246,7 @@ CREATE TABLE `setmana` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `idAula` INT NOT NULL,
   `idSensor` INT NOT NULL,
-  `tipus` ENUM('volum', 'temperatura', 'co2') NOT NULL,
+  `tipus` ENUM('volum', 'temperatura', 'humitat') NOT NULL,
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
@@ -250,7 +261,7 @@ CREATE TABLE `mes` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `idAula` INT NOT NULL,
   `idSensor` INT NOT NULL,
-  `tipus` ENUM('volum', 'temperatura', 'co2') NOT NULL,
+  `tipus` ENUM('volum', 'temperatura', 'humitat') NOT NULL,
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
@@ -265,7 +276,7 @@ CREATE TABLE `curs` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `idAula` INT NOT NULL,
   `idSensor` INT NOT NULL,
-  `tipus` ENUM('volum', 'temperatura', 'co2') NOT NULL,
+  `tipus` ENUM('volum', 'temperatura', 'humitat') NOT NULL,
   `max` FLOAT NOT NULL,
   `min` FLOAT NOT NULL,
   `average` FLOAT NOT NULL,
@@ -283,6 +294,26 @@ INSERT INTO `usuari` (`id`, `nom`, `correu`, `contrasenya`, `admin`) VALUES
 (1, 'admin', 'admin@admin.com', 'admin', 1),
 (2, 'professor', 'prof@prof.com', 'prof', 0);
 
+INSERT INTO `dia` (`id`, `idAula`, `idSensor`, `tipus`, `max`, `min`, `average`, `dataIni`, `dataFi`) VALUES
+(1, 1, 1, 'volum', 30, 10, 20, '2025-02-10 00:00:00', '2025-02-11 00:00:00'),
+(2, 1, 1, 'volum', 100, 50, 75, '2025-02-11 00:00:00', '2025-02-12 00:00:00'),
+(3, 1, 1, 'volum', 50, 2, 34, '2025-02-12 00:00:00', '2025-02-13 00:00:00'),
+(4, 1, 1, 'volum', 38, 12, 20, '2025-02-13 00:00:00', '2025-02-14 00:00:00'),
+(5, 1, 1, 'volum', 100, 50, 75, '2025-02-14 00:00:00', '2025-02-15 00:00:00');
+
+INSERT INTO `sensor` (`idSensor`, `mac`, `nombre`, `ubicacion`, `x`, `y`, `idAula`, `api_key`) VALUES
+(1, 'MAC1', 'sensor1', 'aula1', 1, 1, 1, NULL),
+(2, 'MAC2', 'sensor2', 'aula1', 2, 2, 1, NULL),
+(3, 'MAC3', 'sensor3', 'aula1', 3, 3, 1, 'API_KEY3'),
+(4, 'MAC4', 'sensor4', 'aula1', 4, 4, 1, 'API_KEY4'),
+(5, 'MAC5', 'sensor5', 'aula1', 5, 5, 1, 'API_KEY5'),
+(6, 'MAMAMAM', 'sensor6', 'aula1', 6, 6, 1, 'c8nlsy4955ju75tq5w3f');
+
+INSERT INTO `newsensor` (`idSensor`, `mac`, `ip_sensor`, `accepted`, `banned`) VALUES
+(1, 'MAC1', '192.168.1.1', 0, 0),
+(2, 'MAC2', '192.168.1.1', 0, 0),
+(3, 'MAC3', '192.168.1.1', 0, 0),
+(4, 'MAC4', '192.168.1.1', 0, 0);
 --
 -- Índexs per a les taules bolcades
 --

@@ -1,290 +1,483 @@
 <template>
-    <div>
-        <Header />
-        <div
-            class="min-h-screen bg-gradient-to-r from-[#07C8F9] via-[#0A85ED] to-[#0D41E1] flex flex-col items-center p-8 animated-bg">
+  <div class="min-h-screen bg-slate-800 flex flex-col">
+    <!-- Capçalera personalitzada -->
+    <Header />
 
-            <div class="flex space-x-4">
-            <button @click="navigateToMapas"
-                class="px-4 py-2 my-4 bg-emerald-700 text-white rounded-lg hover:bg-blue-600 transition-all">
-                Veure Mapes
-            </button>
-            
-            <button @click="showCreateAulaForm = !showCreateAulaForm"
-                class="px-4 py-2 my-4 bg-emerald-700 text-white rounded-lg hover:bg-blue-600 transition-all">
-                Crear Aula
-            </button>
+    <!-- Contingut principal -->
+    <div class="flex-grow w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <!-- Botons d'acció -->
+      <div class="flex flex-wrap gap-4 justify-center">
+        <button @click="navigateToSensors"
+          class="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+          </svg>
+          Configurar Sensors
+        </button>
+      </div>
+
+      <!-- Cercar i filtrar -->
+      <div class="bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-700">
+        <div class="flex flex-col md:flex-row gap-4 items-center">
+          <div class="relative flex-grow">
+            <input v-model="searchQuery" type="text" placeholder="Cercar Aula..."
+              class="w-full p-3 pl-10 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 absolute left-3 top-3.5" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          <button @click="showCreateAulaForm = !showCreateAulaForm"
+            class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            {{ showCreateAulaForm ? "Cancel·lar" : "Crear Aula" }}
+          </button>
+
+          <div class="relative w-full md:w-48">
+            <select v-model="selectedEtapa"
+              class="custom-select appearance-none w-full p-3 pr-10 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all">
+              <option :value="null">Totes les etapes</option>
+              <option v-for="etapa in etapas" :key="etapa.value" :value="etapa.value">
+                {{ etapa.label }}
+              </option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a 1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd" />
+              </svg>
             </div>
-            
-            <div class="w-full max-w-3xl mb-8 bg-white p-6 rounded-lg shadow-lg">
-                <div class="flex flex-wrap gap-4">
-                    <input v-model="searchQuery" type="text" placeholder="Cercar Aula..."
-                        class="flex-grow p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all" />
-                    <Dropdown v-model="selectedEtapa" :options="etapas" option-label="label" option-value="value"
-                        placeholder="Filtrar Etapa" class="w-48" />
-                    <button v-if="searchQuery || selectedEtapa" @click="clearFilters"
-                        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all">
-                        Netejar filtres
-                    </button>
-                </div>
-            </div>
+          </div>
 
-
-            <div v-if="showCreateAulaForm" class="w-full max-w-3xl mb-8 bg-white p-6 rounded-lg shadow-lg">
-                <form @submit.prevent="handleCreateAula">
-                    <label for="Curs" class="block text-sm text-gray-700">Curs:</label>
-                    <input v-model="newAula.Curs" type="text" placeholder="Curs"
-                        class="w-full p-3 border rounded-lg transition-all focus:ring-2 focus:ring-blue-500 mb-4" />
-                    <label for="Classe" class="block text-sm text-gray-700">Classe:</label>
-                    <input v-model="newAula.Classe" type="text" placeholder="Classe"
-                        class="w-full p-3 border rounded-lg transition-all focus:ring-2 focus:ring-blue-500 mb-4" />
-                    <label for="Etapa" class="block text-sm text-gray-700">Etapa:</label>
-                    <Dropdown v-model="newAula.Etapa" :options="etapas" option-label="label" option-value="value"
-                        placeholder="Seleccionar Etapa" class="w-full mb-4" />
-                    <label for="Planta" class="block text-sm text-gray-700">Planta:</label>
-                    <input v-model="newAula.Planta" type="number" placeholder="Planta"
-                        class="w-full p-3 border rounded-lg transition-all focus:ring-2 focus:ring-blue-500 mb-4" />
-                    <label for="Aula" class="block text-sm text-gray-700">Aula:</label>
-                    <input v-model="newAula.Aula" type="number" placeholder="Aula"
-                        class="w-full p-3 border rounded-lg transition-all focus:ring-2 focus:ring-blue-500 mb-4" />
-                    <label for="turn" class="block text-sm text-gray-700">Torn:</label>
-                    <input v-model="newAula.turn" type="text" placeholder="Torn"
-                        class="w-full p-3 border rounded-lg transition-all focus:ring-2 focus:ring-blue-500 mb-4" />
-                    <button type="submit"
-                        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all">
-                        Crear
-                    </button>
-                </form>
-            </div>
-
-            <!-- Llista d'Aules -->
-            <div class="w-full max-w-3xl space-y-6">
-                <div v-for="aula in filteredAulas" :key="aula.id"
-                    class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105">
-                    <div class="p-6 cursor-pointer" @click="toggleDetails(aula)">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h2 class="text-2xl font-semibold text-gray-900">{{ aula.id }} - {{ aula.Curs || 'Sense classe' }}</h2>
-                                <p class="text-sm text-gray-700">Etapa: {{ aula.Etapa || 'Sense etapa' }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <label :for="'toggle-' + aula.id"
-                                    class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" :id="'toggle-' + aula.id" :checked="aula.activa === 1"
-                                        @change="toggleActive(aula)" class="sr-only peer">
-                                    <div
-                                        class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full">
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div v-if="aula.showDetails" class="mt-4 space-y-4" @click.stop>
-                            <template v-if="!aula.editing">
-                                <p class="text-sm text-gray-700">Classe: {{ aula.Classe || 'Sense classe' }}</p>
-                                <p class="text-sm text-gray-700">Planta: {{ aula.Planta !== undefined ? aula.Planta :
-                                    'Sense planta' }}</p>
-                                <p class="text-sm text-gray-700">Aula: {{ aula.Aula || 'Sense aula' }}</p>
-                                <p class="text-sm text-gray-700">Torn: {{ aula.turn || 'Sense torn' }}</p>
-                                <div class="flex space-x-4">
-                                    <button @click.stop="startEditing(aula)"
-                                        class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-all">Editar</button>
-                                    <button @click.stop="handleDeleteAula(aula.id)"
-                                        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all">Eliminar</button>
-                                </div>
-                            </template>
-                            <form v-else @submit.prevent="saveEdit(aula)" class="space-y-4">
-                                <label for="curs" class="block text-sm text-gray-700">Curs:</label>
-                                <input v-model="aula.Curs" type="text" placeholder="Curs"
-                                    class="w-full p-3 border rounded-lg transition-all focus:ring-2 focus:ring-blue-500" />
-                                <label for="clase" class="block text-sm text-gray-700">Classe:</label>
-                                <input v-model="aula.Classe" type="text" placeholder="Classe"
-                                    class="w-full p-3 border rounded-lg transition-all focus:ring-2 focus:ring-blue-500" />
-                                <label for="planta" class="block text-sm text-gray-700">Planta:</label>
-                                <input v-model="aula.Planta" type="number" placeholder="Planta"
-                                    class="w-full p-3 border rounded-lg transition-all focus:ring-2 focus:ring-blue-500" />
-                                <label for="aula" class="block text-sm text-gray-700">Aula:</label>
-                                <input v-model="aula.Aula" type="number" placeholder="Aula"
-                                    class="w-full p-3 border rounded-lg transition-all focus:ring-2 focus:ring-blue-500" />
-                                <label for="turn" class="block text-sm text-gray-700">Torn:</label>
-                                <input v-model="aula.turn" type="text" placeholder="Torn"
-                                    class="w-full p-3 border rounded-lg transition-all focus:ring-2 focus:ring-blue-500" />
-                                <div class="flex space-x-4">
-                                    <button type="submit"
-                                        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all">Guardar</button>
-                                    <button @click.stop="cancelEdit(aula)"
-                                        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all">Cancelar</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          <button v-if="searchQuery || selectedEtapa" @click="clearFilters"
+            class="whitespace-nowrap px-4 py-3 rounded-lg bg-slate-700 hover:bg-slate-600 text-white transition-colors flex items-center justify-center border border-slate-600">
+            <span class="text-lg mr-1">&times;</span>
+            <span>Netejar filtres</span>
+          </button>
         </div>
+      </div>
+
+      <!-- Formulari per crear aula -->
+      <div v-if="showCreateAulaForm" class="bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-700">
+        <h2 class="text-2xl font-bold text-white mb-6">Crear Nova Aula</h2>
+        <form @submit.prevent="handleCreateAula" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="Curs" class="block text-sm font-medium text-slate-300 mb-2">Curs:</label>
+              <input v-model="newAula.Curs" type="text" placeholder="Curs"
+                class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all" />
+            </div>
+            <div>
+              <label for="Classe" class="block text-sm font-medium text-slate-300 mb-2">Classe:</label>
+              <input v-model="newAula.Classe" type="text" placeholder="Classe"
+                class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all" />
+            </div>
+            <div>
+              <label for="Etapa" class="block text-sm font-medium text-slate-300 mb-2">Etapa:</label>
+              <select v-model="newAula.Etapa"
+                class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all">
+                <option value="" disabled selected>Seleccionar Etapa</option>
+                <option v-for="etapa in etapas" :key="etapa.value" :value="etapa.value">
+                  {{ etapa.label }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label for="Planta" class="block text-sm font-medium text-slate-300 mb-2">Planta:</label>
+              <input v-model="newAula.Planta" type="number" placeholder="Planta"
+                class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all" />
+            </div>
+            <div>
+              <label for="Aula" class="block text-sm font-medium text-slate-300 mb-2">Aula:</label>
+              <input v-model="newAula.Aula" type="number" placeholder="Aula"
+                class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all" />
+            </div>
+            <div>
+              <label for="turn" class="block text-sm font-medium text-slate-300 mb-2">Torn:</label>
+              <select v-model="newAula.turn"
+                class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all">
+                <option value="mati">Matí</option>
+                <option value="tarda">Tarda</option>
+                <option value="mati i tarda">Matí i tarda</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex justify-end pt-4">
+            <button type="submit"
+              class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              Crear Aula
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Llista d'aules -->
+      <div class="space-y-6">
+        <div v-for="aula in filteredAulas" :key="aula.id"
+          class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 hover:border-teal-500 transition-all duration-300">
+          <div class="p-6 cursor-pointer" @click="toggleDetails(aula)">
+            <div class="flex justify-between items-center">
+              <div>
+                <h2 class="text-2xl font-bold text-white">
+                  {{ aula.id }} - {{ aula.Curs || "Sense classe" }}
+                </h2>
+                <p class="text-sm text-teal-400">
+                  Etapa: {{ aula.Etapa || "Sense etapa" }}
+                </p>
+              </div>
+            </div>
+
+            <div v-if="aula.showDetails" class="mt-6 space-y-4" @click.stop>
+              <template v-if="!aula.editing">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p class="text-sm text-slate-400">Classe:</p>
+                    <p class="text-lg text-white">{{ aula.Classe || "Sense classe" }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-400">Etapa:</p>
+                    <p class="text-lg text-white">{{ aula.Etapa || "Sense etapa" }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-400">Planta:</p>
+                    <p class="text-lg text-white">
+                      {{ aula.Planta !== undefined ? aula.Planta : "Sense planta" }}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-400">Aula:</p>
+                    <p class="text-lg text-white">{{ aula.Aula || "Sense aula" }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-400">Torn:</p>
+                    <p class="text-lg text-white">{{ aula.turn || "Sense torn" }}</p>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-3 pt-4">
+                  <button @click.stop="startEditing(aula)"
+                    class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Editar
+                  </button>
+                  <button @click.stop="handleDeleteAula(aula.id)"
+                    class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Eliminar
+                  </button>
+                </div>
+              </template>
+              <form v-else @submit.prevent="saveEdit(aula)" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Curs:</label>
+                    <input v-model="editData.Curs" type="text" placeholder="Curs"
+                      class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Classe:</label>
+                    <select v-model="editData.Classe"
+                      class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all">
+                      <option value="">Seleccionar Classe</option>
+                      <option v-for="classe in uniqueClasses" :key="classe" :value="classe">
+                        {{ classe }}
+                      </option>
+                      <option value="_new">+ Afegir nova classe</option>
+                    </select>
+                    <input v-if="editData.Classe === '_new'" v-model="editData.newClasse" type="text"
+                      placeholder="Escriu el nom de la nova classe"
+                      class="w-full mt-2 p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all"
+                      @keydown.enter.prevent="addNewClasse(aula)" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Etapa:</label>
+                    <select v-model="editData.Etapa"
+                      class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all">
+                      <option value="" disabled>Seleccionar Etapa</option>
+                      <option v-for="etapa in etapas" :key="etapa.value" :value="etapa.value">
+                        {{ etapa.label }}
+                      </option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Planta:</label>
+                    <input v-model="editData.Planta" type="number" placeholder="Planta"
+                      class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Aula:</label>
+                    <input v-model="editData.Aula" type="number" placeholder="Aula"
+                      class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Torn:</label>
+                    <select v-model="editData.turn"
+                      class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all">
+                      <option value="mati">Matí</option>
+                      <option value="tarda">Tarda</option>
+                      <option value="mati i tarda">Matí i tarda</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-3 pt-4">
+                  <button type="submit"
+                    class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-all flex items-center">
+                    Guardar
+                  </button>
+                  <button type="button" @click.stop="cancelEdit(aula)"
+                    class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-all flex items-center">
+                    Cancel·lar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import Dropdown from 'primevue/dropdown';
-import { getTotesAulas, createAula, deleteAula } from '~/utils/communicationManager';
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
+import {
+  getTotesAulas,
+  createAula,
+  deleteAula,
+  updateAula,
+  habilitarAula,
+  getStatsMedias,
+} from "~/utils/communicationManager";
 
 const router = useRouter();
 const aulas = ref([]);
-const searchQuery = ref('');
+const searchQuery = ref("");
 const selectedEtapa = ref(null);
 const showCreateAulaForm = ref(false);
+const stats = ref({
+  mediaTemperatura: 0,
+  mediaVolumen: 0,
+  totalSensors: 0,
+});
 const newAula = ref({
-    Curs: '',
-    Classe: '',
-    Etapa: '',
-    Planta: 0,
-    Aula: '',
-    activa: 0,
-    turn: ''
+  Curs: "",
+  Classe: "",
+  Etapa: "",
+  Planta: 0,
+  Aula: 0,
+  turn: "mati",
+  activa: 1,
 });
 
 const etapas = [
-    { label: 'ESO', value: 'ESO' },
-    { label: 'BATX', value: 'BATX' },
-    { label: 'PFI', value: 'PFI' },
-    { label: 'CFGM', value: 'CFGM' },
-    { label: 'CFGS', value: 'CFGS' },
-    { label: 'ALTRES', value: 'ALTRES' }
+  { label: "ESO", value: "ESO" },
+  { label: "BATX", value: "BATX" },
+  { label: "PFI", value: "PFI" },
+  { label: "CFGM", value: "CFGM" },
+  { label: "CFGS", value: "CFGS" },
+  { label: "ALTRES", value: "ALTRES" },
 ];
 
-onMounted(async () => {
-    try {
-        aulas.value = await getTotesAulas();
-        aulas.value = aulas.value.map(aula => ({
-            ...aula,
-            showDetails: false,
-            editing: false
-        }));
-    } catch (error) {
-        console.error('Error al cargar las aulas:', error.message);
+// Obtenir classes úniques de les dades d'aules
+const uniqueClasses = computed(() => {
+  const classes = new Set();
+  aulas.value.forEach((aula) => {
+    if (aula.Classe && aula.Classe.trim() !== "") {
+      classes.add(aula.Classe);
     }
+  });
+  return Array.from(classes).sort();
+});
+
+const fetchStats = async () => {
+  try {
+    stats.value = await getStatsMedias();
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
+const startStatsInterval = () => {
+  fetchStats(); // Primera càrrega
+  setInterval(fetchStats, 60000); // Actualitzar cada minut
+};
+
+onMounted(async () => {
+  try {
+    const data = await getTotesAulas();
+    aulas.value = data.map((aula) => ({
+      ...aula,
+      showDetails: false,
+      editing: false,
+      newClasse: "",
+    }));
+    startStatsInterval(); // Iniciar l'actualització d'estadístiques
+  } catch (error) {
+    console.error("Error en carregar les aules:", error.message);
+    alert("Error en carregar les aules: " + error.message);
+  }
 });
 
 const filteredAulas = computed(() => {
-    return aulas.value.filter(aula => {
-        const matchesSearch = aula.Curs.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            aula.Aula.toLowerCase().includes(searchQuery.value.toLowerCase());
-        const matchesEtapa = !selectedEtapa.value || aula.Etapa === selectedEtapa.value;
-        return matchesSearch && matchesEtapa;
-    });
+  return aulas.value.filter((aula) => {
+    const matchesSearch =
+      aula.Curs?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      aula.Aula?.toString().includes(searchQuery.value.toLowerCase());
+    const matchesEtapa = !selectedEtapa.value || aula.Etapa === selectedEtapa.value;
+    return matchesSearch && matchesEtapa;
+  });
 });
 
 const clearFilters = () => {
-    searchQuery.value = '';
-    selectedEtapa.value = null;
+  searchQuery.value = "";
+  selectedEtapa.value = null;
 };
 
-const toggleDetails = (aula) => aula.showDetails = !aula.showDetails;
-const startEditing = (aula) => aula.editing = true;
-const cancelEdit = (aula) => aula.editing = false;
+const toggleDetails = (aula) => (aula.showDetails = !aula.showDetails);
+const editData = ref({});
+
+const startEditing = (aula) => {
+  aula.editing = true;
+  editData.value = {
+    ...aula,
+    newClasse: "",
+  };
+};
+
+const cancelEdit = (aula) => {
+  aula.editing = false;
+  editData.value = {};
+};
+
+const addNewClasse = (aula) => {
+  if (editData.value.newClasse && editData.value.newClasse.trim() !== "") {
+    editData.value.Classe = editData.value.newClasse;
+    editData.value.newClasse = "";
+  }
+};
 
 const saveEdit = async (aula) => {
-    try {
-        await updateAula(aula.id, aula);
-
-        aula.editing = false;
-
-        alert('Aula actualitzada correctament');
-    } catch (error) {
-        console.error('Error en actualitzar l\'aula:', error.message);
-        alert('Ha ocurrido un error al actualizar el aula.');
+  try {
+    // Gestionar nova classe si s'ha seleccionat
+    if (editData.value.Classe === "_new" && editData.value.newClasse) {
+      editData.value.Classe = editData.value.newClasse;
     }
+
+    // Actualitzar l'objecte aula
+    Object.assign(aula, {
+      Curs: editData.value.Curs,
+      Classe: editData.value.Classe,
+      Etapa: editData.value.Etapa,
+      Planta: editData.value.Planta,
+      Aula: editData.value.Aula,
+      turn: editData.value.turn,
+      activa: editData.value.activa,
+    });
+
+    // Enviar actualització al servidor
+    await updateAula(aula.id, {
+      Curs: editData.value.Curs,
+      Classe: editData.value.Classe,
+      Etapa: editData.value.Etapa,
+      Planta: editData.value.Planta,
+      Aula: editData.value.Aula,
+      turn: editData.value.turn,
+      activa: editData.value.activa,
+    });
+
+    aula.editing = false;
+    editData.value = {};
+    alert("Aula actualitzada correctament");
+  } catch (error) {
+    console.error("Error en actualitzar l'aula:", error.message);
+    alert("Error en actualitzar l'aula: " + error.message);
+  }
 };
 
 const handleDeleteAula = async (id) => {
-    if (confirm('Estàs segur que vols eliminar aquesta aula?')) {
-        try {
-            await deleteAula(id);
-            aulas.value = aulas.value.filter(aula => aula.id !== id);
-            alert('Aula eliminada correctament');
-        } catch (error) {
-            console.error('Error en eliminar l\'aula:', error.message);
-            alert('Ha ocurrido un error al eliminar el aula.');
-        }
-    }
-};
-
-const toggleActive = async (aula) => {
+  if (confirm("Estàs segur que vols eliminar aquesta aula?")) {
     try {
-        const updatedAula = {
-            id: aula.id,
-            activa: aula.activa ? 0 : 1
-        };
-        await habilitarAula(updatedAula);
-        aula.activa = !aula.activa;
+      await deleteAula(id);
+      aulas.value = aulas.value.filter((aula) => aula.id !== id);
+      alert("Aula eliminada correctament");
     } catch (error) {
-        console.error('Error al cambiar el estado del aula:', error.message);
-        aula.activa = !aula.activa;
+      console.error("Error en eliminar l'aula:", error.message);
+      alert("Ha ocorregut un error en eliminar l'aula.");
     }
+  }
 };
 
 const navigateToMapas = () => {
-    router.push('/mapas');
+  router.push("/mapas");
+};
+
+const navigateToSensors = () => {
+  router.push("/sensors");
 };
 
 const handleCreateAula = async () => {
-    try {
+  try {
+    const createdAula = await createAula(
+      newAula.value.Curs,
+      newAula.value.Classe,
+      newAula.value.Etapa,
+      newAula.value.Planta,
+      newAula.value.Aula,
+      newAula.value.turn,
+      newAula.value.activa
+    );
 
-        await createAula(newAula.value.Curs, newAula.value.Classe, newAula.value.Etapa);
-        alert('Aula creada correctament!');
+    aulas.value.push({
+      ...createdAula,
+      showDetails: false,
+      editing: false,
+      newClasse: "",
+    });
 
-        newAula.value = { Curs: '', Classe: '', Etapa: '', Planta: 0, Aula: '', activa: 0, turn: '' };
-        showCreateAulaForm.value = false;
-        
-        aulas.value = await getTotesAulas();
-    } catch (error) {
-        console.error("Error al crear el aula:", error.message);
-        alert('Ha ocurrido un error al crear el aula.');
-    }
+    newAula.value = {
+      Curs: "",
+      Classe: "",
+      Etapa: "",
+      Planta: 0,
+      Aula: 0,
+      turn: "mati",
+      activa: 1,
+    };
+    showCreateAulaForm.value = false;
+
+    alert("Aula creada correctament!");
+  } catch (error) {
+    console.error("Error en crear l'aula:", error.message);
+    alert("Error en crear l'aula: " + error.message);
+  }
 };
-
 </script>
 
 <style scoped>
-.animated-bg {
-    background-size: 400% 400%;
-    animation: move-bg 15s ease infinite;
+.custom-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none;
 }
 
-@keyframes move-bg {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-input[type="text"],
-.p-dropdown {
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-input[type="text"]:focus,
-.p-dropdown:focus {
-    border-color: #3B82F6;
-}
-
-button {
-    transition: background-color 0.3s ease-in-out;
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-button:hover {
-    background-color: #E11D48;
+.custom-select:focus {
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2);
 }
 </style>

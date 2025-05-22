@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 
 export const useUserStore = defineStore('user', () => {
     const user = ref(null);
+    const isReady = ref(false); // Nueva propiedad para indicar si el estado está cargado
 
     // Al montar el store, recuperamos el usuario del localStorage si está disponible
     onMounted(() => {
@@ -10,6 +11,7 @@ export const useUserStore = defineStore('user', () => {
         if (storedUser) {
             user.value = JSON.parse(storedUser);
         }
+        isReady.value = true; // Marcamos el estado como listo
     });
 
     // Guardar el usuario en el store y en localStorage
@@ -30,11 +32,16 @@ export const useUserStore = defineStore('user', () => {
     // Computado para verificar si el usuario es administrador
     const isAdmin = computed(() => user.value?.admin === 1);
 
+    // Computado para verificar si el usuario está logueado
+    const isLoggedIn = computed(() => user.value !== null);
+
     return {
         user,
+        isReady,    // Exponemos si el estado está cargado
         setUser,
         logout,
-        userId,  // Exponemos el id del usuario
-        isAdmin, // Exponemos si el usuario es administrador
+        userId,     // Exponemos el id del usuario
+        isAdmin,    // Exponemos si el usuario es administrador
+        isLoggedIn, // Exponemos si el usuario está logueado
     };
 });
