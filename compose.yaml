@@ -1,0 +1,155 @@
+services: 
+  prfg6-front:
+    image: node:23-bullseye
+    container_name: nuxt
+    build:
+      context: ./front/nuxt
+      dockerfile: develop.Dockerfile
+    working_dir: /usr/src/app
+    volumes:
+      - ./front/nuxt:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    links:
+      - prfg6-back
+    networks:
+      - general
+
+  prfg6-back:
+     container_name: back
+     build: 
+       dockerfile: ./back/principal/develop.Dockerfile
+       context: .
+     command: sh -c "cp .env.DEV .env && npm install --no-bin-links && nodemon -L index.js"
+     volumes:
+       - ./back/principal:/usr/src/app
+     working_dir: /usr/src/app
+     ports: 
+       - 3020:3020
+     depends_on:
+       - prfg6-mysql
+       - prfg6-mongodb
+     networks:
+       - general
+    
+  prfg6-sensor:
+     container_name: sensor-back
+     build: 
+       dockerfile: ./back/services/develop.Dockerfile
+       context: .     
+     command: sh -c "cp .env.DEV .env && npm install && nodemon -L index.js"
+     volumes:
+       - ./back/services/sensor:/usr/src/app
+     working_dir: /usr/src/app
+     depends_on:
+       - rabbitmq
+     networks:
+       - general
+
+  prfg6-dbinsert:
+      container_name: dbinsert-back
+      build: 
+        dockerfile: ./back/services/develop.Dockerfile
+        context: .     
+      command: sh -c "cp .env.DEV .env && npm install && nodemon -L index.js"
+      volumes:
+        - ./back/services/DBinsert:/usr/src/app
+      working_dir: /usr/src/app
+      depends_on:
+        - prfg6-mongodb
+        - prfg6-sensor
+      networks:
+        - general
+
+  prfg6-python:
+    build:
+      context: .
+      dockerfile: ./back/services/python/develop.Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./back/services/python:/usr/src/app
+    working_dir: /usr/src/app
+    restart: unless-stopped
+    container_name: prfg6-python
+    networks:
+      - general
+
+  prfg6-mongodb:
+    image: mongo:6.0
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongo-bd:/data/db
+    networks:
+      - general
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      MONGO_USER: root
+      MONGO_PASSWORD: example
+      MONGO_URI: mongodb://root:example@prfg6-mongodb:27017/
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - prfg6-mongodb
+    networks:
+      - general
+
+  prfg6-mysql:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: prf-g6
+    volumes:
+      - mysql-bd:/var/lib/mysql:rw
+      - ./bd/mysql/acubox.sql:/docker-entrypoint-initdb.d/acubox.sql
+    ports:
+      - 3306:3306
+    networks:
+      - general
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      ADMINER_DEFAULT_SERVER: prfg6-mysql
+    depends_on:
+      - prfg6-mysql
+        # condition: service_healthy
+    networks:
+      - general
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - general
+
+volumes:
+  mysql-bd:
+  mongo-bd:
+  rabbitmq_data:
+
+networks:
+    general:
+      driver: bridge
+      name: general

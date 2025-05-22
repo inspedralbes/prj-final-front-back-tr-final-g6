@@ -1,0 +1,69 @@
+name: Desplegament a Producció
+
+on:
+  push:
+    branches:
+      - prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Desplegar a producció via SSH
+        env:
+          SSH_HOST: ${{ secrets.PROD_URL_SERVER }}
+          SSH_USER: ${{ secrets.PROD_USER_SERVER }}
+          SSH_PASSWORD: ${{ secrets.PROD_PASSWORD_SERVER }}
+        run: |
+          set -x
+          
+          # Connexió al servidor
+          sshpass -p "${SSH_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << 'EOF'
+          
+          set -x
+          echo "Connexió amb el servidor establerta"
+
+          # Actualitzar el codi des de GitHub
+          cd /root/PROD/prj-final-front-back-tr-final-g6
+          git switch prod
+          git pull
+
+          # Copiar i configurar arxius .env
+          echo "Copiant arxius .env.PROD a .env"
+          cp -f ./back/principal/.env.PROD ./back/principal/.env
+          cp -f ./front/nuxt/.env.PROD ./front/nuxt/.env
+          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> ./back/principal/.env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> ./back/principal/.env
+          echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> ./back/principal/.env
+
+          cp -f ./back/services/DBinsert/.env.PROD ./back/services/DBinsert/.env
+          cp -f ./back/services/sensor/.env.PROD ./back/services/sensor/.
+          
+          echo "ME_CONFIG_BASICAUTH=false" > ./.env.PROD.DOCKER
+          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> ./.env.PROD.DOCKER
+          echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> ./.env.PROD.DOCKER
+          echo "MONGO_USER=${{ secrets.MONGO_USER }}" >> ./.env.PROD.DOCKER
+          echo "MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}" >> ./.env.PROD.DOCKER
+          echo "MYSQL_DATABASE: prf-g6" >> ./.env.PROD.DOCKER
+          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_USER }}" >> ./.env.PROD.DOCKER
+          echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_PASSWORD }}" >> ./.env.PROD.DOCKER
+          echo "ME_CONFIG_MONGODB_URL=${{ secrets.MONGO_URI }}" >> ./.env.PROD.DOCKER
+
+          echo "Arxius .env copiats i configurats correctament"
+
+          # Iniciar Docker
+          echo "Iniciant Docker"
+          systemctl start docker
+          echo "Docker iniciat"
+          echo "Esborrant imatges velles"
+          docker system prune -a -y
+
+          # Executar Docker Compose
+          docker compose -f compose.prod.yaml up -d --build
+          echo "Docker Compose executat correctament"
+
+          # Llistar contenidors actius
+          docker ps -a
+          
+          EOF

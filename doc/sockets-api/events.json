@@ -1,0 +1,98 @@
+{
+    "events": {
+        "emitted": [
+            {
+                "name": "newRawData",
+                "description": "S'emet quan es reben noves dades crues des de MongoDB.",
+                "payload": {
+                    "volume": "Número que representa el volum.",
+                    "temperature": "Número que representa la temperatura.",
+                    "humidity": "Número que representa la humitat.",
+                    "id_sensor": "Identificador del sensor.",
+                    "id_aula": "Identificador de l'aula associada al sensor.",
+                    "date": "Data i hora de les dades."
+                }
+            },
+            {
+                "name": "newAggregatedData",
+                "description": "S'emet quan es processen i s'insereixen dades agregades a MySQL.",
+                "payload": {
+                    "timeSpan": "Interval de temps de les dades agregades.",
+                    "sensors": "Objecte amb dades agregades per sensor."
+                },
+                "sensor_object_format": {
+                    "2": {
+                        "volume": {
+                            "max": 77,
+                            "min": 54,
+                            "avg": 66.66666666666667
+                        },
+                        "temperature": {
+                            "max": 25.91,
+                            "min": 20.8,
+                            "avg": 23.516666666666666
+                        },
+                        "humidity": {
+                            "max": 60,
+                            "min": 50,
+                            "avg": 55.0
+                        },
+                        "id_aula": 1
+                    },
+                    "1": {
+                        "volume": {
+                            "max": 69,
+                            "min": 60,
+                            "avg": 64.5
+                        },
+                        "temperature": {
+                            "max": 22.22,
+                            "min": 18.93,
+                            "avg": 20.575
+                        },
+                        "humidity": {
+                            "max": 55,
+                            "min": 45,
+                            "avg": 50.0
+                        },
+                        "id_aula": 2
+                    },
+                    "3": {
+                        "volume": {
+                            "max": 51,
+                            "min": 51,
+                            "avg": 51.0
+                        },
+                        "temperature": {
+                            "max": 24.52,
+                            "min": 24.52,
+                            "avg": 24.52
+                        },
+                        "humidity": {
+                            "max": 55,
+                            "min": 55,
+                            "avg": 55.0
+                        },
+                        "id_aula": 3
+                    }
+                }
+            }
+        ],
+        "received": [
+            {
+                "name": "connection",
+                "description": "Es rep quan un client es connecta al servidor.",
+                "payload": {
+                    "socket.id": "Identificador únic del client connectat."
+                }
+            },
+            {
+                "name": "disconnect",
+                "description": "Es rep quan un client es desconnecta del servidor.",
+                "payload": {
+                    "socket.id": "Identificador únic del client desconnectat."
+                }
+            }
+        ]
+    }
+}
